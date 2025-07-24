@@ -26,13 +26,11 @@ exports.createMemorial = async (req, res) => {
     }
 
     const memorial = await Memorial.create(req.body);
-    res
-      .status(201)
-      .json({
-        status: true,
-        message: "Memorial created successfully",
-        data: memorial,
-      });
+    res.status(201).json({
+      status: true,
+      message: "Memorial created successfully",
+      data: memorial,
+    });
   } catch (error) {
     res
       .status(500)
@@ -119,12 +117,10 @@ exports.getMemorialById = async (req, res) => {
 
     // Authorization check: ensure the logged-in user is the owner
     if (memorial.createdBy.toString() !== req.user.userId) {
-      return res
-        .status(403)
-        .json({
-          status: false,
-          message: "Forbidden: You do not have permission to view this.",
-        });
+      return res.status(403).json({
+        status: false,
+        message: "Forbidden: You do not have permission to view this.",
+      });
     }
 
     res.json({ status: true, data: memorial });
@@ -146,12 +142,10 @@ exports.updateMemorial = async (req, res) => {
 
     // Authorization check
     if (memorial.createdBy.toString() !== req.user.userId) {
-      return res
-        .status(403)
-        .json({
-          status: false,
-          message: "Forbidden: You do not have permission to update this.",
-        });
+      return res.status(403).json({
+        status: false,
+        message: "Forbidden: You do not have permission to update this.",
+      });
     }
 
     // Update the memorial
@@ -183,12 +177,10 @@ exports.deleteMemorial = async (req, res) => {
 
     // Authorization check
     if (memorial.createdBy.toString() !== req.user.userId) {
-      return res
-        .status(403)
-        .json({
-          status: false,
-          message: "Forbidden: You do not have permission to delete this.",
-        });
+      return res.status(403).json({
+        status: false,
+        message: "Forbidden: You do not have permission to delete this.",
+      });
     }
 
     await memorial.deleteOne();
@@ -213,12 +205,10 @@ exports.addPhotosToMemorial = async (req, res) => {
 
     // Authorization check: ensure the logged-in user is the owner
     if (memorial.createdBy.toString() !== req.user.userId) {
-      return res
-        .status(403)
-        .json({
-          status: false,
-          message: "Forbidden: You do not have permission to update this.",
-        });
+      return res.status(403).json({
+        status: false,
+        message: "Forbidden: You do not have permission to update this.",
+      });
     }
 
     if (!req.files || req.files.length === 0) {
@@ -272,22 +262,18 @@ exports.addVideoToMemorial = async (req, res) => {
 
     // Authorization check
     if (memorial.createdBy.toString() !== req.user.userId) {
-      return res
-        .status(403)
-        .json({
-          status: false,
-          message: "Forbidden: You do not have permission to update this.",
-        });
+      return res.status(403).json({
+        status: false,
+        message: "Forbidden: You do not have permission to update this.",
+      });
     }
 
     // ENFORCE "ONLY ONE VIDEO" RULE
     if (memorial.videoGallery.length > 0) {
-      return res
-        .status(400)
-        .json({
-          status: false,
-          message: "You can only add one video to this memorial.",
-        });
+      return res.status(400).json({
+        status: false,
+        message: "You can only add one video to this memorial.",
+      });
     }
 
     // --- S3 UPLOAD LOGIC ---
@@ -341,12 +327,10 @@ exports.updateFamilyTree = async (req, res) => {
 
     // Authorization check
     if (memorial.createdBy.toString() !== req.user.userId) {
-      return res
-        .status(403)
-        .json({
-          status: false,
-          message: "Forbidden: You do not have permission to update this.",
-        });
+      return res.status(403).json({
+        status: false,
+        message: "Forbidden: You do not have permission to update this.",
+      });
     }
 
     // Overwrite the existing family tree with the new one
@@ -377,12 +361,10 @@ exports.addDocumentsToMemorial = async (req, res) => {
 
     // Authorization check: ensure the logged-in user is the owner
     if (memorial.createdBy.toString() !== req.user.userId) {
-      return res
-        .status(403)
-        .json({
-          status: false,
-          message: "Forbidden: You do not have permission to update this.",
-        });
+      return res.status(403).json({
+        status: false,
+        message: "Forbidden: You do not have permission to update this.",
+      });
     }
 
     // Check if any files were actually uploaded
@@ -418,5 +400,88 @@ exports.addDocumentsToMemorial = async (req, res) => {
     res
       .status(500)
       .json({ status: false, message: "Server Error: " + error.message });
+  }
+};
+
+// ==================================================================================
+
+const path = require("path");
+
+exports.createOrUpdateMemorial = async (req, res) => {
+  try {
+    const { _id } = req.body;
+    const files = req.files || [];
+
+    // Helper: Group files by fieldname
+    const groupedFiles = files.reduce((acc, file) => {
+      if (!acc[file.fieldname]) acc[file.fieldname] = [];
+      acc[file.fieldname].push(file);
+      return acc;
+    }, {});
+
+    // Upload all grouped files to S3 and add to req.body
+    const uploadGroupedFilesToS3 = async () => {
+      const fileFields = ["photoGallery", "videoGallery", "documents"];
+      for (const field of fileFields) {
+        if (groupedFiles[field]) {
+          const uploadedUrls = [];
+          for (const file of groupedFiles[field]) {
+            const url = await uploadFileToS3(file, "memorials/" + field);
+            uploadedUrls.push(url);
+          }
+          req.body[field] = uploadedUrls;
+        }
+      }
+    };
+
+    if (_id) {
+      // ====== Update Existing ======
+      let memorial = await Memorial.findById(_id);
+      if (!memorial) {
+        return res
+          .status(404)
+          .json({ status: false, message: "Memorial not found." });
+      }
+
+      if (memorial.createdBy.toString() !== req.user.userId) {
+        return res
+          .status(403)
+          .json({ status: false, message: "Forbidden: Unauthorized" });
+      }
+
+      await uploadGroupedFilesToS3(); // Upload files
+
+      delete req.body.createdBy;
+
+      memorial = await Memorial.findByIdAndUpdate(_id, req.body, {
+        new: true,
+        runValidators: true,
+      });
+
+      return res.json({
+        status: true,
+        message: "Memorial updated successfully",
+        data: memorial,
+      });
+    } else {
+      // ====== Create New ======
+      req.body.createdBy = req.user.userId;
+
+      await uploadGroupedFilesToS3(); // Upload files
+
+      const newMemorial = await Memorial.create(req.body);
+
+      return res.status(201).json({
+        status: true,
+        message: "Memorial created successfully",
+        data: newMemorial,
+      });
+    }
+  } catch (error) {
+    console.error("Error in memorial creation/update:", error);
+    return res.status(500).json({
+      status: false,
+      message: "Server Error: " + error.message,
+    });
   }
 };

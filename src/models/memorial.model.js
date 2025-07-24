@@ -44,50 +44,30 @@ const MemorialSchema = new mongoose.Schema(
     lifeStory: { type: String }, // Biography
     biography: { type: String }, // Biography
 
-    // --- Tab 2: Media ---
-    photoGallery: [{ type: String }], // Array of image URLs
-    videoGallery: [
-      {
-        // Array of video objects
-        title: { type: String },
-        url: { type: String }, // e.g., YouTube embed URL
-      },
-    ],
-    documents: [
-      {
-        // Array of document objects
-        fileName: { type: String },
-        url: { type: String },
-      },
-    ],
+    photoGallery: [{ type: String }],
+    videoGallery: [{ type: String }],
+    documents: [{ type: String }],
 
-    // --- Tab 3: Family Tree ---
     familyTree: [FamilyMemberSchema],
 
-    // --- Tab 4: Settings ---
-    isPublic: { type: Boolean, default: true }, // "Public Memorial" toggle
+    isPublic: { type: Boolean, default: true },
     allowComments: { type: Boolean, default: true },
     enableEmailNotifications: { type: Boolean, default: true },
-
-    // --- Public Page Data ---
-    achievements: [{ type: String }], // List for "Achievements & Legacy"
-
-    // --- System Managed Fields ---
-
+    achievements: [{ type: String }],
     moderationStatus: {
       type: String,
       enum: ["pending", "approved", "rejected"],
-      default: "pending", // New memorials require approval
+      default: "pending",
     },
 
     status: {
       type: String,
-      enum: ["active", "inactive", "expired"], // Controlled by subscription status
+      enum: ["active", "inactive", "expired"],
       default: "active",
     },
     plan: {
       type: String,
-      enum: ["Starter", "Plus", "Premium"], // Example subscription tiers
+      enum: ["Starter", "Plus", "Premium"],
       default: "Premium",
     },
     views: { type: Number, default: 0 },
