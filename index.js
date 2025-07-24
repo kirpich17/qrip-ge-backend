@@ -4,8 +4,12 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 
 const authRoutes = require('./src/routes/auth.routes');
-const userRoutes = require('./src/routes/user.routes');
+
 const adminRoutes = require('./src/routes/admin.routes');
+const memorialRoutes = require('./src/routes/memorial.routes');
+const qrCodeRoutes = require('./src/routes/qrcode.routes');
+
+
 
 dotenv.config();
 const app = express();
@@ -23,8 +27,11 @@ mongoose.connect(process.env.MONGO_URL)
 
 // ✅ API Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/user', userRoutes);
+
 app.use('/api/admin', adminRoutes);
+
+app.use('/api/memorials', memorialRoutes);
+app.use('/api/qrcode', qrCodeRoutes);
 
 // ✅ Start Server
 const PORT = process.env.PORT || 5000;
