@@ -116,6 +116,7 @@ exports.getMemorialById = async (req, res) => {
     }
 
     // Authorization check: ensure the logged-in user is the owner
+
     // if (memorial.createdBy.toString() !== req.user.userId) {
     //   return res.status(403).json({
     //     status: false,
@@ -421,15 +422,35 @@ exports.createOrUpdateMemorial = async (req, res) => {
 
     // Upload all grouped files to S3 and add to req.body
     const uploadGroupedFilesToS3 = async () => {
-      const fileFields = ["photoGallery", "videoGallery", "documents"];
+      const fileFields = [
+        "photoGallery",
+        "profileImage",
+        "videoGallery",
+        "documents",
+      ];
       for (const field of fileFields) {
         if (groupedFiles[field]) {
-          const uploadedUrls = [];
-          for (const file of groupedFiles[field]) {
-            const url = await uploadFileToS3(file, "memorials/" + field);
-            uploadedUrls.push(url);
+          if (field == "profileImage") {
+            const url = await uploadFileToS3(
+              groupedFiles[field][0],
+              "memorials/" + field
+            );
+            req.body[field] = url;
+          } else {
+            const uploadedUrls = [];
+
+            for (const file of groupedFiles[field]) {
+              if (file) {
+                const url = await uploadFileToS3(file, "memorials/" + field);
+                if (url) {
+                  uploadedUrls.push(url);
+                }
+              }
+            }
+            console.log(uploadedUrls);
+
+            req.body[field] = uploadedUrls;
           }
-          req.body[field] = uploadedUrls;
         }
       }
     };
@@ -468,6 +489,7 @@ exports.createOrUpdateMemorial = async (req, res) => {
       req.body.createdBy = req.user.userId;
 
       await uploadGroupedFilesToS3(); // Upload files
+      console.log(req.body);
 
       const newMemorial = await Memorial.create(req.body);
 

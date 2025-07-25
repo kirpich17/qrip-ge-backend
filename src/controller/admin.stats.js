@@ -9,11 +9,13 @@ exports.adminStats = async (req, res) => {
     const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
 
     // === USER STATS ===
-    const totalUsers = await userModel.countDocuments();
+    const totalUsers = await userModel.countDocuments({ userType: "user" });
     const usersLastMonth = await userModel.countDocuments({
+      userType: "user",
       createdAt: { $gte: startOfLastMonth, $lte: endOfLastMonth },
     });
     const usersThisMonth = await userModel.countDocuments({
+      userType: "user",
       createdAt: { $gte: startOfCurrentMonth },
     });
     const userGrowth =

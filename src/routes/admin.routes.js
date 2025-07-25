@@ -6,6 +6,7 @@ const {
   adminSignin,
   getAllUsers,
   getAllMemorials,
+  toggleAccountStatus,
 } = require("../controller/admin.controller");
 const { isAuthenticated, isAdmin } = require("../middlewares/auth.middleware");
 const { adminStats } = require("../controller/admin.stats");
@@ -16,5 +17,6 @@ router.post("/signIn", adminSignin);
 router.get("/stats", adminStats);
 router.get("/allusers", getAllUsers);
 router.get("/allmemorials", getAllMemorials);
+router.put("/toggle-user-status/:userId", toggleAccountStatus);
 
 module.exports = router;

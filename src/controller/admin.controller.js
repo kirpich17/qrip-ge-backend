@@ -122,11 +122,12 @@ exports.adminSignin = async (req, res) => {
       .json({ status: false, message: "Server error: " + err.message });
   }
 };
+
 exports.getAllUsers = async (req, res) => {
   try {
     // Fetch all users
-    const users = await User.find().lean();
-
+    const usersData = await User.find({ userType: "user" });
+    const users = JSON.parse(JSON.stringify(usersData));
     // Get memorial counts for all users
     const memorialCounts = await Memorial.aggregate([
       {
@@ -161,6 +162,7 @@ exports.getAllUsers = async (req, res) => {
     });
   }
 };
+
 exports.getAllMemorials = async (req, res) => {
   try {
     const memorial = await Memorial.find();
@@ -178,5 +180,37 @@ exports.getAllMemorials = async (req, res) => {
     res
       .status(500)
       .json({ status: false, message: "Server error: " + err.message });
+  }
+};
+
+exports.toggleAccountStatus = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    if (!userId) {
+      return res
+        .status(400)
+        .json({ status: false, message: "User ID is required" });
+    }
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ status: false, message: "User not found" });
+    }
+
+    // Toggle logic
+    user.accountStatus =
+      user.accountStatus === "active" ? "suspended" : "active";
+    await user.save();
+
+    res.status(200).json({
+      status: true,
+      message: `Account status updated to ${user.accountStatus}`,
+      data: { accountStatus: user.accountStatus },
+    });
+  } catch (error) {
+    console.error("Error toggling account status:", error);
+    res.status(500).json({ status: false, message: "Internal server error" });
   }
 };
