@@ -1,27 +1,35 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const userSchema = new mongoose.Schema({
-  firstname: { type: String},
-  lastname: { type: String},
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  userType: { type: String, enum: ['user', 'admin'], default: 'user' },
-  resetPasswordToken: String,
-  resetPasswordExpires: Date,
+const userSchema = new mongoose.Schema(
+  {
+    firstname: { type: String },
+    lastname: { type: String },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    userType: { type: String, enum: ["user", "admin"], default: "user" },
+    resetPasswordToken: String,
+    resetPasswordExpires: Date,
 
     subscriptionPlan: {
-    type: String,
-    enum: ['Free', 'Basic', 'Premium'],
-    default: 'Free'
+      type: String,
+      enum: ["Free", "Basic", "Premium"],
+      default: "Free",
+    },
+    subscriptionStatus: {
+      type: String,
+      enum: ["active", "inactive", "expired", "cancelled"],
+      default: "inactive",
+    },
+    subscriptionExpiresAt: {
+      type: Date,
+    },
+    accountStatus: {
+      type: String,
+      enum: ["active", "suspended", "banned", "pending"],
+      default: "active",
+    },
   },
-  subscriptionStatus: {
-    type: String,
-    enum: ['active', 'inactive', 'expired', 'cancelled'],
-    default: 'inactive'
-  },
-  subscriptionExpiresAt: {
-    type: Date
-  }
-}, { timestamps: true });
+  { timestamps: true }
+);
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model("User", userSchema);

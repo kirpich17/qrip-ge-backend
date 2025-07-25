@@ -116,12 +116,12 @@ exports.getMemorialById = async (req, res) => {
     }
 
     // Authorization check: ensure the logged-in user is the owner
-    if (memorial.createdBy.toString() !== req.user.userId) {
-      return res.status(403).json({
-        status: false,
-        message: "Forbidden: You do not have permission to view this.",
-      });
-    }
+    // if (memorial.createdBy.toString() !== req.user.userId) {
+    //   return res.status(403).json({
+    //     status: false,
+    //     message: "Forbidden: You do not have permission to view this.",
+    //   });
+    // }
 
     res.json({ status: true, data: memorial });
   } catch (error) {

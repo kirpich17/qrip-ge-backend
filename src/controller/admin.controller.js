@@ -1,6 +1,7 @@
 const User = require("../models/user.model");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const Memorial = require("../models/memorial.model");
 exports.getUserById = async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select("-password");
@@ -114,6 +115,64 @@ exports.adminSignin = async (req, res) => {
         email: user.email,
         userType: user.userType,
       },
+    });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ status: false, message: "Server error: " + err.message });
+  }
+};
+exports.getAllUsers = async (req, res) => {
+  try {
+    // Fetch all users
+    const users = await User.find().lean();
+
+    // Get memorial counts for all users
+    const memorialCounts = await Memorial.aggregate([
+      {
+        $group: {
+          _id: "$createdBy",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    // Create a map for quick lookup
+    const memorialMap = {};
+    memorialCounts.forEach((item) => {
+      memorialMap[item._id.toString()] = item.count;
+    });
+
+    // Add memorial count to each user
+    const usersWithMemorialCount = users.map((user) => ({
+      ...user,
+      memorialCount: memorialMap[user._id.toString()] || 0,
+    }));
+
+    res.json({
+      status: true,
+      message: "Users fetched successfully",
+      users: usersWithMemorialCount,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: false,
+      message: "Server error: " + err.message,
+    });
+  }
+};
+exports.getAllMemorials = async (req, res) => {
+  try {
+    const memorial = await Memorial.find();
+    if (!memorial) {
+      return res
+        .status(404)
+        .json({ status: false, message: "Memorial not found" });
+    }
+    res.json({
+      status: true,
+      message: "Memorial fetched successfully",
+      memorial,
     });
   } catch (err) {
     res

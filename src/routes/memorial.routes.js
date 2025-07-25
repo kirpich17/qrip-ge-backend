@@ -19,7 +19,7 @@ const {
 
 const upload = multer({
   storage: multer.memoryStorage(), // THIS IS THE KEY CHANGE!
-  limits: { fileSize: 500 * 1024 * 1024 }, // 50MB limit
+  limits: { fileSize: 500 * 1024 * 1024 }, // 500MB limit
 });
 
 // Import your security middleware
@@ -87,7 +87,7 @@ router.get("/my-memorials", isAuthenticated, getMyMemorials);
 // Get, Update, and Delete a specific memorial by its ID
 router
   .route("/:id")
-  .get(isAuthenticated, getMemorialById) // Get a memorial for editing
+  .get(getMemorialById) // Get a memorial for editing
 
   .delete(isAuthenticated, deleteMemorial); // Delete the memorial
 
