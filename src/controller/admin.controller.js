@@ -165,7 +165,7 @@ exports.getAllUsers = async (req, res) => {
 
 exports.getAllMemorials = async (req, res) => {
   try {
-    const memorial = await Memorial.find();
+    const memorial = await Memorial.find().populate("createdBy");
     if (!memorial) {
       return res
         .status(404)
