@@ -1,18 +1,27 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { signup, signin, forgotPassword, resetPassword, updatePassword, getUserDetails } = require('../controller/auth.controller');
-const {  isAuthenticated, isUser } = require('../middlewares/auth.middleware');
+const {
+  signup,
+  signin,
+  forgotPassword,
+  resetPassword,
+  updatePassword,
+  getUserDetails,
+  updateUser,
+} = require("../controller/auth.controller");
+const { isAuthenticated, isUser } = require("../middlewares/auth.middleware");
 
 // Signup/Login
-router.post('/signup', signup);
-router.post('/signin', signin);
+router.post("/signup", signup);
+router.post("/signin", signin);
 
 // Password Reset Flow
-router.post('/forgot-password', forgotPassword);
-router.post('/reset-password', resetPassword);
-router.get('/details', isAuthenticated, getUserDetails);
+router.post("/forgot-password", forgotPassword);
+router.post("/reset-password", resetPassword);
+router.get("/details", isAuthenticated, getUserDetails);
 
 // Common Password Update (Admin/User both)
-router.put('/update-password', isAuthenticated,isUser, updatePassword);
+router.put("/update-password", isAuthenticated, isUser, updatePassword);
+router.put("/users/:userId", updateUser);
 
 module.exports = router;

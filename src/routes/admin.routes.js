@@ -7,6 +7,14 @@ const {
   getAllUsers,
   getAllMemorials,
   toggleAccountStatus,
+  adminDeleteMemorial,
+  adminDeleteUser,
+  toggleMemorialStatus,
+  adminCreatePlan,
+  adminGetAllPlans,
+  adminGetPlanById,
+  adminUpdatePlan,
+  adminDeletePlan,
 } = require("../controller/admin.controller");
 const { isAuthenticated, isAdmin } = require("../middlewares/auth.middleware");
 const { adminStats } = require("../controller/admin.stats");
@@ -18,5 +26,13 @@ router.get("/stats", adminStats);
 router.get("/allusers", getAllUsers);
 router.get("/allmemorials", getAllMemorials);
 router.put("/toggle-user-status/:userId", toggleAccountStatus);
+router.delete("/memorial/:id", adminDeleteMemorial);
+router.delete("/user/:id", adminDeleteUser);
+router.patch("/toggle-status-memorial/:id", toggleMemorialStatus);
+
+router.post("/subscription", adminCreatePlan);
+router.get("/subscription", adminGetAllPlans);
+router.put("/subscription/:id", adminUpdatePlan);
+router.delete("/subscription/:id", adminDeletePlan);
 
 module.exports = router;

@@ -63,7 +63,7 @@ const MemorialSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: ["active", "inactive", "expired"],
-      default: "active",
+      default: "inactive",
     },
     plan: {
       type: String,
