@@ -339,7 +339,7 @@ exports.adminCreatePlan = async (req, res) => {
 // Get all plans
 exports.adminGetAllPlans = async (req, res) => {
   try {
-    const plans = await SubscriptionPlan.find().sort({ createdAt: -1 });
+    const plans = await SubscriptionPlan.find();
     res.status(200).json(plans);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -380,5 +380,26 @@ exports.adminDeletePlan = async (req, res) => {
     res.status(200).json({ message: "Plan deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+};
+
+exports.togglePlanStatus = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const plan = await SubscriptionPlan.findById(id);
+    if (!plan) {
+      return res.status(404).json({ error: "Subscription plan not found" });
+    }
+
+    plan.isActive = !plan.isActive;
+    await plan.save();
+
+    res.status(200).json({
+      message: "Subscription plan 'isActive' status toggled successfully",
+      updatedPlan: plan,
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Server error", details: error.message });
   }
 };

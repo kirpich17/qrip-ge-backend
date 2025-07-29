@@ -70,7 +70,8 @@ const MemorialSchema = new mongoose.Schema(
       enum: ["Starter", "Plus", "Premium"],
       default: "Premium",
     },
-    views: { type: Number, default: 0 },
+    viewsCount: { type: Number, default: 0 },
+    scanCount: { type: Number, default: 0 },
   },
   { timestamps: true }
 ); // Adds createdAt and updatedAt automatically

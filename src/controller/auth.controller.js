@@ -3,6 +3,8 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
+const memorialModel = require("../models/memorial.model");
+const { default: mongoose } = require("mongoose");
 
 exports.signup = async (req, res) => {
   try {
@@ -133,13 +135,11 @@ exports.getUserDetails = async (req, res) => {
     if (!user) {
       return res.status(404).json({ status: false, message: "User not found" });
     }
-    res
-      .status(200)
-      .json({
-        status: true,
-        message: "User details fetched successfully",
-        user,
-      });
+    res.status(200).json({
+      status: true,
+      message: "User details fetched successfully",
+      user,
+    });
   } catch (err) {
     res.status(500).json({ status: false, message: err.message });
   }
@@ -171,5 +171,45 @@ exports.updateUser = async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ status: false, message: err.message });
+  }
+};
+
+exports.allStatsforUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const stats = await memorialModel.aggregate([
+      {
+        $match: { createdBy: new mongoose.Types.ObjectId(userId) },
+      },
+      {
+        $group: {
+          _id: null,
+          totalMemorials: { $sum: 1 },
+          totalViews: { $sum: "$viewsCount" },
+          totalScans: { $sum: "$scanCount" },
+          totalFamilyTreeCount: { $sum: { $size: "$familyTree" } },
+        },
+      },
+    ]);
+
+    const result = stats[0] || {
+      totalMemorials: 0,
+      totalViews: 0,
+      totalScans: 0,
+      totalFamilyTreeCount: 0,
+    };
+
+    res.status(200).json({
+      status: true,
+      message: "Stats fetched successfully",
+      data: result,
+    });
+  } catch (error) {
+    console.error("Error fetching memorial stats:", error);
+    res.status(500).json({
+      status: false,
+      message: "Internal server error",
+    });
   }
 };

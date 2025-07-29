@@ -1,15 +1,13 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const dotenv = require('dotenv');
-const cors = require('cors');
+const express = require("express");
+const mongoose = require("mongoose");
+const dotenv = require("dotenv");
+const cors = require("cors");
 
-const authRoutes = require('./src/routes/auth.routes');
+const authRoutes = require("./src/routes/auth.routes");
 
-const adminRoutes = require('./src/routes/admin.routes');
-const memorialRoutes = require('./src/routes/memorial.routes');
-const qrCodeRoutes = require('./src/routes/qrcode.routes');
-
-
+const adminRoutes = require("./src/routes/admin.routes");
+const memorialRoutes = require("./src/routes/memorial.routes");
+const qrCodeRoutes = require("./src/routes/qrcode.routes");
 
 dotenv.config();
 const app = express();
@@ -21,17 +19,16 @@ app.use(cors());
 app.use(express.json());
 
 // ✅ MongoDB Connection
-mongoose.connect(process.env.MONGO_URL)
-.then(() => console.log('MongoDB connected'))
-.catch((err) => console.log('MongoDB connection error:', err));
+mongoose
+  .connect(process.env.MONGO_URL)
+  .then(() => console.log("MongoDB connected"))
+  .catch((err) => console.log("MongoDB connection error:", err));
 
 // ✅ API Routes
-app.use('/api/auth', authRoutes);
-
-app.use('/api/admin', adminRoutes);
-
-app.use('/api/memorials', memorialRoutes);
-app.use('/api/qrcode', qrCodeRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/memorials", memorialRoutes);
+app.use("/api/qrcode", qrCodeRoutes);
 
 // ✅ Start Server
 const PORT = process.env.PORT || 5000;

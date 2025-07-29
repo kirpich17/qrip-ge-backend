@@ -15,6 +15,7 @@ const {
   updateFamilyTree,
   addDocumentsToMemorial,
   createOrUpdateMemorial,
+  viewAndScanMemorialCount,
 } = require("../controller/memorial.controller");
 
 const upload = multer({
@@ -83,6 +84,7 @@ router.post(
 
 // Get all memorials for the currently logged-in user's dashboard
 router.get("/my-memorials", isAuthenticated, getMyMemorials);
+router.post("/view", viewAndScanMemorialCount);
 
 // Get, Update, and Delete a specific memorial by its ID
 router

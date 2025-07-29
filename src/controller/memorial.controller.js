@@ -404,10 +404,6 @@ exports.addDocumentsToMemorial = async (req, res) => {
   }
 };
 
-// ==================================================================================
-
-const path = require("path");
-
 exports.createOrUpdateMemorial = async (req, res) => {
   try {
     const { _id } = req.body;
@@ -502,6 +498,49 @@ exports.createOrUpdateMemorial = async (req, res) => {
   } catch (error) {
     console.error("Error in memorial creation/update:", error);
     return res.status(500).json({
+      status: false,
+      message: "Server Error: " + error.message,
+    });
+  }
+};
+
+exports.viewAndScanMemorialCount = async (req, res) => {
+  const { memorialId, isScan } = req.body;
+
+  try {
+    const updateFields = {
+      $inc: { viewsCount: 1 },
+    };
+
+    if (isScan) {
+      updateFields.$inc.scanCount = 1;
+    }
+
+    const memorial = await Memorial.findByIdAndUpdate(
+      memorialId,
+      updateFields,
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    if (!memorial) {
+      return res
+        .status(404)
+        .json({ status: false, message: "Memorial not found" });
+    }
+
+    res.json({
+      status: true,
+      message: isScan ? "View & Scan count updated" : "View count updated",
+      data: {
+        viewsCount: memorial.viewsCount,
+        scanCount: memorial.scanCount,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
       status: false,
       message: "Server Error: " + error.message,
     });
