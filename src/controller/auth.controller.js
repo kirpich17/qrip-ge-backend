@@ -5,6 +5,8 @@ const nodemailer = require("nodemailer");
 const crypto = require("crypto");
 const memorialModel = require("../models/memorial.model");
 const { default: mongoose } = require("mongoose");
+const { log } = require("console");
+const { uploadFileToS3 } = require("../config/configureAWS");
 
 exports.signup = async (req, res) => {
   try {
@@ -211,5 +213,41 @@ exports.allStatsforUser = async (req, res) => {
       status: false,
       message: "Internal server error",
     });
+  }
+};
+
+exports.updateUserProfile = async (req, res) => {
+  try {
+    const profile = req.files[0];
+    const userId = req.params.userId;
+
+    if (!profile) {
+      return res
+        .status(400)
+        .json({ status: false, message: "No file uploaded." });
+    }
+
+    const url = await uploadFileToS3(profile);
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { profileImage: url },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res
+        .status(404)
+        .json({ status: false, message: "User not found." });
+    }
+
+    res.status(200).json({
+      status: true,
+      message: "Profile image updated successfully",
+      data: updatedUser,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ status: false, message: "Internal server error" });
   }
 };
