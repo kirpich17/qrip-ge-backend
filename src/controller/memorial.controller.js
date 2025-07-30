@@ -107,7 +107,11 @@ exports.getPublicMemorialBySlug = async (req, res) => {
 
 exports.getMemorialById = async (req, res) => {
   try {
-    const memorial = await Memorial.findById(req.params.id);
+    const memorial = await Memorial.findOne({
+      _id: req.params.id,
+      isPublic: true,
+      status: "active",
+    });
 
     if (!memorial) {
       return res

@@ -52,6 +52,12 @@ exports.signin = async (req, res) => {
         .status(400)
         .json({ status: false, message: "Invalid credentials" });
 
+    if (user.accountStatu != "active") {
+      res
+        .status(401)
+        .json({ status: false, message: "Your account is suspended." });
+    }
+
     const token = jwt.sign(
       { userId: user._id, userType: user.userType },
       process.env.JWT_SECRET,
