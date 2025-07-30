@@ -52,7 +52,7 @@ exports.signin = async (req, res) => {
         .status(400)
         .json({ status: false, message: "Invalid credentials" });
 
-    if (user.accountStatu != "active") {
+    if (user.accountStatus != "active") {
       res
         .status(401)
         .json({ status: false, message: "Your account is suspended." });
