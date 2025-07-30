@@ -80,7 +80,7 @@ exports.forgotPassword = async (req, res) => {
     user.resetPasswordToken = resetToken;
     user.resetPasswordExpires = Date.now() + 3600000;
     await user.save();
-
+    const resetLink = `${process.env.FRONTEND_BASE_URL}/reset-password?token=${resetToken}`;
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -91,8 +91,13 @@ exports.forgotPassword = async (req, res) => {
 
     const mailOptions = {
       to: email,
-      subject: "Password Reset",
-      text: `Reset your password using this token: ${resetToken}`,
+      subject: "Reset your QRIP password",
+      html: `
+<p>Hello ${user.firstname || "User"},</p>
+<p>You requested to reset your password. Click the button below:</p>
+<a href="${resetLink}" style="background:#547455;color:#fff;padding:10px 15px;border-radius:5px;text-decoration:none;">Reset Password</a>
+<p>This link will expire in 1 hour.</p>
+      `,
     };
 
     await transporter.sendMail(mailOptions);
