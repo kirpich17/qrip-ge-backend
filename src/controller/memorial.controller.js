@@ -1,6 +1,6 @@
 // controllers/memorial.controller.js
 
-const { uploadFileToS3 } = require("../config/configureAWS");
+const { uploadFileToS3, deleteFileFromS3 } = require("../config/configureAWS");
 const Memorial = require("../models/memorial.model");
 const { createPaginationObject } = require("../utils/pagination");
 
@@ -24,7 +24,6 @@ exports.createMemorial = async (req, res) => {
           .json({ message: "Failed to upload offer image. Please try again." });
       }
     }
-
     const memorial = await Memorial.create(req.body);
     res.status(201).json({
       status: true,
@@ -83,6 +82,8 @@ exports.getMyMemorials = async (req, res) => {
       .json({ status: false, message: "Server Error: " + error.message });
   }
 };
+
+
 
 exports.getPublicMemorialBySlug = async (req, res) => {
   try {
@@ -408,10 +409,117 @@ exports.addDocumentsToMemorial = async (req, res) => {
   }
 };
 
+// exports.createOrUpdateMemorial = async (req, res) => {
+//   try {
+//     const { _id } = req.body;
+//     const files = req.files || [];
+
+//     // Helper: Group files by fieldname
+//     const groupedFiles = files.reduce((acc, file) => {
+//       if (!acc[file.fieldname]) acc[file.fieldname] = [];
+//       acc[file.fieldname].push(file);
+//       return acc;
+//     }, {});
+
+//     // Upload all grouped files to S3 and add to req.body
+//     const uploadGroupedFilesToS3 = async () => {
+//       const fileFields = [
+//         "photoGallery",
+//         "profileImage",
+//         "videoGallery",
+//         "documents",
+//       ];
+//       for (const field of fileFields) {
+//         if (groupedFiles[field]) {
+//           if (field == "profileImage") {
+//             const url = await uploadFileToS3(
+//               groupedFiles[field][0],
+//               "memorials/" + field
+//             );
+//             req.body[field] = url;
+//           } else {
+//             const uploadedUrls = [];
+
+//             for (const file of groupedFiles[field]) {
+//               if (file) {
+//                 const url = await uploadFileToS3(file, "memorials/" + field);
+//                 if (url) {
+//                   uploadedUrls.push(url);
+//                 }
+//               }
+//             }
+//             console.log(uploadedUrls);
+
+//             req.body[field] = uploadedUrls;
+//           }
+//         }
+//       }
+//     };
+
+//     if (_id) {
+//       // ====== Update Existing ======
+//       let memorial = await Memorial.findById(_id);
+//       if (!memorial) {
+//         return res
+//           .status(404)
+//           .json({ status: false, message: "Memorial not found." });
+//       }
+
+//       if (memorial.createdBy.toString() !== req.user.userId) {
+//         return res
+//           .status(403)
+//           .json({ status: false, message: "Forbidden: Unauthorized" });
+//       }
+
+//       await uploadGroupedFilesToS3(); // Upload files
+
+//       delete req.body.createdBy;
+
+//       memorial = await Memorial.findByIdAndUpdate(_id, req.body, {
+//         new: true,
+//         runValidators: true,
+//       });
+
+//       return res.json({
+//         status: true,
+//         message: "Memorial updated successfully",
+//         data: memorial,
+//       });
+//     } else {
+//       // ====== Create New ======
+//       req.body.createdBy = req.user.userId;
+
+//       await uploadGroupedFilesToS3(); // Upload files
+//       console.log(req.body);
+
+//       const newMemorial = await Memorial.create(req.body);
+
+//       return res.status(201).json({
+//         status: true,
+//         message: "Memorial created successfully",
+//         data: newMemorial,
+//       });
+//     }
+//   } catch (error) {
+//     console.error("Error in memorial creation/update:", error);
+//     return res.status(500).json({
+//       status: false,
+//       message: "Server Error: " + error.message,
+//     });
+//   }
+// };
+
 exports.createOrUpdateMemorial = async (req, res) => {
   try {
     const { _id } = req.body;
     const files = req.files || [];
+
+    // Parse deleted files from request body
+    const deletedFiles = {
+      photos: req.body.deletedPhotos ? JSON.parse(req.body.deletedPhotos) : [],
+      videos: req.body.deletedVideos ? JSON.parse(req.body.deletedVideos) : [],
+      documents: req.body.deletedDocuments ? JSON.parse(req.body.deletedDocuments) : []
+    };
 
     // Helper: Group files by fieldname
     const groupedFiles = files.reduce((acc, file) => {
@@ -420,37 +528,68 @@ exports.createOrUpdateMemorial = async (req, res) => {
       return acc;
     }, {});
 
-    // Upload all grouped files to S3 and add to req.body
-    const uploadGroupedFilesToS3 = async () => {
+    // Upload all grouped files to S3 and handle file management
+    const processFiles = async (existingMemorial = null) => {
       const fileFields = [
         "photoGallery",
         "profileImage",
         "videoGallery",
         "documents",
       ];
+
       for (const field of fileFields) {
-        if (groupedFiles[field]) {
-          if (field == "profileImage") {
+        // Initialize with existing files if updating
+        const existingFiles = existingMemorial ? existingMemorial[field] || [] : [];
+
+        if (field === "profileImage") {
+          // Profile image is special - always replace if new one is uploaded
+          if (groupedFiles[field]) {
             const url = await uploadFileToS3(
               groupedFiles[field][0],
               "memorials/" + field
             );
             req.body[field] = url;
-          } else {
-            const uploadedUrls = [];
 
+            // Delete old profile image if it exists
+            if (existingMemorial?.profileImage) {
+              const oldKey = existingMemorial.profileImage.split('/').slice(3).join('/');
+              await deleteFileFromS3(oldKey);
+            }
+          } else if (existingMemorial) {
+            // Keep existing profile image if no new one uploaded
+            req.body[field] = existingMemorial.profileImage;
+          }
+        } else {
+          // For galleries (photos, videos, documents)
+          const currentUrls = [];
+
+          // 1. Process existing files (filter out deleted ones)
+          if (Array.isArray(existingFiles)) {
+            for (const url of existingFiles) {
+              if (!deletedFiles[field === 'photoGallery' ? 'photos' :
+                field === 'videoGallery' ? 'videos' : 'documents'].includes(url)) {
+                currentUrls.push(url);
+              } else {
+                // Delete from S3 if marked for deletion
+                const key = url.split('/').slice(3).join('/');
+                await deleteFileFromS3(key);
+              }
+            }
+          }
+
+          // 2. Add newly uploaded files
+          if (groupedFiles[field]) {
             for (const file of groupedFiles[field]) {
               if (file) {
                 const url = await uploadFileToS3(file, "memorials/" + field);
                 if (url) {
-                  uploadedUrls.push(url);
+                  currentUrls.push(url);
                 }
               }
             }
-            console.log(uploadedUrls);
-
-            req.body[field] = uploadedUrls;
           }
+
+          req.body[field] = currentUrls;
         }
       }
     };
@@ -470,8 +609,7 @@ exports.createOrUpdateMemorial = async (req, res) => {
           .json({ status: false, message: "Forbidden: Unauthorized" });
       }
 
-      await uploadGroupedFilesToS3(); // Upload files
-
+      await processFiles(memorial); // Process files with existing memorial data
       delete req.body.createdBy;
 
       memorial = await Memorial.findByIdAndUpdate(_id, req.body, {
@@ -487,9 +625,7 @@ exports.createOrUpdateMemorial = async (req, res) => {
     } else {
       // ====== Create New ======
       req.body.createdBy = req.user.userId;
-
-      await uploadGroupedFilesToS3(); // Upload files
-      console.log(req.body);
+      await processFiles(); // Process files for new memorial
 
       const newMemorial = await Memorial.create(req.body);
 
@@ -507,6 +643,8 @@ exports.createOrUpdateMemorial = async (req, res) => {
     });
   }
 };
+
+
 
 exports.viewAndScanMemorialCount = async (req, res) => {
   const { memorialId, isScan } = req.body;
