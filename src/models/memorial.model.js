@@ -67,8 +67,8 @@ const MemorialSchema = new mongoose.Schema(
     },
     plan: {
       type: String,
-      enum: ["Starter", "Plus", "Premium"],
-      default: "Premium",
+      enum: ["Free", "Plus", "Premium"],
+      default: "Free",
     },
     viewsCount: { type: Number, default: 0 },
     scanCount: { type: Number, default: 0 },
