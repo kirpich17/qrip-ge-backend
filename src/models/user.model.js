@@ -31,6 +31,14 @@ const userSchema = new mongoose.Schema(
       enum: ["active", "suspended"],
       default: "active",
     },
+    shippingDetails: {
+      fullName: { type: String },
+      address: { type: String },
+      phone: { type: String },
+      zipCode: { type: String },
+      city: { type: String },
+      country: { type: String },
+    },
   },
   { timestamps: true }
 );

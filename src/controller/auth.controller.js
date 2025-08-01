@@ -16,6 +16,7 @@ exports.signup = async (req, res) => {
       email,
       password,
       userType = "user",
+      shippingDetails,
     } = req.body;
     const existing = await User.findOne({ email });
     if (existing)
@@ -30,6 +31,7 @@ exports.signup = async (req, res) => {
       email,
       password: hash,
       userType,
+      shippingDetails,
     });
     res.status(201).json({ status: true, message: "Signup successful", user });
   } catch (err) {
