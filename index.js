@@ -8,6 +8,8 @@ const authRoutes = require("./src/routes/auth.routes");
 const adminRoutes = require("./src/routes/admin.routes");
 const memorialRoutes = require("./src/routes/memorial.routes");
 const qrCodeRoutes = require("./src/routes/qrcode.routes");
+const paymentRouter = require("./src/routes/payment.routes");
+const userRoutes = require("./src/routes/user.routes");
 
 dotenv.config();
 const app = express();
@@ -28,8 +30,9 @@ mongoose
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/memorials", memorialRoutes);
+app.use("/api/user", userRoutes);
 app.use("/api/qrcode", qrCodeRoutes);
-
+app.use('/api/payments', paymentRouter);
 // ✅ Start Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
