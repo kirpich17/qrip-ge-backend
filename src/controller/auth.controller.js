@@ -7,6 +7,7 @@ const memorialModel = require("../models/memorial.model");
 const { default: mongoose } = require("mongoose");
 const { log } = require("console");
 const { uploadFileToS3 } = require("../config/configureAWS");
+const { assignFreePlan } = require("../service/subscriptionService");
 
 exports.signup = async (req, res) => {
   try {
@@ -33,6 +34,9 @@ exports.signup = async (req, res) => {
       userType,
       shippingDetails,
     });
+
+    await assignFreePlan(user._id);
+
     res.status(201).json({ status: true, message: "Signup successful", user });
   } catch (err) {
     res.status(500).json({ status: false, message: err.message });

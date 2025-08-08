@@ -4,6 +4,8 @@ const { uploadFileToS3, deleteFileFromS3 } = require("../config/configureAWS");
 const UserSubscription = require("../models/UserSubscription");
 const subscriptionModal = require("../models/SubscriptionPlan");
 const { createPaginationObject } = require("../utils/pagination");
+const subscriptionPlan = require("../models/SubscriptionPlan");
+
 
 
 
@@ -12,10 +14,16 @@ const { createPaginationObject } = require("../utils/pagination");
 
 exports.getUserSubscriptionDetails = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.userId;
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
+
+    // Get only monthly and lifetime plans
+    const paidPlans = await subscriptionPlan.find({
+      billingPeriod: { $in: ['monthly', 'one_time'] },
+      isActive: true
+    }).lean();
 
     // Get current active subscription (or most recent if no active)
     let currentSubscription = await UserSubscription.findOne({ 
@@ -34,13 +42,45 @@ exports.getUserSubscriptionDetails = async (req, res) => {
         .lean();
     }
 
+    // Get ALL user subscriptions first
+    const allUserSubscriptions = await UserSubscription.find({ userId })
+      .populate('planId', 'name description status price billingPeriod')
+      .lean();
+
+    // Then filter for paid plans only
+    const paidSubscriptions = allUserSubscriptions.filter(sub => 
+      sub.planId && ['monthly', 'one_time'].includes(sub.planId.billingPeriod)
+    );
+    console.log("🚀 ~ paidSubscriptions:", paidSubscriptions);
+
+    // Create otherPlanCurrentStatus object with only paid plans
+    const otherPlanCurrentStatus = {};
+    
+    paidPlans.forEach(plan => {
+      const planSub = paidSubscriptions.find(sub => 
+        sub.planId._id.toString() === plan._id.toString()
+      );
+      
+      otherPlanCurrentStatus[plan.billingPeriod] = {
+        planId: plan._id,
+         subscriptionId: planSub?._id, 
+        planName: plan.name,
+        status: planSub?.status || 'never_active',
+        startDate: planSub?.startDate,
+        endDate: planSub?.endDate,
+        lastPaymentDate: planSub?.lastPaymentDate,
+        canResume: planSub?.status === 'canceled' && 
+                  planSub?.endDate && 
+                  new Date(planSub.endDate) > new Date()
+      };
+    });
+
     let allTransactions = [];
-    // 1. ONLY USE CURRENT SUBSCRIPTION'S TRANSACTIONS
     if (currentSubscription && currentSubscription.transactionHistory) {
       allTransactions = currentSubscription.transactionHistory.map(transaction => ({
         ...transaction,
         subscriptionId: currentSubscription._id,
-        planId: currentSubscription.planId._id.toString(), // Ensure ID is string
+        planId: currentSubscription.planId._id.toString(),
         subscriptionStatus: currentSubscription.status
       }));
     }
@@ -55,6 +95,7 @@ exports.getUserSubscriptionDetails = async (req, res) => {
     // Format response
     const response = {
       currentSubscription: currentSubscription || null,
+      otherPlanCurrentStatus, // Only contains monthly and lifetime plans
       transactions: paginatedTransactions,
       totalTransactions,
       totalPages: Math.ceil(totalTransactions / limit),

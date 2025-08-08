@@ -24,7 +24,7 @@ const userSubscriptionSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['pending', 'active', 'payment_failed', 'canceled', 'expired'],
+    enum: ['pending', 'active', 'payment_failed', 'canceled', 'expired','inactive'],
     default: 'pending',
   },
   startDate: { type: Date },

@@ -2,6 +2,7 @@
   const getBogToken =require('../config/bogToken.js');
   const SubscriptionPlan =require('./../models/subscriptionPlan.js');
   const UserSubscription =require('./../models/UserSubscription.js');
+const { restartFreePlan, cancelActiveFreePlan } = require('../service/subscriptionService.js');
 
 
   const initiatePayment = async (req, res) => {
@@ -21,6 +22,7 @@
 
       const orderPayload = {
         callback_url: `${process.env.BACKEND_URL}/api/payments/callback`,
+        // callback_url: "http://localhost:5000/api/payments/callback",
         // external_order_id: externalOrderId,
         purchase_units: {
           currency: "GEL",
@@ -37,6 +39,8 @@
         redirect_urls: {
           fail: `${process.env.FRONTEND_URL}/userDashboard/subscription/failure`,
           success: `${process.env.FRONTEND_URL}/userDashboard/subscription/success`
+        // fail:"http://localhost:3000/dashboard/subscription/failure",
+        // success:"http://localhost:3000/dashboard/subscription/success"
         }
       };
       console.log("🚀 ~ initiatePayment ~ orderPayload:", orderPayload)
@@ -162,13 +166,25 @@
       await subscription.save();
       console.log(`Payment successful for subscription ${subscription._id}`);
 
-      // Handle redirect for initial payments
+   
+   // Only cancel free subscription for new paid subscriptions
+    if (isInitialPayment) {
+      try {
+        await cancelActiveFreePlan(subscription.userId);
+      } catch (cancelError) {
+        console.error('Error canceling free plan:', cancelError);
+      }
+    }
+    
+
+       // Handle redirect for initial payments
       if (isInitialPayment) {
         const redirectUrl = successUrl || 'https://mydiscount.ge/userDashboard/subscription/success';
         console.log(`Redirecting to: ${redirectUrl}`);
         return res.redirect(redirectUrl);
       }
       
+    
       res.status(200).send('OK');
       
     } else {
@@ -202,5 +218,128 @@
   }
 };
 
+// FOR ONE-TIME PAYMENTS
+const initiateOneTimePayment = async (req, res) => {
+    const userId = req.user.userId;
+    const { planId } = req.body;
 
-  module.exports = {initiatePayment,paymentCallbackWebhook}
+    try {
+        const plan = await SubscriptionPlan.findById(planId);
+        if (!plan || plan.billingPeriod !== 'one_time') {
+            return res.status(400).json({ message: "Invalid plan for one-time payment." });
+        }
+
+        const accessToken = await getBogToken();
+      
+        // --- Create Ecommerce Order ---
+        const orderPayload = {
+            callback_url: `${process.env.BACKEND_URL}/api/payments/callback`,
+            purchase_units: {
+                currency: "GEL",
+                // total_amount: plan.price, // Using actual price
+
+                 total_amount:0.01,
+                basket: [{
+                    quantity: 1,
+                    // unit_price: plan.price, // Using actual price
+
+                             unit_price: 0.01,
+                    product_id: process.env.BOG_PRODUCT_ID,
+                    // description: `One-time payment for ${plan.name}`
+                }]
+            },
+            redirect_urls: {
+             fail: `${process.env.FRONTEND_URL}/userDashboard/subscription/failure`,
+          success: `${process.env.FRONTEND_URL}/userDashboard/subscription/success`
+            }
+        };
+ console.log("🚀 ~ initiateOneTimePayment ~:", orderPayload)
+        const orderResponse = await axios.post('https://api.bog.ge/payments/v1/ecommerce/orders', orderPayload, {
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}`,  'Accept-Language': 'en' }
+        });
+
+        const orderData = orderResponse.data;
+        const bogOrderId = orderData.id;
+
+        // --- CARD SAVING STEP IS SKIPPED ---
+        console.log('One-time payment. Card save step is intentionally skipped.');
+        
+        // --- Create a pending subscription record in DB ---
+        // This is still needed so the webhook can find and activate the record
+        await UserSubscription.create({
+            userId,
+            planId,
+            bogInitialOrderId: bogOrderId,
+            status: 'pending'
+        });
+
+        res.json({ redirectUrl: orderData._links.redirect.href, orderId: bogOrderId });
+
+    } catch (error) {
+        console.error("One-time payment initiation failed:", error.response?.data || error.message);
+        res.status(500).json({ message: "Failed to initiate one-time payment." });
+    }
+};
+
+
+const restartLifeTimeFreePlan = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+
+    // Check if user has active paid subscriptions
+    const activePaidSubs = await UserSubscription.find({
+      userId,
+      status: 'active',
+      'plan.billingPeriod': { $ne: 'free' }
+    });
+
+    if (activePaidSubs.length > 0) {
+      return res.status(400).json({
+        message: "Cannot restart free plan while active paid subscriptions exist"
+      });
+    }
+
+    // Restart free plan
+    await restartFreePlan(userId);
+
+    res.json({ 
+      status: true,
+      message: "Free plan restarted successfully" 
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      status: false,
+      message: error.message 
+    });
+  }
+};
+
+const getActiveSubscription = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    
+    const subscription = await UserSubscription.findOne({
+      userId,
+      status: 'active'
+    }).populate('planId');
+    
+    if (!subscription) {
+      return res.status(404).json({
+        status: false,
+        message: "No active subscription found"
+      });
+    }
+    
+    res.json({
+      status: true,
+      data: subscription
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: false,
+      message: error.message
+    });
+  }
+};
+
+  module.exports = {initiatePayment,paymentCallbackWebhook,initiateOneTimePayment,getActiveSubscription,restartLifeTimeFreePlan}
