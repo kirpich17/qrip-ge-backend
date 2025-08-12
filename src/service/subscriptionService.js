@@ -1,5 +1,5 @@
-const SubscriptionPlan = require('../models/subscriptionPlan');
-const UserSubscription = require('../models/UserSubscription');
+const SubscriptionPlan = require('../models/subscriptionPlan.js');
+const UserSubscription = require('../models/UserSubscription.js');
 
 exports.assignFreePlan = async (userId) => {
   try {
