@@ -37,8 +37,8 @@ const { restartFreePlan, cancelActiveFreePlan } = require('../service/subscripti
           }]
         },
         redirect_urls: {
-          fail: `${process.env.FRONTEND_URL}/userDashboard/subscription/failure`,
-          success: `${process.env.FRONTEND_URL}/userDashboard/subscription/success`
+          fail: `${process.env.FRONTEND_URL}/dashboard/subscription/failure`,
+          success: `${process.env.FRONTEND_URL}/dashboard/subscription/success`
         // fail:"http://localhost:3000/dashboard/subscription/failure",
         // success:"http://localhost:3000/dashboard/subscription/success"
         }

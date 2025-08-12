@@ -2,6 +2,8 @@
 
 const { uploadFileToS3, deleteFileFromS3 } = require("../config/configureAWS");
 const Memorial = require("../models/memorial.model");
+const userModel = require("../models/user.model");
+const UserSubscription = require("../models/UserSubscription");
 const { createPaginationObject } = require("../utils/pagination");
 
 exports.createMemorial = async (req, res) => {
@@ -513,6 +515,57 @@ exports.createOrUpdateMemorial = async (req, res) => {
   try {
     const { _id } = req.body;
     const files = req.files || [];
+ const userId = req.user.userId;
+
+      // =============================================
+    // 1. CHECK USER SUBSCRIPTION STATUS
+    // =============================================
+    const user = await userModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        status: false,
+        message: "User not found"
+      });
+    }
+
+
+    // Find active subscription for the user
+    const activeSubscription = await UserSubscription.findOne({
+      userId: userId,
+      status: 'active'
+    }).populate('planId');
+
+    // Check if user has premium access
+    let hasPremiumAccess = false;
+    if (activeSubscription) {
+      // Get plan details from active subscription
+      const plan = activeSubscription.planId;
+      
+      // Determine premium access based on plan type
+      if (plan.billingPeriod === 'monthly' || plan.billingPeriod === 'one_time') {
+        hasPremiumAccess = true;
+      }
+    }
+
+    // =============================================
+    // 2. RESTRICT PREMIUM FEATURES FOR FREE USERS
+    // =============================================
+    // Check for premium feature attempts
+    const attemptingVideoUpload = files.some(f => f.fieldname === 'videoGallery');
+    const attemptingDocUpload = files.some(f => f.fieldname === 'documents');
+    const attemptingDocPhotoGallery = files.some(f => f.fieldname === 'photoGallery');
+console.log(req.body.familyTree,"req.body.familyTree.lengt")
+    // ADDED: Check if the user is trying to add family members
+    const attemptingFamilyTree = req.body.familyTree && req.body.familyTree.length > 0;
+
+    if ((attemptingVideoUpload || attemptingDocUpload || attemptingDocPhotoGallery || attemptingFamilyTree) && !hasPremiumAccess) {
+      return res.status(403).json({
+        status: false,
+        // UPDATED: Modified the error message to include Family Tree
+        message: "Photo, Video, document uploads, and Family Tree require a premium subscription",
+        actionCode: "UPGRADE_REQUIRED"
+      });
+    }
 
     // Parse deleted files from request body
     const deletedFiles = {

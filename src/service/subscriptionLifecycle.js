@@ -1,6 +1,6 @@
 
 
-// const cron =require('node-cron');
+const cron =require('node-cron');
 const mongoose =require('mongoose');
 const UserModal =require('../../src/models/user.model.js');
 const UserSubscription =require('../../src/models/UserSubscription.js');
@@ -67,9 +67,9 @@ const manageSubscriptionLifecycle = async () => {
 };
 
 // Production schedule: Daily at 3 AM Tbilisi time
-// cron.schedule('0 3 * * *', manageSubscriptionLifecycle, {
-//   timezone: "Asia/Tbilisi"
-// });
+cron.schedule('0 3 * * *', manageSubscriptionLifecycle, {
+  timezone: "Asia/Tbilisi"
+});
 
 
 
