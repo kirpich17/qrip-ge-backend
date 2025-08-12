@@ -67,9 +67,9 @@ const manageSubscriptionLifecycle = async () => {
 };
 
 // Production schedule: Daily at 3 AM Tbilisi time
-cron.schedule('0 3 * * *', manageSubscriptionLifecycle, {
-  timezone: "Asia/Tbilisi"
-});
+// cron.schedule('0 3 * * *', manageSubscriptionLifecycle, {
+//   timezone: "Asia/Tbilisi"
+// });
 
 
 
