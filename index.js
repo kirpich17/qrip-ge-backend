@@ -2,7 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cors = require("cors");
-
+require('./src/service/subscriptionLifecycle');
 const authRoutes = require("./src/routes/auth.routes");
 
 const adminRoutes = require("./src/routes/admin.routes");
