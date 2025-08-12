@@ -1,6 +1,6 @@
   const  axios = require('axios');
   const getBogToken =require('../config/bogToken.js');
-  const SubscriptionPlan =require('./../models/subscriptionPlan.js');
+  const SubscriptionPlan =require('./../models/SubscriptionPlan.js');
   const UserSubscription =require('./../models/UserSubscription.js');
 const { restartFreePlan, cancelActiveFreePlan } = require('../service/subscriptionService.js');
 

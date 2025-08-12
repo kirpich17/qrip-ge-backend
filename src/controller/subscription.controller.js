@@ -91,7 +91,7 @@
 
 
 // controllers/subscription.controller.js
-const subscriptionPlan = require('../models/subscriptionPlan.js');
+const subscriptionPlan = require('../models/SubscriptionPlan.js');
 const UserSubscription = require('../models/UserSubscription.js');
 
 // Helper to calculate the end of the current billing period

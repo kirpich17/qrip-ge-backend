@@ -1,4 +1,4 @@
-const SubscriptionPlan = require('../models/subscriptionPlan.js');
+const SubscriptionPlan = require('../models/SubscriptionPlan.js');
 const UserSubscription = require('../models/UserSubscription.js');
 
 exports.assignFreePlan = async (userId) => {
