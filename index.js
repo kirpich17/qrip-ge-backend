@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cors = require("cors");
+const cron =require('node-cron');
 require('./src/service/subscriptionLifecycle');
 const authRoutes = require("./src/routes/auth.routes");
 
@@ -11,7 +12,7 @@ const qrCodeRoutes = require("./src/routes/qrcode.routes");
 const paymentRouter = require("./src/routes/payment.routes");
 const userRoutes = require("./src/routes/user.routes");
 const subscriptionRoutes = require("./src/routes/subscriptions.routes");
-
+const chargeRecurringSubscriptions = require("./src/service/bog-cron-jobs");
 dotenv.config();
 const app = express();
 
@@ -26,6 +27,21 @@ mongoose
   .connect(process.env.MONGO_URL)
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.log("MongoDB connection error:", err));
+
+//   cron.schedule('* * * * * *', () => {
+//   chargeRecurringSubscriptions();
+// }, {
+//   timezone: "Asia/Tbilisi"
+// });
+
+
+// This runs at 2:00 AM every single day.
+cron.schedule('0 2 * * *', () => {
+  console.log('Running the daily recurring subscription job at 2:00 AM...');
+  chargeRecurringSubscriptions();
+}, {
+  timezone: "Asia/Tbilisi"
+});
 
 // ✅ API Routes
 app.use("/api/auth", authRoutes);

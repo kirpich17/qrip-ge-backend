@@ -157,11 +157,17 @@ const { restartFreePlan, cancelActiveFreePlan } = require('../service/subscripti
       subscription.lastPaymentDate = new Date();
       
       // Calculate next billing date
-      const nextBillingDate = new Date();
+     
+
+
       if (subscription.planId.billingPeriod === 'monthly') {
-        nextBillingDate.setMonth(nextBillingDate.getMonth() + 1);
-      } 
-      subscription.nextBillingDate = nextBillingDate;
+  const nextBillingDate = new Date();
+  nextBillingDate.setMonth(nextBillingDate.getMonth() + 1);
+  subscription.nextBillingDate = nextBillingDate;
+} else {
+  // For one_time plans, set to null
+  subscription.nextBillingDate = null;
+}
 
       await subscription.save();
       console.log(`Payment successful for subscription ${subscription._id}`);

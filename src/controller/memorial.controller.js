@@ -110,11 +110,21 @@ exports.getPublicMemorialBySlug = async (req, res) => {
 
 exports.getMemorialById = async (req, res) => {
   try {
+    // const userId=req.user.userId
     const memorial = await Memorial.findOne({
       _id: req.params.id,
       isPublic: true,
       status: "active",
+    })
+    .populate({
+      path: 'subscription',
+      select: 'planId status',
+      populate: {
+        path: 'planId',
+        select: 'name'
+      }
     });
+    console.log("🚀 ~ memorial:", memorial)
 
     if (!memorial) {
       return res
@@ -122,16 +132,21 @@ exports.getMemorialById = async (req, res) => {
         .json({ status: false, message: "Memorial not found." });
     }
 
-    // Authorization check: ensure the logged-in user is the owner
+    // Convert to plain object to modify
+    const memorialData = memorial.toObject();
+    
+    // Determine plan name based on subscription
+    if (memorial.subscription && memorial.subscription.planId) {
+      memorialData.plan = memorial.subscription.planId.name;
+    } else {
+      // Default to Free if no subscription
+      memorialData.plan = "Free";
+    }
 
-    // if (memorial.createdBy.toString() !== req.user.userId) {
-    //   return res.status(403).json({
-    //     status: false,
-    //     message: "Forbidden: You do not have permission to view this.",
-    //   });
-    // }
+    // Remove internal subscription details from response
+    delete memorialData.subscription;
 
-    res.json({ status: true, data: memorial });
+    res.json({ status: true, data: memorialData });
   } catch (error) {
     res
       .status(500)
@@ -664,7 +679,7 @@ console.log(req.body.familyTree,"req.body.familyTree.lengt")
 
       await processFiles(memorial); // Process files with existing memorial data
       delete req.body.createdBy;
-
+      req.body.subscription = activeSubscription._id; 
       memorial = await Memorial.findByIdAndUpdate(_id, req.body, {
         new: true,
         runValidators: true,
@@ -678,6 +693,7 @@ console.log(req.body.familyTree,"req.body.familyTree.lengt")
     } else {
       // ====== Create New ======
       req.body.createdBy = req.user.userId;
+       req.body.subscription = activeSubscription._id;
       await processFiles(); // Process files for new memorial
 
       const newMemorial = await Memorial.create(req.body);

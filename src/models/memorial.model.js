@@ -65,10 +65,9 @@ const MemorialSchema = new mongoose.Schema(
       enum: ["active", "inactive", "expired"],
       default: "inactive",
     },
-    plan: {
-      type: String,
-      enum: ["Free", "Plus", "Premium"],
-      default: "Free",
+  subscription: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "UserSubscription"
     },
     viewsCount: { type: Number, default: 0 },
     scanCount: { type: Number, default: 0 },
