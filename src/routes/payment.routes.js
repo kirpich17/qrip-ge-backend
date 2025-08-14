@@ -1,6 +1,6 @@
 // routes/paymentRoutes.js
 const Router=require('express');
-const  {initiatePayment, initiateOneTimePayment, getActiveSubscription, restartLifeTimeFreePlan, paymentCallbackWebhook} = require('../controller/payment.controller');
+const  {initiatePayment, initiateOneTimePayment, getActiveSubscription, restartLifeTimeFreePlan, paymentCallbackWebhook, reTrySubscriptionPayment} = require('../controller/payment.controller');
 const { isAuthenticated, isUser } =require('../middlewares/auth.middleware');
 const  chargeRecurringSubscriptions  = require('../service/bog-cron-jobs');
 
@@ -17,4 +17,5 @@ paymentRouter.post('/callback', paymentCallbackWebhook);
   paymentRouter.post('/restart-free', isAuthenticated, isUser, restartLifeTimeFreePlan);
   paymentRouter.get('/active', isAuthenticated, isUser, getActiveSubscription);
 paymentRouter.get('/cron', chargeRecurringSubscriptions);
+paymentRouter.post('/retry-subscription', reTrySubscriptionPayment);
 module.exports= paymentRouter;

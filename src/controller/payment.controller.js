@@ -348,4 +348,196 @@ const getActiveSubscription = async (req, res) => {
   }
 };
 
-  module.exports = {initiatePayment,paymentCallbackWebhook,initiateOneTimePayment,getActiveSubscription,restartLifeTimeFreePlan}
+
+
+
+
+// Helper to calculate next billing date
+const calculateNextBillingDate = (billingPeriod, startDate = new Date()) => {
+  const nextDate = new Date(startDate);
+  if (billingPeriod === 'monthly') {
+    nextDate.setMonth(nextDate.getMonth() + 1);
+  } 
+  return nextDate;
+};
+
+// Define retry policy
+const MAX_RETRY_ATTEMPTS = 3;
+const RETRY_DELAY_MS = 3 * 24 * 60 * 60 * 1000; // 3 days
+
+const reTrySubscriptionPayment = async (req, res) => {
+  try {
+    const { subscriptionId } = req.body;
+    
+    if (!subscriptionId) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Subscription ID is required' 
+      });
+    }
+
+    // 1. Find and lock the subscription
+    const subscription = await UserSubscription.findOneAndUpdate(
+      { 
+        _id: subscriptionId, 
+        status: 'payment_failed' 
+      },
+      // { $set: { status: 'processing_payment' } },
+      { new: true }
+    ).populate('planId').populate('userId');
+
+    if (!subscription) {
+      return res.status(404).json({
+        success: false,
+        message: 'Subscription not found or not eligible for retry'
+      });
+    }
+
+    console.log(`Processing manual retry for subscription ${subscription._id}`);
+
+    // 2. Prepare payment request
+    const isTestMode = process.env.PAYMENT_TEST_MODE === 'true';
+    const accessToken = await getBogToken();
+    const subscriptionIdForBog = subscription.bogSubscriptionId || subscription.bogInitialOrderId;
+    const chargeAmount = isTestMode ? 0.01 : subscription.planId.price;
+
+    const chargePayload = {
+      callback_url: `${process.env.BACKEND_URL}/api/payments/callback`,
+      purchase_units: {
+        total_amount: chargeAmount,
+        currency_code: "GEL",
+        basket: [{
+          quantity: 1,
+          unit_price: chargeAmount,
+          product_id: process.env.BOG_PRODUCT_ID
+        }]
+      }
+    };
+
+    // 3. Attempt payment
+    const chargeResponse = await axios.post(
+      `https://api.bog.ge/payments/v1/ecommerce/orders/${subscriptionIdForBog}/subscribe`,
+      //  `https://api.bog.ge.INVALID/payments/v1/ecommerce/orders/${subscriptionIdForBog}/subscribe`,
+      chargePayload,
+      {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+          'Accept-Language': 'en'
+        }
+      }
+    );
+
+    // 4. Handle success
+    const newTransactionId = chargeResponse.data.id;
+    const receiptUrl = chargeResponse.data._links?.details?.href || null;
+
+    // Update subscription
+    subscription.status = 'active';
+    subscription.retryAttemptCount = 0;
+    subscription.lastRetryAttemptDate = null;
+    subscription.lastPaymentDate = new Date();
+    
+    if (subscription.planId.billingPeriod === 'monthly') {
+      subscription.nextBillingDate = calculateNextBillingDate(
+        'monthly', 
+        subscription.lastPaymentDate
+      );
+    }
+
+    subscription.transactionHistory.push({
+      bogTransactionId: newTransactionId,
+      bogOrderId: subscriptionIdForBog,
+      amount: chargeAmount,
+      status: 'recurring_payment_success',
+      date: new Date(),
+      receiptUrl: receiptUrl
+    });
+
+    await subscription.save();
+
+    console.log(`Manual retry succeeded for subscription ${subscription._id}`);
+
+    return res.json({
+      success: true,
+      message: 'Payment successful',
+      receiptUrl
+    });
+
+  } catch (error) {
+    console.error('Manual retry failed:', error.message);
+    
+    // 5. Handle payment failure
+    try {
+      const currentSub = await UserSubscription.findById(subscriptionId)
+        .populate('planId')
+        .populate('userId');
+
+      if (!currentSub) {
+        return res.status(500).json({
+          success: false,
+          message: 'Error updating subscription after failed payment'
+        });
+      }
+
+      // // Update subscription
+      // currentSub.status = 'payment_failed';
+      // currentSub.retryAttemptCount = (currentSub.retryAttemptCount || 0) + 1;
+      // currentSub.lastRetryAttemptDate = new Date();
+
+      // currentSub.transactionHistory.push({
+      //   bogTransactionId: 'N/A_Failed_Attempt',
+      //   bogOrderId: currentSub.bogSubscriptionId || currentSub.bogInitialOrderId,
+      //   amount: currentSub.planId.price,
+      //   status: 'recurring_payment_failed',
+      //   date: new Date(),
+      //   receiptUrl: null
+      // });
+
+      // // Check if max attempts reached
+      // if (currentSub.retryAttemptCount >= MAX_RETRY_ATTEMPTS) {
+      //   currentSub.status = 'expired';
+      //   currentSub.endDate = new Date();
+      //   console.warn(`Subscription ${currentSub._id} expired after ${MAX_RETRY_ATTEMPTS} failed attempts`);
+      // }
+
+      // await currentSub.save();
+
+      // Send email if not expired
+      // if (currentSub.userId?.email && currentSub.status !== 'expired') {
+      //   const nextRetryDelay = Math.min(
+      //     Math.pow(2, currentSub.retryAttemptCount - 1) * RETRY_DELAY_MS,
+      //     30 * 24 * 60 * 60 * 1000 // Max 30 days
+      //   );
+      //   const nextRetryDate = new Date(Date.now() + nextRetryDelay);
+        
+      //   await sendPaymentFailureEmail(
+      //     currentSub.userId.email,
+      //     currentSub.planId.name,
+      //     currentSub.planId.price,
+      //     currentSub.retryAttemptCount,
+      //     MAX_RETRY_ATTEMPTS,
+      //     nextRetryDate
+      //   );
+      // }
+
+      // return res.status(402).json({
+      //   success: false,
+      //   message: 'Payment failed',
+      //   status: currentSub.status,
+      //   retryAttempts: currentSub.retryAttemptCount,
+      //   maxRetryAttempts: MAX_RETRY_ATTEMPTS
+      // });
+
+    } catch (dbError) {
+      console.error('Error updating subscription after failed payment:', dbError);
+      return res.status(500).json({
+        success: false,
+        message: 'Error updating subscription after failed payment'
+      });
+    }
+  }
+};
+
+
+  module.exports = {reTrySubscriptionPayment,initiatePayment,paymentCallbackWebhook,initiateOneTimePayment,getActiveSubscription,restartLifeTimeFreePlan}
