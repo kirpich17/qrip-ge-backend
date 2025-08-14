@@ -210,7 +210,7 @@ const { restartFreePlan, cancelActiveFreePlan } = require('../service/subscripti
 
       // Handle redirect for initial payments
       if (isInitialPayment) {
-        const redirectUrl = failUrl || 'https://mydiscount.ge/userDashboard/subscription/failure';
+        const redirectUrl = failUrl || `${process.env.FRONTEND_URL}/dashboard/subscription/failure`
         console.log(`Redirecting to: ${redirectUrl}`);
         return res.redirect(redirectUrl);
       }
@@ -254,9 +254,10 @@ const initiateOneTimePayment = async (req, res) => {
                     // description: `One-time payment for ${plan.name}`
                 }]
             },
-            redirect_urls: {
-             fail: `${process.env.FRONTEND_URL}/userDashboard/subscription/failure`,
-          success: `${process.env.FRONTEND_URL}/userDashboard/subscription/success`
+            redirect_urls: {       
+
+                 fail: `${process.env.FRONTEND_URL}/dashboard/subscription/failure`,
+          success: `${process.env.FRONTEND_URL}/dashboard/subscription/success`
             }
         };
  console.log("🚀 ~ initiateOneTimePayment ~:", orderPayload)
