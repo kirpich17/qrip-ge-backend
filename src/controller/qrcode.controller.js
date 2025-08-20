@@ -39,7 +39,7 @@ exports.generateQrCode = async (req, res) => {
 
     // ✅ 4. Construct the public URL based on the memorial's slug
     // It's best practice to store your frontend's base URL in an environment variable
-    const publicUrl = `${process.env.FRONTEND_BASE_URL}/memorial/${memorial._id}?isScan=true`;
+    const publicUrl = `${process.env.FRONTEND_URL}/memorial/${memorial._id}?isScan=true`;
 
     // --- The rest of the generation logic remains the same, using the new 'publicUrl' ---
 

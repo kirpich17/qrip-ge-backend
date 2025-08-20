@@ -35,7 +35,7 @@ exports.signup = async (req, res) => {
       shippingDetails,
     });
 
-    await assignFreePlan(user._id);
+    // await assignFreePlan(user._id);
 
     res.status(201).json({ status: true, message: "Signup successful", user });
   } catch (err) {
@@ -86,7 +86,7 @@ exports.forgotPassword = async (req, res) => {
     user.resetPasswordToken = resetToken;
     user.resetPasswordExpires = Date.now() + 3600000;
     await user.save();
-    const resetLink = `${process.env.FRONTEND_BASE_URL}/reset-password?token=${resetToken}`;
+    const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -148,16 +148,44 @@ exports.updatePassword = async (req, res) => {
   }
 };
 
+// Add this at the top of your controller file
+const MemorialPurchase = require('../models/MemorialPurchase'); // Adjust path as needed
+
+// Replace your existing function with this one
 exports.getUserDetails = async (req, res) => {
   try {
-    const user = await User.findById(req.user.userId).select("-password");
+    // Use .lean() to get a plain JavaScript object, which is easier to modify
+    const user = await User.findById(req.user.userId).select("-password").lean();
+
     if (!user) {
       return res.status(404).json({ status: false, message: "User not found" });
     }
+
+    // Find all purchases made by this user to determine their effective plan
+    const purchases = await MemorialPurchase.find({ userId: user._id })
+      .populate({
+        path: 'planId',
+        select: 'planType' // We only need the planType field
+      });
+
+    // Determine the highest-tier plan the user has
+    let highestPlan = 'minimal'; // Default plan
+
+    if (purchases && purchases.length > 0) {
+      if (purchases.some(p => p.planId?.planType === 'premium')) {
+        highestPlan = 'premium';
+      } else if (purchases.some(p => p.planId?.planType === 'medium')) {
+        highestPlan = 'medium';
+      }
+    }
+
+    // Add the derived subscriptionPlan field to the user object for the response
+    user.subscriptionPlan = highestPlan;
+
     res.status(200).json({
       status: true,
       message: "User details fetched successfully",
-      user,
+      user, // The user object now includes the 'subscriptionPlan' field
     });
   } catch (err) {
     res.status(500).json({ status: false, message: err.message });

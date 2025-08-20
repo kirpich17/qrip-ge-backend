@@ -329,7 +329,22 @@ exports.toggleMemorialStatus = async (req, res) => {
 // Create a new plan
 exports.adminCreatePlan = async (req, res) => {
   try {
-    const plan = await SubscriptionPlan.create(req.body);
+    const { 
+      maxPhotos = 0,
+      allowSlideshow = false,
+      allowVideos = false,
+      maxVideoDuration = 0,
+      ...otherFields
+    } = req.body;
+    
+    const plan = await SubscriptionPlan.create({
+      maxPhotos,
+      allowSlideshow,
+      allowVideos,
+      maxVideoDuration,
+      ...otherFields
+    });
+    
     res.status(201).json(plan);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -360,13 +375,27 @@ exports.adminGetPlanById = async (req, res) => {
 // Update a plan
 exports.adminUpdatePlan = async (req, res) => {
   try {
+    const { 
+      maxPhotos,
+      allowSlideshow,
+      allowVideos,
+      maxVideoDuration,
+      ...otherFields
+    } = req.body;
+    
     const plan = await SubscriptionPlan.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      {
+        maxPhotos,
+        allowSlideshow,
+        allowVideos,
+        maxVideoDuration,
+        ...otherFields
+      },
       { new: true }
     );
-    if (!plan) return res.status(404).json({ error: "Plan not found" });
-    res.status(200).json(plan);
+    
+    res.json(plan);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }

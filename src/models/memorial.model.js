@@ -65,6 +65,18 @@ const MemorialSchema = new mongoose.Schema(
       enum: ["active", "inactive", "expired"],
       default: "inactive",
     },
+
+
+      purchase: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'MemorialPurchase'
+      },
+      memorialPaymentStatus: {
+        type: String,
+        enum: ['draft', 'pending_payment', 'active'],
+        default: 'draft'
+      },
+      
   subscription: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "UserSubscription"

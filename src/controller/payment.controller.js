@@ -3,6 +3,8 @@
   const SubscriptionPlan =require('./../models/SubscriptionPlan.js');
   const UserSubscription =require('./../models/UserSubscription.js');
 const { restartFreePlan, cancelActiveFreePlan } = require('../service/subscriptionService.js');
+const MemorialPurchase = require('../models/MemorialPurchase.js');
+const memorialModel = require('../models/memorial.model.js');
 
 
   const initiatePayment = async (req, res) => {
@@ -84,138 +86,71 @@ const { restartFreePlan, cancelActiveFreePlan } = require('../service/subscripti
   };
 
 
-  const paymentCallbackWebhook = async (req, res) => {
+// controllers/payment.controller.js
+
+const paymentCallbackWebhook = async (req, res) => {
   const paymentData = req.body;
   console.log('Full BOG Webhook received:', JSON.stringify(paymentData, null, 2));
 
   try {
-    // 1. Extract data from correct structure
-    const event = paymentData.event;
+    // 1. Extract data
     const body = paymentData.body || {};
     const orderStatus = body.order_status?.key;
-    const orderId = body.order_id; // Correct extraction
-    const externalOrderId = body.external_order_id;
+    const orderId = body.order_id;
+    const transactionId = body.payment_detail?.transaction_id;
+    const amount = body.purchase_units?.transfer_amount || body.purchase_units?.request_amount;
     
-    // 2. Extract payment details correctly
-    const paymentDetail = body.payment_detail || {};
-    const transactionId = paymentDetail.transaction_id;
-    const paymentOption = paymentDetail.payment_option;
-    
-    // 3. Extract purchase units correctly
-    const amount =  body.purchase_units?.transfer_amount || body.purchase_units?.request_amount;
-    
-    // 4. Extract redirect URLs
-    const redirectLinks = body.redirect_links || {};
-    const successUrl = redirectLinks.success;
-    const failUrl = redirectLinks.fail;
-
-    console.log(`Payment Update:
-      Event: ${event}
-      Order ID: ${orderId}
-      External Order ID: ${externalOrderId}
-      Status: ${orderStatus}
-      Transaction ID: ${transactionId}
-      Amount: ${amount}
-      Payment Option: ${paymentOption}
-      Success URL: ${successUrl || 'Not provided'}
-      Fail URL: ${failUrl || 'Not provided'}`);
-
-    // 5. Validate we have required data
+    // 2. Validate required data
     if (!orderId) {
       console.error('Missing order ID in webhook payload');
       return res.status(400).send('Missing order ID');
     }
 
-    const subscription = await UserSubscription.findOne({ 
-      bogInitialOrderId: orderId 
-    }).populate('planId').populate('userId');
+    // 3. Find the memorial purchase record
+    const purchase = await MemorialPurchase.findOne({ 
+      bogOrderId: orderId 
+    }).populate('planId').populate('memorialId');
 
-    if (!subscription) {
+    if (!purchase) {
       console.warn(`Webhook received for unknown order: ${orderId}`);
-      return res.status(404).send('Subscription record not found');
+      return res.status(404).send('Purchase record not found');
     }
 
-    // Determine payment type
-    const isInitialPayment = subscription.status === 'pending';
-
+    // 4. Handle payment status
     if (orderStatus === 'completed') {
-      // Record transaction
-      subscription.transactionHistory.push({
-        bogTransactionId: transactionId,
-        bogOrderId: orderId,
-        amount: parseFloat(amount) || subscription.planId.price,
-        status: isInitialPayment ? 'initial_payment_success' : 'recurring_payment_success',
-        date: new Date(),
-        receiptUrl: `https://api.bog.ge/payments/v1/receipt/${orderId}`
+      // Update purchase record
+      purchase.status = 'completed';
+      purchase.transactionId = transactionId;
+      purchase.paymentDate = new Date();
+      await purchase.save();
+
+      // Activate the memorial
+      await memorialModel.findByIdAndUpdate(purchase.memorialId, {
+        status: 'active',
+        memorialPaymentStatus: 'active',
+        planId: purchase.planId,
+        purchase: purchase._id
       });
 
-      // Update subscription
-      subscription.status = 'active';
-      if (isInitialPayment) {
-        subscription.startDate = new Date();
-      }
-      subscription.lastPaymentDate = new Date();
+      console.log(`Payment successful for memorial ${purchase.memorialId}`);
       
-      // Calculate next billing date
-     
-
-
-      if (subscription.planId.billingPeriod === 'monthly') {
-  const nextBillingDate = new Date();
-  nextBillingDate.setMonth(nextBillingDate.getMonth() + 1);
-  subscription.nextBillingDate = nextBillingDate;
-} else {
-  // For one_time plans, set to null
-  subscription.nextBillingDate = null;
-}
-
-      await subscription.save();
-      console.log(`Payment successful for subscription ${subscription._id}`);
-
-   
-   // Only cancel free subscription for new paid subscriptions
-    if (isInitialPayment) {
-      try {
-        await cancelActiveFreePlan(subscription.userId);
-      } catch (cancelError) {
-        console.error('Error canceling free plan:', cancelError);
-      }
-    }
-    
-
-       // Handle redirect for initial payments
-      if (isInitialPayment) {
-        const redirectUrl = successUrl || 'https://mydiscount.ge/userDashboard/subscription/success';
-        console.log(`Redirecting to: ${redirectUrl}`);
-        return res.redirect(redirectUrl);
-      }
-      
-    
-      res.status(200).send('OK');
+      // Just return success - the frontend will handle the redirect
+      return res.status(200).send('Webhook processed successfully');
       
     } else {
       // Handle failed payment
-      subscription.transactionHistory.push({
-        bogTransactionId: transactionId || 'N/A',
-        bogOrderId: orderId,
-        amount: parseFloat(amount) || subscription.planId.price,
-        status: isInitialPayment ? 'initial_payment_failed' : 'recurring_payment_failed',
-        date: new Date(),
-        receiptUrl: null
+      purchase.status = 'failed';
+      await purchase.save();
+      
+      // Update memorial status
+      await Memorial.findByIdAndUpdate(purchase.memorialId, {
+        memorialPaymentStatus: 'pending_payment'
       });
       
-      subscription.status = 'payment_failed';
-      await subscription.save();
-      console.log(`Payment failed for subscription ${subscription._id}`);
-
-      // Handle redirect for initial payments
-      if (isInitialPayment) {
-        const redirectUrl = failUrl || `${process.env.FRONTEND_URL}/dashboard/subscription/failure`
-        console.log(`Redirecting to: ${redirectUrl}`);
-        return res.redirect(redirectUrl);
-      }
+      console.log(`Payment failed for memorial ${purchase.memorialId}`);
       
-      res.status(200).send('OK');
+      // Just return success - the frontend will handle the redirect
+      return res.status(200).send('Webhook processed (payment failed)');
     }
 
   } catch (error) {
@@ -223,6 +158,7 @@ const { restartFreePlan, cancelActiveFreePlan } = require('../service/subscripti
     res.status(500).send("Internal Server Error");
   }
 };
+
 
 // FOR ONE-TIME PAYMENTS
 const initiateOneTimePayment = async (req, res) => {
@@ -541,4 +477,90 @@ const reTrySubscriptionPayment = async (req, res) => {
 };
 
 
-  module.exports = {reTrySubscriptionPayment,initiatePayment,paymentCallbackWebhook,initiateOneTimePayment,getActiveSubscription,restartLifeTimeFreePlan}
+
+
+
+const initiateMemorialPayment = async (req, res) => {
+    const userId = req.user.userId;
+    const { planId, memorialId } = req.body; // Add memorialId
+
+    try {
+        const plan = await SubscriptionPlan.findById(planId);
+        if (!plan) {
+            return res.status(400).json({ message: "Invalid plan selected." });
+        }
+
+        // Verify memorial exists and is in draft status
+        const memorial = await memorialModel.findOne({
+            _id: memorialId,
+            memorialPaymentStatus: 'draft',
+            createdBy: userId
+        });
+        
+        if (!memorial) {
+            return res.status(404).json({ message: "Draft memorial not found" });
+        }
+
+        const accessToken = await getBogToken();
+        const isTestMode = process.env.PAYMENT_TEST_MODE === 'true';
+        const amount = isTestMode ? 0.01 : plan.price;
+
+        // Create order payload
+        const orderPayload = {
+            callback_url: `${process.env.BACKEND_URL}/api/payments/callback`,
+            external_order_id: memorialId, // Pass memorial ID to webhook
+            purchase_units: {
+                currency: "GEL",
+                total_amount: amount,
+                basket: [{
+                    quantity: 1,
+                    unit_price: amount,
+                    product_id: process.env.BOG_PRODUCT_ID,
+                    description: `Memorial Plan: ${plan.name}`
+                }]
+            },
+            redirect_urls: {
+                fail: `${process.env.FRONTEND_URL}/dashboard/subscription/failure`,
+                 // Changed to success page instead of direct memorial creation
+                success: `${process.env.FRONTEND_URL}/dashboard/subscription/success?memorialId=${memorialId}`
+            }
+        };
+
+        // Create Bog order
+        const orderResponse = await axios.post(
+            'https://api.bog.ge/payments/v1/ecommerce/orders',
+            orderPayload,
+            {
+                headers: { 
+                    'Content-Type': 'application/json', 
+                    'Authorization': `Bearer ${accessToken}`,  
+                    'Accept-Language': 'en' 
+                }
+            }
+        );
+
+        const orderData = orderResponse.data;
+        const bogOrderId = orderData.id;
+
+        // Create purchase record
+        await MemorialPurchase.create({
+            userId,
+            memorialId,
+            planId,
+            bogOrderId,
+            amount: plan.price,
+            status: 'pending'
+        });
+
+        res.json({ 
+            redirectUrl: orderData._links.redirect.href,
+            memorialId
+        });
+
+    } catch (error) {
+        console.error("Payment initiation failed:", error.response?.data || error.message);
+        res.status(500).json({ message: "Failed to initiate payment" });
+    }
+};
+
+  module.exports = {reTrySubscriptionPayment,initiateMemorialPayment,initiatePayment,paymentCallbackWebhook,initiateOneTimePayment,getActiveSubscription,restartLifeTimeFreePlan}

@@ -20,6 +20,14 @@ const SubscriptionPlanSchema = new mongoose.Schema(
     //   type: Boolean,
     //   default: false,
     // },
+
+
+      planType: {
+    type: String,
+    enum: ['minimal', 'medium', 'premium'],
+    required: true
+  },
+
     isActive: {
       type: Boolean,
       default: true,
@@ -59,10 +67,22 @@ const SubscriptionPlanSchema = new mongoose.Schema(
       default: "border-gray-200",
     },
 
-      billingPeriod: { // e.g., "Monthly", "Yearly", "One-Time", "Free Trial"
-    type: String,
-    enum: ['monthly',  'one_time', 'free'], // Using lowercase for consistency
-    required: [true, 'Billing period is required'],
+  maxPhotos: {
+    type: Number,
+    required: true,
+    default: 0
+  },
+  allowSlideshow: {
+    type: Boolean,
+    default: false
+  },
+  allowVideos: {
+    type: Boolean,
+    default: false
+  },
+  maxVideoDuration: {
+    type: Number, // in seconds
+    default: 0
   },
 
   ctaButtonText: { // e.g., "14 Day's Free Trial", "Upgrade to Premium", "Go Yearly & Save"

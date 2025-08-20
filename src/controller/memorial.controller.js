@@ -1,7 +1,10 @@
 // controllers/memorial.controller.js
 
 const { uploadFileToS3, deleteFileFromS3 } = require("../config/configureAWS");
+const memorialModel = require("../models/memorial.model");
 const Memorial = require("../models/memorial.model");
+const MemorialPurchase = require("../models/MemorialPurchase");
+const SubscriptionPlan = require("../models/SubscriptionPlan");
 const userModel = require("../models/user.model");
 const UserSubscription = require("../models/UserSubscription");
 const { createPaginationObject } = require("../utils/pagination");
@@ -116,14 +119,17 @@ exports.getMemorialById = async (req, res) => {
       isPublic: true,
       status: "active",
     })
+    
+
+      // FIX: Populate 'purchase', and then the 'planId' inside of it.
     .populate({
-      path: 'subscription',
-      select: 'planId status',
+      path: 'purchase',
       populate: {
         path: 'planId',
-        select: 'name'
+        model: 'SubscriptionPlan' // Explicitly state the model for clarity
       }
     });
+ 
     console.log("🚀 ~ memorial:", memorial)
 
     if (!memorial) {
@@ -135,16 +141,13 @@ exports.getMemorialById = async (req, res) => {
     // Convert to plain object to modify
     const memorialData = memorial.toObject();
     
-    // Determine plan name based on subscription
-    if (memorial.subscription && memorial.subscription.planId) {
-      memorialData.plan = memorial.subscription.planId.name;
-    } else {
-      // Default to Free if no subscription
-      memorialData.plan = "Free";
-    }
+       // FIX: Determine plan name based on the correctly populated path.
+    if (memorial.purchase && memorial.purchase.planId && memorial.purchase.planId.name) {
+      memorialData.planName = memorial.purchase.planId.name;
+    } 
 
     // Remove internal subscription details from response
-    delete memorialData.subscription;
+   delete memorialData.purchase;
 
     res.json({ status: true, data: memorialData });
   } catch (error) {
@@ -530,58 +533,60 @@ exports.createOrUpdateMemorial = async (req, res) => {
   try {
     const { _id } = req.body;
     const files = req.files || [];
- const userId = req.user.userId;
+    const userId = req.user.userId;
 
-      // =============================================
-    // 1. CHECK USER SUBSCRIPTION STATUS
-    // =============================================
-    const user = await userModel.findById(userId);
-    if (!user) {
-      return res.status(404).json({
-        status: false,
-        message: "User not found"
-      });
-    }
-
-
-    // Find active subscription for the user
-    const activeSubscription = await UserSubscription.findOne({
-      userId: userId,
-      status: 'active'
-    }).populate('planId');
-
-    // Check if user has premium access
-    let hasPremiumAccess = false;
-    if (activeSubscription) {
-      // Get plan details from active subscription
-      const plan = activeSubscription.planId;
-      
-      // Determine premium access based on plan type
-      if (plan.billingPeriod === 'monthly' || plan.billingPeriod === 'one_time') {
-        hasPremiumAccess = true;
+    let userPlan;
+    let memorial;
+    
+    // Check if we're updating an existing memorial
+    if (_id) {
+      memorial = await Memorial.findById(_id);
+      console.log("🚀 ~ memoria22222l:", memorial)
+      if (!memorial) {
+        return res.status(404).json({ status: false, message: "Memorial not found." });
       }
+
+      // --- THIS IS THE SECURITY CHECK ---
+      // If the memorial has already been set to 'active', it means it was already created.
+      // Do not allow another "creation" from this endpoint.
+      if (memorial.memorialPaymentStatus === 'active') {
+        return res.status(403).json({ 
+            status: false, 
+            message: "This memorial has already been created. To make changes, please edit it from your dashboard." ,
+                actionCode: "UPGRADE_REQUIRED"
+        });
+      }
+      // The only valid status to proceed from here should be 'draft'
+      if (memorial.memorialPaymentStatus !== 'draft') {
+        return res.status(403).json({ status: false, message: "This memorial is not in a valid state for creation." ,    actionCode: "UPGRADE_REQUIRED"});
+      }
+      // --- END SECURITY CHECK ---
+
+      // Authorization check
+      if (memorial.createdBy.toString() !== userId) {
+        return res.status(403).json({
+          status: false,
+          message: "Forbidden: You do not have permission to update this memorial.",
+        });
+      }
+      
+      // Get the plan from the memorial's purchase
+      if (memorial.purchase) {
+        const purchase = await MemorialPurchase.findById(memorial.purchase).populate('planId');
+        console.log("🚀 ~ memorialpurchase:", purchase)
+     userPlan = purchase ? purchase.planId : null;
+      } else {
+        userPlan = await SubscriptionPlan.findOne({ planType: 'minimal' });
+      }
+    } else {
+      // For new memorials, use minimal plan as default until purchase is made
+      userPlan = await SubscriptionPlan.findOne({ planType: 'minimal' });
     }
-
-    // =============================================
-    // 2. RESTRICT PREMIUM FEATURES FOR FREE USERS
-    // =============================================
-    // Check for premium feature attempts
-    const attemptingVideoUpload = files.some(f => f.fieldname === 'videoGallery');
-    const attemptingDocUpload = files.some(f => f.fieldname === 'documents');
-    const attemptingDocPhotoGallery = files.some(f => f.fieldname === 'photoGallery');
-console.log(req.body.familyTree,"req.body.familyTree.lengt")
-    // ADDED: Check if the user is trying to add family members
-    const attemptingFamilyTree = req.body.familyTree && req.body.familyTree.length > 0;
-
-    if ((attemptingVideoUpload || attemptingDocUpload || attemptingDocPhotoGallery || attemptingFamilyTree) && !hasPremiumAccess) {
-      return res.status(403).json({
-        status: false,
-        // UPDATED: Modified the error message to include Family Tree
-        message: "Photo, Video, document uploads, and Family Tree require a premium subscription",
-        actionCode: "UPGRADE_REQUIRED"
-      });
+    if (!userPlan) {
+      return res.status(500).json({ status: false, message: "Could not determine subscription plan." });
     }
-
+    
+    console.log("🚀 ~ userPlan:", userPlan)
     // Parse deleted files from request body
     const deletedFiles = {
       photos: req.body.deletedPhotos ? JSON.parse(req.body.deletedPhotos) : [],
@@ -595,6 +600,86 @@ console.log(req.body.familyTree,"req.body.familyTree.lengt")
       acc[file.fieldname].push(file);
       return acc;
     }, {});
+
+     const familyTree = req.body.familyTree || [];
+
+    // Check plan restrictions based on one-time purchase model
+    if (userPlan.planType === 'minimal') {
+      // Minimal plan restrictions (1 photo, no videos, no documents, no family tree)
+      if (groupedFiles['videoGallery'] && groupedFiles['videoGallery'].length > 0) {
+        return res.status(403).json({
+          status: false,
+          message: "Video uploads require a Medium or Premium plan",
+          actionCode: "UPGRADE_REQUIRED"
+        });
+      }
+      
+      if (groupedFiles['documents'] && groupedFiles['documents'].length > 0) {
+        return res.status(403).json({
+          status: false,
+          message: "Document uploads require a Premium plan",
+          actionCode: "UPGRADE_REQUIRED"
+        });
+      }
+      
+      //  if (familyTree.length > 0) {
+      //   return res.status(403).json({ status: false, message: "Family tree features require a Medium or Premium plan", actionCode: "UPGRADE_REQUIRED" });
+      // }
+      
+      // Check photo count (minimal allows only 1 photo)
+      const existingPhotos = memorial ? memorial.photoGallery.length : 0;
+      const newPhotos = groupedFiles['photoGallery'] ? groupedFiles['photoGallery'].length : 0;
+      const remainingPhotos = existingPhotos - deletedFiles.photos.length + newPhotos;
+      
+      if (remainingPhotos > 1) { // Minimal plan allows only 1 photo
+        return res.status(403).json({
+          status: false,
+          message: "Minimal plan allows only 1 photo",
+          actionCode: "UPGRADE_REQUIRED"
+        });
+      }
+    } 
+    else if (userPlan.planType === 'medium') {
+      // Medium plan restrictions (10 photos, videos allowed but check duration, no documents)
+      if (groupedFiles['documents'] && groupedFiles['documents'].length > 0) {
+        return res.status(403).json({
+          status: false,
+          message: "Document uploads require a Premium plan",
+          actionCode: "UPGRADE_REQUIRED"
+        });
+      }
+      
+      // Check photo count (medium allows up to 10 photos)
+      const existingPhotos = memorial ? memorial.photoGallery.length : 0;
+      const newPhotos = groupedFiles['photoGallery'] ? groupedFiles['photoGallery'].length : 0;
+      const remainingPhotos = existingPhotos - deletedFiles.photos.length + newPhotos;
+      console.log("🚀 ~ remainingPhotos:", remainingPhotos)
+      
+      if (remainingPhotos > 10) { // Medium plan allows up to 10 photos
+        return res.status(403).json({
+          status: false,
+          message: "Medium plan allows only 10 photos",
+          actionCode: "UPGRADE_REQUIRED"
+        });
+      }
+      
+      // Check video count and duration
+      if (groupedFiles['videoGallery'] && groupedFiles['videoGallery'].length > 0) {
+        const existingVideos = memorial ? memorial.videoGallery.length : 0;
+        const newVideos = groupedFiles['videoGallery'].length;
+        const remainingVideos = existingVideos - deletedFiles.videos.length + newVideos;
+        
+        // Medium plan doesn't specify a video limit but check if any videos are allowed
+        if (remainingVideos > 0 && !userPlan.allowVideos) {
+          return res.status(403).json({
+            status: false,
+            message: "Video uploads require a Premium plan",
+            actionCode: "UPGRADE_REQUIRED"
+          });
+        }
+      }
+    }
+    // Premium plan has no restrictions
 
     // Upload all grouped files to S3 and handle file management
     const processFiles = async (existingMemorial = null) => {
@@ -611,7 +696,7 @@ console.log(req.body.familyTree,"req.body.familyTree.lengt")
 
         if (field === "profileImage") {
           // Profile image is special - always replace if new one is uploaded
-          if (groupedFiles[field]) {
+          if (groupedFiles[field] && groupedFiles[field].length > 0) {
             const url = await uploadFileToS3(
               groupedFiles[field][0],
               "memorials/" + field
@@ -623,9 +708,12 @@ console.log(req.body.familyTree,"req.body.familyTree.lengt")
               const oldKey = existingMemorial.profileImage.split('/').slice(3).join('/');
               await deleteFileFromS3(oldKey);
             }
-          } else if (existingMemorial) {
+          } else if (existingMemorial && existingMemorial.profileImage) {
             // Keep existing profile image if no new one uploaded
             req.body[field] = existingMemorial.profileImage;
+          } else {
+            // No profile image to set
+            req.body[field] = null;
           }
         } else {
           // For galleries (photos, videos, documents)
@@ -634,8 +722,10 @@ console.log(req.body.familyTree,"req.body.familyTree.lengt")
           // 1. Process existing files (filter out deleted ones)
           if (Array.isArray(existingFiles)) {
             for (const url of existingFiles) {
-              if (!deletedFiles[field === 'photoGallery' ? 'photos' :
-                field === 'videoGallery' ? 'videos' : 'documents'].includes(url)) {
+              const fieldType = field === 'photoGallery' ? 'photos' :
+                               field === 'videoGallery' ? 'videos' : 'documents';
+              
+              if (!deletedFiles[fieldType].includes(url)) {
                 currentUrls.push(url);
               } else {
                 // Delete from S3 if marked for deletion
@@ -646,13 +736,11 @@ console.log(req.body.familyTree,"req.body.familyTree.lengt")
           }
 
           // 2. Add newly uploaded files
-          if (groupedFiles[field]) {
+          if (groupedFiles[field] && groupedFiles[field].length > 0) {
             for (const file of groupedFiles[field]) {
-              if (file) {
-                const url = await uploadFileToS3(file, "memorials/" + field);
-                if (url) {
-                  currentUrls.push(url);
-                }
+              const url = await uploadFileToS3(file, "memorials/" + field);
+              if (url) {
+                currentUrls.push(url);
               }
             }
           }
@@ -662,58 +750,50 @@ console.log(req.body.familyTree,"req.body.familyTree.lengt")
       }
     };
 
+
+    // Prepare the update payload
+    const payload = { ...req.body };
+    // --- FIX: Assign the already parsed familyTree object to the payload ---
+    payload.familyTree = familyTree;
+
     if (_id) {
-      // ====== Update Existing ======
-      let memorial = await Memorial.findById(_id);
-      if (!memorial) {
-        return res
-          .status(404)
-          .json({ status: false, message: "Memorial not found." });
-      }
+      await processFiles(memorial);
+      
 
-      if (memorial.createdBy.toString() !== req.user.userId) {
-        return res
-          .status(403)
-          .json({ status: false, message: "Forbidden: Unauthorized" });
-      }
+        // 2. NOW create the payload from the updated req.body
+  const payload = { ...req.body, familyTree };
+  delete payload.createdBy;
+  
+    // --- CONSUME THE CREATION RIGHT ---
+      // When saving successfully for the first time, change the status to 'active'.
+      payload.memorialPaymentStatus = 'active';
 
-      await processFiles(memorial); // Process files with existing memorial data
-      delete req.body.createdBy;
-      req.body.subscription = activeSubscription._id; 
-      memorial = await Memorial.findByIdAndUpdate(_id, req.body, {
+      const updatedMemorial = await Memorial.findByIdAndUpdate(_id, payload, {
         new: true,
         runValidators: true,
       });
 
-      return res.json({
-        status: true,
-        message: "Memorial updated successfully",
-        data: memorial,
-      });
+      return res.json({ status: true, message: "Memorial updated successfully", data: updatedMemorial });
     } else {
-      // ====== Create New ======
-      req.body.createdBy = req.user.userId;
-       req.body.subscription = activeSubscription._id;
-      await processFiles(); // Process files for new memorial
+      // 1. Process files first
+  await processFiles();
+  
+  // 2. Create payload from the updated req.body
+  const payload = { ...req.body, familyTree, createdBy: userId };
 
-      const newMemorial = await Memorial.create(req.body);
-
-      return res.status(201).json({
-        status: true,
-        message: "Memorial created successfully",
-        data: newMemorial,
-      });
+  // 3. Save the correct payload
+  const newMemorial = await Memorial.create(payload);
+  return res.status(201).json({ status: true, message: "Memorial created successfully", data: newMemorial });
     }
   } catch (error) {
     console.error("Error in memorial creation/update:", error);
-    return res.status(500).json({
-      status: false,
-      message: "Server Error: " + error.message,
-    });
+    // Provide a more specific error message if it's a known type
+    if (error instanceof TypeError) {
+        return res.status(500).json({ status: false, message: "Server Error: A data type mismatch occurred. " + error.message });
+    }
+    return res.status(500).json({ status: false, message: "Server Error: " + error.message });
   }
 };
-
-
 
 exports.viewAndScanMemorialCount = async (req, res) => {
   const { memorialId, isScan } = req.body;
@@ -758,3 +838,43 @@ exports.viewAndScanMemorialCount = async (req, res) => {
   }
 };
 
+
+const MAX_DRAFTS_PER_USER = 5; // Prevent abuse
+
+exports. createDraftMemorial = async (req, res) => {
+    const userId = req.user.userId;
+
+    try {
+        // --- SECURITY CHECK from Flow #1 ---
+        // Prevents a single user from creating endless draft memorials.
+        const draftCount = await memorialModel.countDocuments({ 
+            createdBy: userId, 
+            memorialPaymentStatus: 'draft' 
+        });
+
+        if (draftCount >= MAX_DRAFTS_PER_USER) {
+            return res.status(429).json({ message: 'You have reached the maximum number of draft memorials.' });
+        }
+        // --- END SECURITY CHECK ---
+
+        // Create a minimal memorial object.
+        const newMemorial = new memorialModel({
+            createdBy: userId,
+            memorialPaymentStatus: 'draft',
+            // Set default empty values to satisfy schema validation if needed
+            firstName: 'Untitled',
+            lastName: 'Memorial',
+            birthDate: new Date(),
+            deathDate: new Date(),
+        });
+
+        await newMemorial.save();
+
+        // Respond with the ID needed for the next step (plan selection).
+        res.status(201).json({ memorialId: newMemorial._id });
+
+    } catch (error) {
+        console.error("Failed to create draft memorial:", error);
+        res.status(500).json({ message: "Error creating draft memorial" });
+    }
+};

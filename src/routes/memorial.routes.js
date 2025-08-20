@@ -16,6 +16,7 @@ const {
   addDocumentsToMemorial,
   createOrUpdateMemorial,
   viewAndScanMemorialCount,
+  createDraftMemorial,
 } = require("../controller/memorial.controller");
 
 const upload = multer({
@@ -92,5 +93,5 @@ router
   .get(getMemorialById) // Get a memorial for editing
 
   .delete(isAuthenticated, deleteMemorial); // Delete the memorial
-
+router.post('/create-draft', isAuthenticated, createDraftMemorial);
 module.exports = router;
