@@ -8,7 +8,8 @@ const SubscriptionPlan = require("../models/SubscriptionPlan");
 const userModel = require("../models/user.model");
 const UserSubscription = require("../models/UserSubscription");
 const { createPaginationObject } = require("../utils/pagination");
-
+const fs=require('fs')
+const tmp = require('tmp')
 exports.createMemorial = async (req, res) => {
   try {
     // Add the logged-in user's ID to the request body
@@ -529,19 +530,51 @@ exports.addDocumentsToMemorial = async (req, res) => {
 //   }
 // };
 
+
+const { getVideoDurationInSeconds } = require('get-video-duration');
+
+const getVideoDuration = async (videoFile) => {
+  try {
+    if (!videoFile.buffer) {
+      throw new Error('No video buffer found');
+    }
+    
+    // Create a temporary file
+    const tempFile = tmp.fileSync({ postfix: '.mp4' });
+    
+    try {
+      // Write buffer to temporary file
+      fs.writeFileSync(tempFile.name, videoFile.buffer);
+      
+      // Get duration from the temporary file
+      const duration = await getVideoDurationInSeconds(tempFile.name);
+      return duration;
+    } finally {
+      // Clean up temporary file
+      if (fs.existsSync(tempFile.name)) {
+        fs.unlinkSync(tempFile.name);
+      }
+    }
+  } catch (error) {
+    console.error('Error getting video duration:', error);
+    throw error;
+  }
+};
+
 exports.createOrUpdateMemorial = async (req, res) => {
   try {
     const { _id } = req.body;
     const files = req.files || [];
     const userId = req.user.userId;
-
+    let {createReq}= req.body;
+   createReq =   createReq == true || createReq == "true"
+    console.log("🚀 ~ memoria22222l:", createReq)
     let userPlan;
     let memorial;
     
     // Check if we're updating an existing memorial
     if (_id) {
       memorial = await Memorial.findById(_id);
-      console.log("🚀 ~ memoria22222l:", memorial)
       if (!memorial) {
         return res.status(404).json({ status: false, message: "Memorial not found." });
       }
@@ -549,17 +582,14 @@ exports.createOrUpdateMemorial = async (req, res) => {
       // --- THIS IS THE SECURITY CHECK ---
       // If the memorial has already been set to 'active', it means it was already created.
       // Do not allow another "creation" from this endpoint.
-      if (memorial.memorialPaymentStatus === 'active') {
+      if (memorial.memorialPaymentStatus === 'active' && createReq == true) {
         return res.status(403).json({ 
             status: false, 
             message: "This memorial has already been created. To make changes, please edit it from your dashboard." ,
                 actionCode: "UPGRADE_REQUIRED"
         });
       }
-      // The only valid status to proceed from here should be 'draft'
-      if (memorial.memorialPaymentStatus !== 'draft') {
-        return res.status(403).json({ status: false, message: "This memorial is not in a valid state for creation." ,    actionCode: "UPGRADE_REQUIRED"});
-      }
+    
       // --- END SECURITY CHECK ---
 
       // Authorization check
@@ -681,6 +711,41 @@ exports.createOrUpdateMemorial = async (req, res) => {
     }
     // Premium plan has no restrictions
 
+ else if (userPlan.planType === 'premium') {
+      // Premium plan - only check video duration
+      if (groupedFiles['videoGallery'] && groupedFiles['videoGallery'].length > 0) {
+        for (const video of groupedFiles['videoGallery']) {
+          try {
+            console.log("Processing video:", {
+              originalname: video.originalname,
+              hasPath: !!video.path,
+              hasBuffer: !!video.buffer,
+              size: video.size
+            });
+            
+            const duration = await getVideoDuration(video);
+            console.log(`Video ${video.originalname} duration: ${duration} seconds`);
+            
+            if (duration > 60) {
+              return res.status(403).json({
+                status: false,
+                message: `Video '${video.originalname}' exceeds the maximum allowed duration of 1 minute.`,
+                actionCode: "VIDEO_TOO_LONG"
+              });
+            }
+          } catch (error) {
+            console.error("Error checking video duration:", error);
+            return res.status(500).json({
+              status: false,
+              message: `Error processing video file '${video.originalname}': ${error.message}`
+            });
+          }
+        }
+      }
+    }
+
+
+    
     // Upload all grouped files to S3 and handle file management
     const processFiles = async (existingMemorial = null) => {
       const fileFields = [
@@ -847,14 +912,17 @@ exports. createDraftMemorial = async (req, res) => {
     try {
         // --- SECURITY CHECK from Flow #1 ---
         // Prevents a single user from creating endless draft memorials.
-        const draftCount = await memorialModel.countDocuments({ 
-            createdBy: userId, 
-            memorialPaymentStatus: 'draft' 
-        });
 
-        if (draftCount >= MAX_DRAFTS_PER_USER) {
-            return res.status(429).json({ message: 'You have reached the maximum number of draft memorials.' });
-        }
+        // const draftCount = await memorialModel.countDocuments({ 
+        //     createdBy: userId, 
+        //     memorialPaymentStatus: 'draft' 
+        // });
+
+        // if (draftCount >= MAX_DRAFTS_PER_USER) {
+        //     return res.status(429).json({ message: 'You have reached the maximum number of draft memorials.' });
+        // }
+
+
         // --- END SECURITY CHECK ---
 
         // Create a minimal memorial object.
