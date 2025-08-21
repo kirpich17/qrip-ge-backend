@@ -582,13 +582,14 @@ exports.createOrUpdateMemorial = async (req, res) => {
       // --- THIS IS THE SECURITY CHECK ---
       // If the memorial has already been set to 'active', it means it was already created.
       // Do not allow another "creation" from this endpoint.
-      if (memorial.memorialPaymentStatus === 'active' && createReq == true) {
-        return res.status(403).json({ 
-            status: false, 
-            message: "This memorial has already been created. To make changes, please edit it from your dashboard." ,
-                actionCode: "UPGRADE_REQUIRED"
-        });
-      }
+
+      // if (memorial.memorialPaymentStatus === 'active' && createReq == true) {
+      //   return res.status(403).json({ 
+      //       status: false, 
+      //       message: "This memorial has already been created. To make changes, please edit it from your dashboard." ,
+      //           actionCode: "UPGRADE_REQUIRED"
+      //   });
+      // }
     
       // --- END SECURITY CHECK ---
 
