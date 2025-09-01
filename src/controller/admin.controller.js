@@ -140,7 +140,8 @@ exports.getAllUsers = async (req, res) => {
     };
 
     // Fetch users with pagination and search
-    const usersData = await User.find(searchFilter).skip(skip).limit(limit);
+    const usersData = await User.find(searchFilter)
+    // .skip(skip).limit(limit);
 
     const totalUsers = await User.countDocuments(searchFilter);
     const users = JSON.parse(JSON.stringify(usersData));
@@ -171,12 +172,12 @@ exports.getAllUsers = async (req, res) => {
       status: true,
       message: "Users fetched successfully",
       users: usersWithMemorialCount,
-      pagination: {
-        currentPage: page,
-        totalPages: Math.ceil(totalUsers / limit),
-        totalUsers,
-        usersPerPage: limit,
-      },
+      // pagination: {
+      //   currentPage: page,
+      //   totalPages: Math.ceil(totalUsers / limit),
+      //   totalUsers,
+      //   usersPerPage: limit,
+      // },
     });
   } catch (err) {
     res.status(500).json({
@@ -194,19 +195,28 @@ exports.getAllMemorials = async (req, res) => {
 
     // Search functionality
     const searchQuery = req.query.search || "";
+     console.log("🚀 ~ searchQuery:", searchQuery)
+     let searchRegex =''
+    if(searchQuery){
+
+       searchRegex = searchQuery?.trim()
+    }
     const searchFilter = {
+
+
       $or: [
-        { name: { $regex: searchQuery, $options: "i" } },
-        { lifeStory: { $regex: searchQuery, $options: "i" } },
-        { location: { $regex: searchQuery, $options: "i" } },
+        { firstName: { $regex: searchRegex, $options: "i" } },
+        { lastName: { $regex: searchRegex, $options: "i" } },
+        { lifeStory: { $regex: searchRegex, $options: "i" } },
+        { location: { $regex: searchRegex, $options: "i" } },
       ],
     };
 
     // Fetch memorials with pagination and search
     const memorials = await Memorial.find(searchFilter)
       .populate("createdBy")
-      .skip(skip)
-      .limit(limit);
+      // .skip(skip)
+      // .limit(limit);
 
     const totalMemorials = await Memorial.countDocuments(searchFilter);
 
@@ -220,12 +230,12 @@ exports.getAllMemorials = async (req, res) => {
       status: true,
       message: "Memorials fetched successfully",
       memorials,
-      pagination: {
-        currentPage: page,
-        totalPages: Math.ceil(totalMemorials / limit),
-        totalMemorials,
-        memorialsPerPage: limit,
-      },
+      // pagination: {
+      //   currentPage: page,
+      //   totalPages: Math.ceil(totalMemorials / limit),
+      //   totalMemorials,
+      //   memorialsPerPage: limit,
+      // },
     });
   } catch (err) {
     res

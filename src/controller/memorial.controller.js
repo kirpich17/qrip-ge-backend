@@ -68,7 +68,17 @@ exports.getMyMemorials = async (req, res) => {
 
     // --- Execute Queries ---
     const [memorials, totalItems] = await Promise.all([
-      Memorial.find(query).sort(sortOptions).skip(skipValue).limit(limitValue),
+      Memorial.find(query).sort(sortOptions).skip(skipValue).limit(limitValue)
+      .populate({
+path:"purchase",
+populate:{
+  path:"planId",
+  model:"SubscriptionPlan",
+  select:"_id name"
+}
+
+
+      }),
       Memorial.countDocuments(query),
     ]);
 

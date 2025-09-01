@@ -483,7 +483,7 @@ const reTrySubscriptionPayment = async (req, res) => {
 const initiateMemorialPayment = async (req, res) => {
     const userId = req.user.userId;
     const { planId, memorialId } = req.body; // Add memorialId
-
+let successUrl
     try {
         const plan = await SubscriptionPlan.findById(planId);
         if (!plan) {
@@ -493,12 +493,14 @@ const initiateMemorialPayment = async (req, res) => {
         // Verify memorial exists and is in draft status
         const memorial = await memorialModel.findOne({
             _id: memorialId,
-            memorialPaymentStatus: 'draft',
+            memorialPaymentStatus: 'active',
             createdBy: userId
         });
         
-        if (!memorial) {
-            return res.status(404).json({ message: "Draft memorial not found" });
+        if (memorial) {
+          successUrl= `${process.env.FRONTEND_URL}/dashboard/subscription/update?memorialId=${memorialId}`
+        }else{
+          successUrl= `${process.env.FRONTEND_URL}/dashboard/subscription/success?memorialId=${memorialId}`
         }
 
         const accessToken = await getBogToken();
@@ -506,6 +508,7 @@ const initiateMemorialPayment = async (req, res) => {
         const amount = isTestMode ? 0.01 : plan.price;
 
         // Create order payload
+        console.log("🚀 ~ initiateMemorialPayment ~ successUrl:", successUrl)
         const orderPayload = {
             callback_url: `${process.env.BACKEND_URL}/api/payments/callback`,
             external_order_id: memorialId, // Pass memorial ID to webhook
@@ -522,7 +525,7 @@ const initiateMemorialPayment = async (req, res) => {
             redirect_urls: {
                 fail: `${process.env.FRONTEND_URL}/dashboard/subscription/failure`,
                  // Changed to success page instead of direct memorial creation
-                success: `${process.env.FRONTEND_URL}/dashboard/subscription/success?memorialId=${memorialId}`
+                success: successUrl
             }
         };
 
