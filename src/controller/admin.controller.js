@@ -186,39 +186,79 @@ exports.getAllUsers = async (req, res) => {
     });
   }
 };
+
+
+
 exports.getAllMemorials = async (req, res) => {
   try {
-    // Pagination parameters
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
+    // Check for the pagination flag
+    const isPagination = req.query.isPagination === 'true' || false;
+    const isPublic = req.query.isPublic === 'true';
 
-    // Search functionality
+    // --- Search functionality (no changes here) ---
     const searchQuery = req.query.search || "";
-     console.log("🚀 ~ searchQuery:", searchQuery)
-     let searchRegex =''
-    if(searchQuery){
-
-       searchRegex = searchQuery?.trim()
-    }
-    const searchFilter = {
-
-
-      $or: [
-        { firstName: { $regex: searchRegex, $options: "i" } },
-        { lastName: { $regex: searchRegex, $options: "i" } },
-        { lifeStory: { $regex: searchRegex, $options: "i" } },
-        { location: { $regex: searchRegex, $options: "i" } },
-      ],
+    let searchFilter = {
+      memorialPaymentStatus: { $ne: 'draft' }
     };
 
-    // Fetch memorials with pagination and search
-    const memorials = await Memorial.find(searchFilter)
-      .populate("createdBy")
-      // .skip(skip)
-      // .limit(limit);
+    if (isPublic) {
+      searchFilter.isPublic = true;
+    }
+    if (searchQuery) {
+      const searchRegex = searchQuery.trim();
+      searchFilter = {
+        ...searchFilter,
+        $or: [
+          { firstName: { $regex: searchRegex, $options: "i" } },
+          { lastName: { $regex: searchRegex, $options: "i" } },
+          { lifeStory: { $regex: searchRegex, $options: "i" } },
+          { location: { $regex: searchRegex, $options: "i" } },
+        ],
+      };
+    }
+    // --- End of search logic ---
 
-    const totalMemorials = await Memorial.countDocuments(searchFilter);
+    // --- Sorting logic ---
+    const sortBy = req.query.sortBy || 'recent'; // Default to 'recent' if not provided
+    let sortOptions = {};
+
+    if (sortBy === 'a-z') {
+      // Sort alphabetically by firstName, then by lastName as a fallback
+      sortOptions = { firstName: 1, lastName: 1 };
+    } else {
+      // Default to 'recent'
+      sortOptions = { createdAt: -1 }; // Sort by creation date in descending order
+    }
+    // --- End of sorting logic ---
+
+    // Start building the query
+    let query = Memorial.find(searchFilter)
+      .populate("createdBy")
+      .sort(sortOptions); // Apply the sorting to the query
+
+    let paginationData = null;
+
+    // --- Conditionally apply pagination ---
+    if (isPagination) {
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
+      const skip = (page - 1) * limit;
+
+      query = query.skip(skip).limit(limit);
+
+      const totalMemorials = await Memorial.countDocuments(searchFilter);
+
+      paginationData = {
+        currentPage: page,
+        totalPages: Math.ceil(totalMemorials / limit),
+        totalMemorials,
+        memorialsPerPage: limit,
+      };
+    }
+    // --- End of pagination logic ---
+
+    // Execute the final query
+    const memorials = await query;
 
     if (!memorials || memorials.length === 0) {
       return res
@@ -226,23 +266,27 @@ exports.getAllMemorials = async (req, res) => {
         .json({ status: false, message: "No memorials found" });
     }
 
-    res.json({
+    // --- Conditionally build the final response object ---
+    const response = {
       status: true,
       message: "Memorials fetched successfully",
       memorials,
-      // pagination: {
-      //   currentPage: page,
-      //   totalPages: Math.ceil(totalMemorials / limit),
-      //   totalMemorials,
-      //   memorialsPerPage: limit,
-      // },
-    });
+    };
+
+    if (isPagination) {
+      response.pagination = paginationData;
+    }
+
+    res.json(response);
+
   } catch (err) {
     res
       .status(500)
       .json({ status: false, message: "Server error: " + err.message });
   }
 };
+
+
 exports.toggleAccountStatus = async (req, res) => {
   try {
     const { userId } = req.params;
