@@ -55,7 +55,7 @@ exports.getMyMemorials = async (req, res) => {
     } = req.query;
 
     // --- Build the Search Query ---
-    const query = { createdBy: req.user.userId };
+    const query = { createdBy: req.user.userId ,   memorialPaymentStatus: { $ne: 'draft' }};
     if (search) {
       const searchRegex = new RegExp(search?.trim(), "i");
       query.$or = [{ firstName: searchRegex }, { lastName: searchRegex }];
@@ -628,6 +628,9 @@ exports.createOrUpdateMemorial = async (req, res) => {
     }
     
     console.log("🚀 ~ userPlan:", userPlan)
+    const isDocumentUploadIncluded = userPlan.features.some(
+  feature => feature.text === "Document Upload" && feature.included === true
+);console.log("isDocumentUploadIncluded",isDocumentUploadIncluded);
     // Parse deleted files from request body
     const deletedFiles = {
       photos: req.body.deletedPhotos ? JSON.parse(req.body.deletedPhotos) : [],
@@ -648,14 +651,49 @@ exports.createOrUpdateMemorial = async (req, res) => {
     if (userPlan.planType === 'minimal') {
       // Minimal plan restrictions (1 photo, no videos, no documents, no family tree)
       if (groupedFiles['videoGallery'] && groupedFiles['videoGallery'].length > 0) {
+           const existingVideos = memorial ? memorial.videoGallery.length : 0;
+        const newVideos = groupedFiles['videoGallery'].length;
+     const remainingVideos = existingVideos - deletedFiles.videos.length + newVideos;
+          if (remainingVideos > 0 && !userPlan.allowVideos) {
         return res.status(403).json({
           status: false,
           message: "Video uploads require a Medium or Premium plan",
           actionCode: "UPGRADE_REQUIRED"
         });
       }
+      }
+
+        if (groupedFiles['videoGallery'] && groupedFiles['videoGallery'].length > 0) {
+        for (const video of groupedFiles['videoGallery']) {
+          try {
+            console.log("Processing video:", {
+              originalname: video.originalname,
+              hasPath: !!video.path,
+              hasBuffer: !!video.buffer,
+              size: video.size
+            });
+            
+            const duration = await getVideoDuration(video);
+            console.log(`Video ${video.originalname} duration: ${duration} seconds`);
+            
+            if (duration > userPlan?.maxVideoDuration) {
+              return res.status(403).json({
+                status: false,
+                message: `Video '${video.originalname}' exceeds the maximum allowed duration of ${userPlan?.maxVideoDuration} seconds.`,
+                actionCode: "VIDEO_TOO_LONG"
+              });
+            }
+          } catch (error) {
+            console.error("Error checking video duration:", error);
+            return res.status(500).json({
+              status: false,
+              message: `Error processing video file '${video.originalname}': ${error.message}`
+            });
+          }
+        }
+      }
       
-      if (groupedFiles['documents'] && groupedFiles['documents'].length > 0) {
+      if (groupedFiles['documents'] && groupedFiles['documents'].length > 0 && !isDocumentUploadIncluded) {
         return res.status(403).json({
           status: false,
           message: "Document uploads require a Premium plan",
@@ -672,17 +710,17 @@ exports.createOrUpdateMemorial = async (req, res) => {
       const newPhotos = groupedFiles['photoGallery'] ? groupedFiles['photoGallery'].length : 0;
       const remainingPhotos = existingPhotos - deletedFiles.photos.length + newPhotos;
       
-      if (remainingPhotos > 1) { // Minimal plan allows only 1 photo
+      if (remainingPhotos >  userPlan?.maxPhotos) { // Minimal plan allows only 1 photo
         return res.status(403).json({
           status: false,
-          message: "Minimal plan allows only 1 photo",
+          message: `Minimal plan allows only ${userPlan?.maxPhotos}photo`,
           actionCode: "UPGRADE_REQUIRED"
         });
       }
     } 
     else if (userPlan.planType === 'medium') {
       // Medium plan restrictions (10 photos, videos allowed but check duration, no documents)
-      if (groupedFiles['documents'] && groupedFiles['documents'].length > 0) {
+      if (groupedFiles['documents'] && groupedFiles['documents'].length > 0 && !isDocumentUploadIncluded) {
         return res.status(403).json({
           status: false,
           message: "Document uploads require a Premium plan",
@@ -696,10 +734,10 @@ exports.createOrUpdateMemorial = async (req, res) => {
       const remainingPhotos = existingPhotos - deletedFiles.photos.length + newPhotos;
       console.log("🚀 ~ remainingPhotos:", remainingPhotos)
       
-      if (remainingPhotos > 10) { // Medium plan allows up to 10 photos
+      if (remainingPhotos >  userPlan?.maxPhotos) { // Medium plan allows up to 10 photos
         return res.status(403).json({
           status: false,
-          message: "Medium plan allows only 10 photos",
+          message: `Medium plan allows only ${userPlan?.maxPhotos} photos`,
           actionCode: "UPGRADE_REQUIRED"
         });
       }
@@ -718,12 +756,55 @@ exports.createOrUpdateMemorial = async (req, res) => {
             actionCode: "UPGRADE_REQUIRED"
           });
         }
+         if (groupedFiles['videoGallery'] && groupedFiles['videoGallery'].length > 0) {
+        for (const video of groupedFiles['videoGallery']) {
+          try {
+            console.log("Processing video:", {
+              originalname: video.originalname,
+              hasPath: !!video.path,
+              hasBuffer: !!video.buffer,
+              size: video.size
+            });
+            
+            const duration = await getVideoDuration(video);
+            console.log(`Video ${video.originalname} duration: ${duration} seconds`);
+            
+               if (duration > userPlan?.maxVideoDuration) {
+              return res.status(403).json({
+                status: false,
+                  message: `Video '${video.originalname}' exceeds the maximum allowed duration of ${userPlan?.maxVideoDuration} seconds.`,
+                actionCode: "VIDEO_TOO_LONG"
+              });
+            }
+          } catch (error) {
+            console.error("Error checking video duration:", error);
+            return res.status(500).json({
+              status: false,
+              message: `Error processing video file '${video.originalname}': ${error.message}`
+            });
+          }
+        }
+      }
       }
     }
     // Premium plan has no restrictions
 
  else if (userPlan.planType === 'premium') {
       // Premium plan - only check video duration
+
+ const existingPhotos = memorial ? memorial.photoGallery.length : 0;
+      const newPhotos = groupedFiles['photoGallery'] ? groupedFiles['photoGallery'].length : 0;
+      const remainingPhotos = existingPhotos - deletedFiles.photos.length + newPhotos;
+      console.log("🚀 ~ remainingPhotos:premium", remainingPhotos)
+         if (remainingPhotos > userPlan?.maxPhotos) { // Medium plan allows up to 10 photos
+        return res.status(403).json({
+          status: false,
+          message: `Premium plan allows only ${userPlan?.maxPhotos} photos`,
+          actionCode: "UPGRADE_REQUIRED"
+        });
+      }
+      
+
       if (groupedFiles['videoGallery'] && groupedFiles['videoGallery'].length > 0) {
         for (const video of groupedFiles['videoGallery']) {
           try {
@@ -737,10 +818,11 @@ exports.createOrUpdateMemorial = async (req, res) => {
             const duration = await getVideoDuration(video);
             console.log(`Video ${video.originalname} duration: ${duration} seconds`);
             
-            if (duration > 60) {
+               if (duration > userPlan?.maxVideoDuration) {
               return res.status(403).json({
                 status: false,
-                message: `Video '${video.originalname}' exceeds the maximum allowed duration of 1 minute.`,
+   
+                  message: `Video '${video.originalname}' exceeds the maximum allowed duration of ${userPlan?.maxVideoDuration} seconds.`,
                 actionCode: "VIDEO_TOO_LONG"
               });
             }
