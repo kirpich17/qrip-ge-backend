@@ -155,6 +155,7 @@ exports.getMemorialById = async (req, res) => {
        // FIX: Determine plan name based on the correctly populated path.
     if (memorial.purchase && memorial.purchase.planId && memorial.purchase.planId.name) {
       memorialData.planName = memorial.purchase.planId.name;
+      memorialData.allowSlideshow = memorial.purchase.planId.allowSlideshow;
     } 
 
     // Remove internal subscription details from response
