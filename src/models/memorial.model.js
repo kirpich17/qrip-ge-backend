@@ -83,6 +83,29 @@ const MemorialSchema = new mongoose.Schema(
     },
     viewsCount: { type: Number, default: 0 },
     scanCount: { type: Number, default: 0 },
+
+
+    
+    // --- NEW FIELDS FOR ADMIN-ASSIGNED DISCOUNTS/FREE MEMORIALS ---
+    isAdminDiscounted: {
+      type: Boolean,
+      default: false,
+      // If true, this memorial's price is determined by the fields below, not by a subscription plan.
+      // This allows an admin to bypass normal pricing.
+    },
+    adminDiscountType: {
+      type: String,
+      enum: ["percentage", "fixed", "free", null], // 'free' means 100% off. Null if no admin discount.
+      default: null,
+      required: function() { return this.isAdminDiscounted; } // Required if discounted
+    },
+    adminDiscountValue: {
+      type: Number,
+      min: [0, "Discount value cannot be negative"],
+      default: 0,
+      required: function() { return this.isAdminDiscounted && this.adminDiscountType !== "free"; } // Required if discounted and not free
+    },
+    
   },
   { timestamps: true }
 ); // Adds createdAt and updatedAt automatically

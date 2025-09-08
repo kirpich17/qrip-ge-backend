@@ -16,6 +16,11 @@ const {
   adminUpdatePlan,
   adminDeletePlan,
   togglePlanStatus,
+  AddPromoCode,
+  GetAllPromoCodes,
+  GetPromoCodeById,
+  DeletePromoCode,
+  UpdatePromoCode,
 } = require("../controller/admin.controller");
 const { isAuthenticated, isAdmin } = require("../middlewares/auth.middleware");
 const { adminStats } = require("../controller/admin.stats");
@@ -38,5 +43,12 @@ router.get("/subscription", adminGetAllPlans);
 router.put("/subscription/:id", adminUpdatePlan);
 router.delete("/subscription/:id", adminDeletePlan);
 router.patch("/subscription-status/:id", togglePlanStatus);
+
+
+router.post("/promocode", AddPromoCode);
+router.get("/promocode", GetAllPromoCodes);
+router.get("/promocode/:id", GetPromoCodeById);
+router.delete("/promocode/:id", DeletePromoCode);
+router.put("/promocode/:id", UpdatePromoCode );
 
 module.exports = router;

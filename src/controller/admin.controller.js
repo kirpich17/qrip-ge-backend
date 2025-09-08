@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const Memorial = require("../models/memorial.model");
 const SubscriptionPlan = require("../models/SubscriptionPlan");
+const PromoCodeSchema = require("../models/PromoCodeSchema");
 
 exports.getUserById = async (req, res) => {
   try {
@@ -484,5 +485,177 @@ exports.togglePlanStatus = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ error: "Server error", details: error.message });
+  }
+};
+
+
+exports.AddPromoCode = async (req, res) => {
+ try {
+    const { code, discountType, discountValue, expiryDate, maxUsage, isActive, appliesToPlan, appliesToUser } = req.body;
+
+    // Basic validation
+    if (!code || !discountType || !expiryDate) {
+      return res.status(400).json({ message: "Please provide code, discount type, and expiry date." });
+    }
+
+       if (!appliesToPlan) {
+      return res.status(400).json({ message: "Please select plan first." });
+    }
+    if (discountType !== 'free' && (discountValue === undefined || discountValue === null)) {
+      return res.status(400).json({ message: "Discount value is required for 'percentage' or 'fixed' discount types." });
+    }
+    if (discountType === 'percentage' && (discountValue < 0 || discountValue > 100)) {
+      return res.status(400).json({ message: "Percentage discount value must be between 0 and 100." });
+    }
+    if (discountType === 'fixed' && discountValue < 0) {
+      return res.status(400).json({ message: "Fixed discount value cannot be negative." });
+    }
+    if (maxUsage !== undefined && maxUsage !== null && maxUsage < 1) {
+        return res.status(400).json({ message: "Max usage must be at least 1 or left empty for unlimited." });
+    }
+
+    const newPromoCode = new PromoCodeSchema({
+      code: code.toUpperCase(), // Ensure code is uppercase
+      discountType,
+      discountValue: discountType === 'free' ? 0 : discountValue, // Set value to 0 for free type
+      expiryDate,
+      maxUsage: maxUsage === "" ? null : maxUsage, // Handle empty string for maxUsage as null
+      isActive,
+      appliesToPlan: appliesToPlan || null,
+      appliesToUser: appliesToUser || null,
+    });
+
+    const savedPromoCode = await newPromoCode.save();
+    res.status(201).json(savedPromoCode);
+  } catch (error) {
+    console.error("Error creating promo code:", error);
+    if (error.code === 11000) {
+      return res.status(400).json({ message: "Promo code already exists.", error: error.message });
+    }
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+
+
+
+exports.GetAllPromoCodes = async (req, res) => {
+  try {
+    let { page = 1, limit = 5, search = "" } = req.query;
+    page = parseInt(page);
+    limit = parseInt(limit);
+
+    const query = search
+      ? { code: { $regex: search, $options: "i" } }
+      : {};
+
+    const total = await PromoCodeSchema.countDocuments(query);
+    const promoCodes = await PromoCodeSchema.find(query)
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      data: promoCodes,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+    });
+  } catch (error) {
+    console.error("Error fetching promo codes:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+exports.GetPromoCodeById = async (req, res) => {
+  try {
+    const promoCode = await PromoCodeSchema.findById(req.params.id);
+    if (!promoCode) {
+      return res.status(404).json({ message: "Promo code not found" });
+    }
+    res.status(200).json(promoCode);
+  } catch (error) {
+    console.error("Error fetching promo code:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+
+exports.DeletePromoCode = async (req, res) => {
+  try {
+    const deletedPromo = await PromoCodeSchema.findByIdAndDelete(req.params.id);
+    if (!deletedPromo) {
+      return res.status(404).json({ message: "Promo code not found" });
+    }
+    res.status(200).json({ message: "Promo code deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting promo code:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+exports.UpdatePromoCode = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      code,
+      discountType,
+      discountValue,
+      expiryDate,
+      maxUsage,
+      isActive,
+      appliesToPlan,
+      appliesToUser,
+    } = req.body;
+
+    // Basic validation
+    if (discountType && !["percentage", "fixed", "free"].includes(discountType)) {
+      return res.status(400).json({ message: "Invalid discount type." });
+    }
+    if (discountType === "percentage" && (discountValue < 0 || discountValue > 100)) {
+      return res.status(400).json({ message: "Percentage discount value must be between 0 and 100." });
+    }
+    if (discountType === "fixed" && discountValue < 0) {
+      return res.status(400).json({ message: "Fixed discount value cannot be negative." });
+    }
+    if (maxUsage !== undefined && maxUsage !== null && maxUsage < 1) {
+      return res.status(400).json({ message: "Max usage must be at least 1 or left empty for unlimited." });
+    }
+
+    // Prepare update object
+    const updateData = {};
+    if (code) updateData.code = code.toUpperCase();
+    if (discountType) updateData.discountType = discountType;
+    if (discountType === "free") {
+      updateData.discountValue = 0;
+    } else if (discountValue !== undefined) {
+      updateData.discountValue = discountValue;
+    }
+    if (expiryDate) updateData.expiryDate = expiryDate;
+    if (maxUsage === "") {
+      updateData.maxUsage = null;
+    } else if (maxUsage !== undefined) {
+      updateData.maxUsage = maxUsage;
+    }
+    if (isActive !== undefined) updateData.isActive = isActive;
+    if (appliesToPlan !== undefined) updateData.appliesToPlan = appliesToPlan;
+    if (appliesToUser !== undefined) updateData.appliesToUser = appliesToUser;
+
+    const updatedPromoCode = await PromoCodeSchema.findByIdAndUpdate(id, updateData, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!updatedPromoCode) {
+      return res.status(404).json({ message: "Promo code not found." });
+    }
+
+    res.status(200).json(updatedPromoCode);
+  } catch (error) {
+    console.error("Error updating promo code:", error);
+    if (error.code === 11000) {
+      return res.status(400).json({ message: "Promo code already exists.", error: error.message });
+    }
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
