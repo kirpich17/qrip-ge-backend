@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const Memorial = require("../models/memorial.model");
 const SubscriptionPlan = require("../models/SubscriptionPlan");
 const PromoCodeSchema = require("../models/PromoCodeSchema");
+const memorialModel = require("../models/memorial.model");
 
 exports.getUserById = async (req, res) => {
   try {
@@ -657,5 +658,88 @@ exports.UpdatePromoCode = async (req, res) => {
       return res.status(400).json({ message: "Promo code already exists.", error: error.message });
     }
     res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+
+
+// Updated validation function that accepts planId
+exports.ValidatePromoCode = async (req, res) => {
+  try {
+    console.log("🚀 ~ req:", req)
+    const { promoCode, memorialId, planId } = req.body;
+
+    if (!promoCode || !memorialId || !planId) {
+      return res.status(400).json({ 
+        isValid: false, 
+        message: "Promo code, memorial ID, and plan ID are required" 
+      });
+    }
+
+    // Find the promo code
+    const promo = await PromoCodeSchema.findOne({ 
+      code: promoCode.toUpperCase(), 
+      isActive: true 
+    });
+
+    if (!promo) {
+      return res.status(404).json({ 
+        isValid: false, 
+        message: "Promo code not found" 
+      });
+    }
+
+    // Check if expired
+    if (new Date() > promo.expiryDate) {
+      return res.status(400).json({ 
+        isValid: false, 
+        message: "Promo code has expired" 
+      });
+    }
+
+    // Check usage limits
+    if (promo.maxUsage !== null && promo.currentUsage >= promo.maxUsage) {
+      return res.status(400).json({ 
+        isValid: false, 
+        message: "Promo code has reached its usage limit" 
+      });
+    }
+
+    // Check if applies to specific user
+ 
+
+    // Check if applies to specific plan
+    if (promo.appliesToPlan && promo.appliesToPlan.toString() !== planId) {
+      return res.status(400).json({ 
+        isValid: false, 
+        message: "This promo code is not valid for the selected plan" 
+      });
+    }
+
+    // Get memorial to check if it already has a discount
+    const memorial = await memorialModel.findById(memorialId);
+    if (memorial && memorial.isAdminDiscounted) {
+      return res.status(400).json({ 
+        isValid: false, 
+        message: "Cannot apply promo code to an already discounted memorial" 
+      });
+    }
+
+    // If all checks pass, return success with discount details
+    return res.status(200).json({
+      isValid: true,
+      discountType: promo.discountType,
+      discountValue: promo.discountValue,
+      appliesToPlan: promo.appliesToPlan,
+      code: promo.code,
+      message: "Promo code applied successfully"
+    });
+
+  } catch (error) {
+    console.error("Error validating promo code:", error);
+    res.status(500).json({ 
+      isValid: false, 
+      message: "Server error validating promo code" 
+    });
   }
 };

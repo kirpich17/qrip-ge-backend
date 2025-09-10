@@ -5,6 +5,7 @@
 const { restartFreePlan, cancelActiveFreePlan } = require('../service/subscriptionService.js');
 const MemorialPurchase = require('../models/MemorialPurchase.js');
 const memorialModel = require('../models/memorial.model.js');
+const PromoCodeSchema = require('../models/PromoCodeSchema.js');
 
 
   const initiatePayment = async (req, res) => {
@@ -109,7 +110,7 @@ const paymentCallbackWebhook = async (req, res) => {
     // 3. Find the memorial purchase record
     const purchase = await MemorialPurchase.findOne({ 
       bogOrderId: orderId 
-    }).populate('planId').populate('memorialId');
+    }).populate('planId').populate('memorialId').populate('appliedPromoCode');
 
     if (!purchase) {
       console.warn(`Webhook received for unknown order: ${orderId}`);
@@ -123,6 +124,17 @@ const paymentCallbackWebhook = async (req, res) => {
       purchase.transactionId = transactionId;
       purchase.paymentDate = new Date();
       await purchase.save();
+
+
+        // Increment promo code usage if applicable
+      if (purchase.appliedPromoCode) {
+        await PromoCodeSchema.findByIdAndUpdate(
+          purchase.appliedPromoCode._id,
+          { $inc: { currentUsage: 1 } }
+        );
+        console.log(`Incremented usage for promo code: ${purchase.appliedPromoCode.code}`);
+      }
+
 
       // Activate the memorial
       await memorialModel.findByIdAndUpdate(purchase.memorialId, {
@@ -482,9 +494,12 @@ const reTrySubscriptionPayment = async (req, res) => {
 
 const initiateMemorialPayment = async (req, res) => {
     const userId = req.user.userId;
-    const { planId, memorialId } = req.body; // Add memorialId
-let successUrl
+    const { planId, memorialId, promoCode } = req.body;
+    let successUrl;
+
     try {
+        console.log(req.body, "req.bodyreq.body");
+        
         const plan = await SubscriptionPlan.findById(planId);
         if (!plan) {
             return res.status(400).json({ message: "Invalid plan selected." });
@@ -505,7 +520,40 @@ let successUrl
 
         const accessToken = await getBogToken();
         const isTestMode = process.env.PAYMENT_TEST_MODE === 'true';
-        const amount = isTestMode ? 0.01 : plan.price;
+        
+        // Calculate amount after applying promo code (if any)
+        let amount = plan.price;
+        let promoCodeDoc
+        if (promoCode) {
+            // Validate promo code and calculate discount
+            const promoValidation = await validatePromoCode(promoCode, memorialId, planId);
+            
+            if (promoValidation.isValid) {
+                switch (promoValidation.discountType) {
+                    case "percentage":
+                        amount = plan.price * (1 - promoValidation.discountValue / 100);
+                        break;
+                    case "fixed":
+                        amount = Math.max(0, plan.price - promoValidation.discountValue);
+                        break;
+                    case "free":
+                        amount = 0;
+                        break;
+                    default:
+                        amount = plan.price;
+                }
+
+                 // Store promo code document for later use
+    promoCodeDoc = promoValidation.promoCodeDoc;
+            } else {
+                return res.status(400).json({ message: promoValidation.message || "Invalid promo code" });
+            }
+        }
+        
+        // Use test amount if in test mode
+        if (isTestMode) {
+            amount = 0.01;
+        }
 
         // Create order payload
         console.log("🚀 ~ initiateMemorialPayment ~ successUrl:", successUrl)
@@ -552,6 +600,15 @@ let successUrl
             planId,
             bogOrderId,
             amount: plan.price,
+             finalPricePaid: amount,
+             ...(promoCodeDoc && {
+    appliedPromoCode: promoCodeDoc._id,
+     isAdminDiscount: true,
+    discountDetails: {
+      type: promoCodeDoc.discountType,
+      value: promoCodeDoc.discountValue
+    }
+  }),
             status: 'pending'
         });
 
@@ -561,9 +618,51 @@ let successUrl
         });
 
     } catch (error) {
-        console.error("Payment initiation failed:", error.response?.data || error.message);
+        console.error("Payment initiation failed:", error);
         res.status(500).json({ message: "Failed to initiate payment" });
     }
 };
 
+async function validatePromoCode(promoCode, memorialId, planId) {
+    try {
+        // Find the promo code in the database
+        const promo = await PromoCodeSchema.findOne({ code: promoCode.toUpperCase() });
+        
+        if (!promo) {
+            return { isValid: false, message: "Promo code not found" };
+        }
+        
+        // Check if expired
+        if (promo.expiryDate && new Date() > promo.expiryDate) {
+            return { isValid: false, message: "Promo code has expired" };
+        }
+        
+        // Check if usage limit exceeded
+        if (promo.maxUsage && promo.usedCount >= promo.maxUsage) {
+            return { isValid: false, message: "Promo code usage limit exceeded" };
+        }
+        
+        // Check if the promo code applies to the specific plan
+        if (promo.appliesToPlan && promo.appliesToPlan.toString() !== planId) {
+            return { isValid: false, message: "This promo code is not valid for the selected plan" };
+        }
+        
+        // Check if the memorial has already used this promo code
+        const existingUsage = await MemorialPurchase.findOne({ memorialId, promoCode: promo.code });
+        if (existingUsage) {
+            return { isValid: false, message: "This memorial has already used this promo code" };
+        }
+        
+        return {
+            isValid: true,
+            discountType: promo.discountType,
+            discountValue: promo.discountValue,
+            appliesToPlan: promo.appliesToPlan,
+             promoCodeDoc: promo // Return the document
+        };
+    } catch (error) {
+        console.error("Error validating promo code:", error);
+        return { isValid: false, message: "Error validating promo code" };
+    }
+}
   module.exports = {reTrySubscriptionPayment,initiateMemorialPayment,initiatePayment,paymentCallbackWebhook,initiateOneTimePayment,getActiveSubscription,restartLifeTimeFreePlan}

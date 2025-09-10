@@ -21,6 +21,7 @@ const {
   GetPromoCodeById,
   DeletePromoCode,
   UpdatePromoCode,
+  ValidatePromoCode,
 } = require("../controller/admin.controller");
 const { isAuthenticated, isAdmin } = require("../middlewares/auth.middleware");
 const { adminStats } = require("../controller/admin.stats");
@@ -50,5 +51,7 @@ router.get("/promocode", GetAllPromoCodes);
 router.get("/promocode/:id", GetPromoCodeById);
 router.delete("/promocode/:id", DeletePromoCode);
 router.put("/promocode/:id", UpdatePromoCode );
+
+router.post("/validate-promo", ValidatePromoCode);
 
 module.exports = router;
