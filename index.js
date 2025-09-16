@@ -10,6 +10,7 @@ const adminRoutes = require("./src/routes/admin.routes");
 const memorialRoutes = require("./src/routes/memorial.routes");
 const qrCodeRoutes = require("./src/routes/qrcode.routes");
 const paymentRouter = require("./src/routes/payment.routes");
+const termRouter = require("./src/routes/terms.routes");
 const userRoutes = require("./src/routes/user.routes");
 const subscriptionRoutes = require("./src/routes/subscriptions.routes");
 const chargeRecurringSubscriptions = require("./src/service/bog-cron-jobs");
@@ -51,6 +52,7 @@ app.use("/api/user", userRoutes);
 app.use("/api/subscription", subscriptionRoutes);
 app.use("/api/qrcode", qrCodeRoutes);
 app.use('/api/payments', paymentRouter);
+app.use('/api/terms', termRouter);
 app.use('/', (req, res) => {
   res.send("Hello Everyone");
 })

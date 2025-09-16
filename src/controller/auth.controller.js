@@ -227,7 +227,10 @@ exports.allStatsforUser = async (req, res) => {
 
     const stats = await memorialModel.aggregate([
       {
-        $match: { createdBy: new mongoose.Types.ObjectId(userId) },
+        $match: { createdBy: new mongoose.Types.ObjectId(userId) ,
+
+          firstName: { $ne: "Untitled" },
+        },
       },
       {
         $group: {

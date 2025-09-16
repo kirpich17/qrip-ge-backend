@@ -921,6 +921,7 @@ exports.createOrUpdateMemorial = async (req, res) => {
 
         // 2. NOW create the payload from the updated req.body
   const payload = { ...req.body, familyTree };
+  console.log("🚀 ~ payload:", payload)
   delete payload.createdBy;
   
     // --- CONSUME THE CREATION RIGHT ---
