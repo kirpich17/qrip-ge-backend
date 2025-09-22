@@ -15,6 +15,7 @@ const {
   handleStickerPaymentCallback,
   deleteOrder,
   getOrderById,
+  getUserOrderById,
 } = require("../controller/qrSticker.controller");
 
 // Public routes
@@ -28,6 +29,7 @@ router.use(isAuthenticated); // Apply auth middleware to all routes below
 // User sticker operations
 router.post("/orders", createStickerOrder);
 router.get("/orders", getUserStickerOrders);
+router.get("/orders/:orderId", getUserOrderById);
 router.put("/orders/payment-status", updateOrderPaymentStatus);
 
 // Payment routes

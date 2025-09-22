@@ -559,6 +559,40 @@ exports.deleteOrder = async (req, res) => {
   }
 };
 
+// Get single order by ID (user accessible)
+exports.getUserOrderById = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const userId = req.user.userId;
+
+    const order = await QRStickerOrder.findOne({
+      _id: orderId,
+      user: userId
+    })
+      .populate('memorial', 'firstName lastName slug')
+      .populate('stickerOption', 'name type size price');
+    
+    if (!order) {
+      return res.status(404).json({
+        status: false,
+        message: "Order not found"
+      });
+    }
+
+    res.json({
+      status: true,
+      data: order
+    });
+
+  } catch (error) {
+    console.error("❌ Get User Order Error:", error);
+    res.status(500).json({
+      status: false,
+      message: "Failed to get order: " + error.message
+    });
+  }
+};
+
 // Admin: Get single order by ID
 exports.getOrderById = async (req, res) => {
   try {
