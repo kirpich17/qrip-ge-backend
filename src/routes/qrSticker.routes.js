@@ -16,6 +16,7 @@ const {
   deleteOrder,
   getOrderById,
   getUserOrderById,
+  manualUpdatePaymentStatus,
 } = require("../controller/qrSticker.controller");
 
 // Public routes
@@ -31,6 +32,8 @@ router.post("/orders", createStickerOrder);
 router.get("/orders", getUserStickerOrders);
 router.get("/orders/:orderId", getUserOrderById);
 router.put("/orders/payment-status", updateOrderPaymentStatus);
+// Manual payment status update (for testing)
+router.put("/orders/:orderId/manual-payment-status", manualUpdatePaymentStatus);
 
 // Payment routes
 router.post("/payment/initiate", initiateStickerPayment);

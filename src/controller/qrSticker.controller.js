@@ -472,6 +472,9 @@ exports.initiateStickerPayment = async (req, res) => {
 // Handle payment callback from BOG
 exports.handleStickerPaymentCallback = async (req, res) => {
   try {
+    console.log("🚀 QR Sticker Payment Callback - Full Request Body:", JSON.stringify(req.body, null, 2));
+    console.log("🚀 QR Sticker Payment Callback - Headers:", JSON.stringify(req.headers, null, 2));
+    
     const { order_id, status, external_order_id } = req.body;
     
     console.log("🚀 QR Sticker Payment Callback:", { order_id, status, external_order_id });
@@ -489,6 +492,12 @@ exports.handleStickerPaymentCallback = async (req, res) => {
       console.error("❌ Order not found:", external_order_id);
       return res.status(404).json({ status: false, message: "Order not found" });
     }
+
+    console.log("🔍 Found order:", { 
+      orderId: order._id, 
+      currentStatus: order.paymentStatus,
+      paymentId: order.paymentId 
+    });
 
     // Update payment status based on BOG response
     if (status === 'APPROVED') {
@@ -589,6 +598,47 @@ exports.getUserOrderById = async (req, res) => {
     res.status(500).json({
       status: false,
       message: "Failed to get order: " + error.message
+    });
+  }
+};
+
+// Manual payment status update (for testing/debugging)
+exports.manualUpdatePaymentStatus = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { paymentStatus } = req.body;
+
+    console.log("🔧 Manual payment status update:", { orderId, paymentStatus });
+
+    const order = await QRStickerOrder.findById(orderId);
+    
+    if (!order) {
+      return res.status(404).json({
+        status: false,
+        message: "Order not found"
+      });
+    }
+
+    order.paymentStatus = paymentStatus;
+    if (paymentStatus === 'paid') {
+      order.orderStatus = 'processing';
+    }
+    
+    await order.save();
+    
+    console.log("✅ Manual payment status updated:", { orderId, newStatus: paymentStatus });
+
+    res.json({
+      status: true,
+      message: "Payment status updated manually",
+      data: order
+    });
+
+  } catch (error) {
+    console.error("❌ Manual Payment Status Update Error:", error);
+    res.status(500).json({
+      status: false,
+      message: "Failed to update payment status: " + error.message
     });
   }
 };
