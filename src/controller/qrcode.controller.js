@@ -22,7 +22,9 @@ exports.generateQrCode = async (req, res) => {
         .json({ status: false, message: "Memorial not found." });
     }
 
-    if (memorial.createdBy.toString() !== req.user.userId) {
+    // Allow admin users to generate QR codes for any memorial
+    // Regular users can only generate QR codes for their own memorials
+    if (req.user.userType !== 'admin' && memorial.createdBy.toString() !== req.user.userId) {
       return res.status(403).json({
         status: false,
         message:
