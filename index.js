@@ -13,6 +13,8 @@ const paymentRouter = require("./src/routes/payment.routes");
 const termRouter = require("./src/routes/terms.routes");
 const userRoutes = require("./src/routes/user.routes");
 const subscriptionRoutes = require("./src/routes/subscriptions.routes");
+const qrStickerRoutes = require("./src/routes/qrSticker.routes");
+const adminStickerRoutes = require("./src/routes/adminSticker.routes");
 const chargeRecurringSubscriptions = require("./src/service/bog-cron-jobs");
 dotenv.config();
 const app = express();
@@ -47,10 +49,12 @@ cron.schedule('0 2 * * *', () => {
 // ✅ API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/admin", adminStickerRoutes);
 app.use("/api/memorials", memorialRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/subscription", subscriptionRoutes);
 app.use("/api/qrcode", qrCodeRoutes);
+app.use("/api/stickers", qrStickerRoutes);
 app.use('/api/payments', paymentRouter);
 app.use('/api/terms', termRouter);
 app.use('/', (req, res) => {
