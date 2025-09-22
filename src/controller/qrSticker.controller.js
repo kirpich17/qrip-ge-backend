@@ -476,6 +476,12 @@ exports.handleStickerPaymentCallback = async (req, res) => {
     
     console.log("🚀 QR Sticker Payment Callback:", { order_id, status, external_order_id });
 
+    // Basic validation - ensure we have required fields
+    if (!external_order_id) {
+      console.error("❌ Missing external_order_id in callback");
+      return res.status(400).json({ status: false, message: "Missing external_order_id" });
+    }
+
     // Find the order
     const order = await QRStickerOrder.findById(external_order_id);
     
@@ -488,6 +494,7 @@ exports.handleStickerPaymentCallback = async (req, res) => {
     if (status === 'APPROVED') {
       order.paymentStatus = 'paid';
       order.paymentId = order_id;
+      order.orderStatus = 'processing'; // Set order status to processing when payment is successful
       
       // Update stock
       const stickerOption = await QRStickerOption.findById(order.stickerOption);

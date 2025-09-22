@@ -19,6 +19,8 @@ const {
 
 // Public routes
 router.get("/options", getStickerOptions);
+// Payment callback (webhook) - must be public for BOG to access
+router.post("/payment/callback", handleStickerPaymentCallback);
 
 // User routes (protected)
 router.use(isAuthenticated); // Apply auth middleware to all routes below
@@ -30,7 +32,6 @@ router.put("/orders/payment-status", updateOrderPaymentStatus);
 
 // Payment routes
 router.post("/payment/initiate", initiateStickerPayment);
-router.post("/payment/callback", handleStickerPaymentCallback);
 
 // Admin routes (additional admin check needed in controller)
 router.get("/admin/orders", getAllStickerOrders);
