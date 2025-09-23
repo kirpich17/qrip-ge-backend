@@ -100,6 +100,7 @@ const paymentCallbackWebhook = async (req, res) => {
     const orderId = body.order_id;
     const transactionId = body.payment_detail?.transaction_id;
     const amount = body.purchase_units?.transfer_amount || body.purchase_units?.request_amount;
+    const externalOrderId = body.external_order_id;
     
     // 2. Validate required data
     if (!orderId) {
@@ -107,7 +108,45 @@ const paymentCallbackWebhook = async (req, res) => {
       return res.status(400).send('Missing order ID');
     }
 
-    // 3. Find the memorial purchase record
+    // 3. Check if this is a sticker order first
+    if (externalOrderId) {
+      console.log('🔍 Processing sticker order callback:', externalOrderId);
+      const QRStickerOrder = require('../models/QRStickerOrder');
+      const QRStickerOption = require('../models/QRStickerOption');
+      
+      const stickerOrder = await QRStickerOrder.findById(externalOrderId);
+      
+      if (stickerOrder) {
+        console.log('✅ Found sticker order:', stickerOrder._id);
+        
+        if (orderStatus === 'completed') {
+          stickerOrder.paymentStatus = 'paid';
+          stickerOrder.paymentId = orderId;
+          stickerOrder.orderStatus = 'processing';
+          
+          // Update stock
+          const stickerOption = await QRStickerOption.findById(stickerOrder.stickerOption);
+          if (stickerOption) {
+            stickerOption.stock = Math.max(0, stickerOption.stock - stickerOrder.quantity);
+            if (stickerOption.stock === 0) {
+              stickerOption.isInStock = false;
+            }
+            await stickerOption.save();
+          }
+          
+          await stickerOrder.save();
+          console.log('✅ Sticker payment successful:', externalOrderId);
+        } else {
+          stickerOrder.paymentStatus = 'failed';
+          await stickerOrder.save();
+          console.log('❌ Sticker payment failed:', externalOrderId);
+        }
+        
+        return res.status(200).send('Sticker webhook processed successfully');
+      }
+    }
+
+    // 4. Handle memorial purchase (existing logic)
     const purchase = await MemorialPurchase.findOne({ 
       bogOrderId: orderId 
     }).populate('planId').populate('memorialId').populate('appliedPromoCode');
@@ -117,7 +156,7 @@ const paymentCallbackWebhook = async (req, res) => {
       return res.status(404).send('Purchase record not found');
     }
 
-    // 4. Handle payment status
+    // 5. Handle payment status
     if (orderStatus === 'completed') {
       // Update purchase record
       purchase.status = 'completed';

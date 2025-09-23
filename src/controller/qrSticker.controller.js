@@ -379,7 +379,7 @@ exports.initiateStickerPayment = async (req, res) => {
     // For testing, use 0.01 amount like subscription payments
     const testAmount = 0.01;
     const orderPayload = {
-      callback_url: `${process.env.BACKEND_URL}/api/stickers/payment/callback`,
+      callback_url: `${process.env.BACKEND_URL}/api/payments/callback`,
       external_order_id: orderId,
       purchase_units: {
         currency: "GEL",
