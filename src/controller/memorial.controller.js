@@ -141,7 +141,6 @@ exports.getMemorialById = async (req, res) => {
       }
     });
  
-    console.log("🚀 ~ memorial:", memorial)
 
     if (!memorial) {
       return res
@@ -579,7 +578,6 @@ exports.createOrUpdateMemorial = async (req, res) => {
     const userId = req.user.userId;
     let {createReq}= req.body;
    createReq =   createReq == true || createReq == "true"
-    console.log("🚀 ~ memoria22222l:", createReq)
     let userPlan;
     let memorial;
     
@@ -615,7 +613,6 @@ exports.createOrUpdateMemorial = async (req, res) => {
       // Get the plan from the memorial's purchase
       if (memorial.purchase) {
         const purchase = await MemorialPurchase.findById(memorial.purchase).populate('planId');
-        console.log("🚀 ~ memorialpurchase:", purchase)
      userPlan = purchase ? purchase.planId : null;
       } else {
         userPlan = await SubscriptionPlan.findOne({ planType: 'minimal' });
@@ -628,10 +625,9 @@ exports.createOrUpdateMemorial = async (req, res) => {
       return res.status(500).json({ status: false, message: "Could not determine subscription plan." });
     }
     
-    console.log("🚀 ~ userPlan:", userPlan)
     const isDocumentUploadIncluded = userPlan.features.some(
   feature => feature.text === "Document Upload" && feature.included === true
-);console.log("isDocumentUploadIncluded",isDocumentUploadIncluded);
+);
     // Parse deleted files from request body
     const deletedFiles = {
       photos: req.body.deletedPhotos ? JSON.parse(req.body.deletedPhotos) : [],
@@ -667,15 +663,7 @@ exports.createOrUpdateMemorial = async (req, res) => {
         if (groupedFiles['videoGallery'] && groupedFiles['videoGallery'].length > 0) {
         for (const video of groupedFiles['videoGallery']) {
           try {
-            console.log("Processing video:", {
-              originalname: video.originalname,
-              hasPath: !!video.path,
-              hasBuffer: !!video.buffer,
-              size: video.size
-            });
-            
             const duration = await getVideoDuration(video);
-            console.log(`Video ${video.originalname} duration: ${duration} seconds`);
             
             if (duration > userPlan?.maxVideoDuration) {
               return res.status(403).json({
@@ -733,7 +721,6 @@ exports.createOrUpdateMemorial = async (req, res) => {
       const existingPhotos = memorial ? memorial.photoGallery.length : 0;
       const newPhotos = groupedFiles['photoGallery'] ? groupedFiles['photoGallery'].length : 0;
       const remainingPhotos = existingPhotos - deletedFiles.photos.length + newPhotos;
-      console.log("🚀 ~ remainingPhotos:", remainingPhotos)
       
       if (remainingPhotos >  userPlan?.maxPhotos) { // Medium plan allows up to 10 photos
         return res.status(403).json({
@@ -760,15 +747,7 @@ exports.createOrUpdateMemorial = async (req, res) => {
          if (groupedFiles['videoGallery'] && groupedFiles['videoGallery'].length > 0) {
         for (const video of groupedFiles['videoGallery']) {
           try {
-            console.log("Processing video:", {
-              originalname: video.originalname,
-              hasPath: !!video.path,
-              hasBuffer: !!video.buffer,
-              size: video.size
-            });
-            
             const duration = await getVideoDuration(video);
-            console.log(`Video ${video.originalname} duration: ${duration} seconds`);
             
                if (duration > userPlan?.maxVideoDuration) {
               return res.status(403).json({
@@ -796,7 +775,6 @@ exports.createOrUpdateMemorial = async (req, res) => {
  const existingPhotos = memorial ? memorial.photoGallery.length : 0;
       const newPhotos = groupedFiles['photoGallery'] ? groupedFiles['photoGallery'].length : 0;
       const remainingPhotos = existingPhotos - deletedFiles.photos.length + newPhotos;
-      console.log("🚀 ~ remainingPhotos:premium", remainingPhotos)
          if (remainingPhotos > userPlan?.maxPhotos) { // Medium plan allows up to 10 photos
         return res.status(403).json({
           status: false,
@@ -809,15 +787,7 @@ exports.createOrUpdateMemorial = async (req, res) => {
       if (groupedFiles['videoGallery'] && groupedFiles['videoGallery'].length > 0) {
         for (const video of groupedFiles['videoGallery']) {
           try {
-            console.log("Processing video:", {
-              originalname: video.originalname,
-              hasPath: !!video.path,
-              hasBuffer: !!video.buffer,
-              size: video.size
-            });
-            
             const duration = await getVideoDuration(video);
-            console.log(`Video ${video.originalname} duration: ${duration} seconds`);
             
                if (duration > userPlan?.maxVideoDuration) {
               return res.status(403).json({
@@ -910,19 +880,25 @@ exports.createOrUpdateMemorial = async (req, res) => {
     };
 
 
-    // Prepare the update payload
-    const payload = { ...req.body };
-    // --- FIX: Assign the already parsed familyTree object to the payload ---
-    payload.familyTree = familyTree;
-
     if (_id) {
       await processFiles(memorial);
       
-
-        // 2. NOW create the payload from the updated req.body
-  const payload = { ...req.body, familyTree };
-  console.log("🚀 ~ payload:", payload)
-  delete payload.createdBy;
+      // Prepare the update payload
+      const payload = { ...req.body, familyTree };
+      
+      // Ensure GPS coordinates are properly parsed
+      if (req.body.gps) {
+        if (typeof req.body.gps === 'string') {
+          try {
+            payload.gps = JSON.parse(req.body.gps);
+          } catch (e) {
+            console.error('Error parsing GPS coordinates:', e);
+          }
+        } else {
+          payload.gps = req.body.gps;
+        }
+      }
+      delete payload.createdBy;
   
     // --- CONSUME THE CREATION RIGHT ---
       // When saving successfully for the first time, change the status to 'active'.
@@ -936,14 +912,27 @@ exports.createOrUpdateMemorial = async (req, res) => {
       return res.json({ status: true, message: "Memorial updated successfully", data: updatedMemorial });
     } else {
       // 1. Process files first
-  await processFiles();
-  
-  // 2. Create payload from the updated req.body
-  const payload = { ...req.body, familyTree, createdBy: userId };
+      await processFiles();
+      
+      // 2. Create payload from the updated req.body
+      const payload = { ...req.body, familyTree, createdBy: userId };
+      
+      // Ensure GPS coordinates are properly parsed for creation
+      if (req.body.gps) {
+        if (typeof req.body.gps === 'string') {
+          try {
+            payload.gps = JSON.parse(req.body.gps);
+          } catch (e) {
+            console.error('Error parsing GPS coordinates (create):', e);
+          }
+        } else {
+          payload.gps = req.body.gps;
+        }
+      }
 
-  // 3. Save the correct payload
-  const newMemorial = await Memorial.create(payload);
-  return res.status(201).json({ status: true, message: "Memorial created successfully", data: newMemorial });
+      // 3. Save the correct payload
+      const newMemorial = await Memorial.create(payload);
+      return res.status(201).json({ status: true, message: "Memorial created successfully", data: newMemorial });
     }
   } catch (error) {
     console.error("Error in memorial creation/update:", error);
