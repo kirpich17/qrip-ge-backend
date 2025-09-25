@@ -8,6 +8,7 @@ const {
   getMyMemorials,
   getPublicMemorialBySlug,
   getMemorialById,
+  getMyMemorialById,
   updateMemorial,
   deleteMemorial,
   addPhotosToMemorial,
@@ -85,6 +86,10 @@ router.post(
 
 // Get all memorials for the currently logged-in user's dashboard
 router.get("/my-memorials", isAuthenticated, getMyMemorials);
+
+// Get a specific memorial by ID for editing (user's own memorials only)
+router.get("/my-memorial/:id", isAuthenticated, getMyMemorialById);
+
 router.post("/view", viewAndScanMemorialCount);
 
 // Get, Update, and Delete a specific memorial by its ID

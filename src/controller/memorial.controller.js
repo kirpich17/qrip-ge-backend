@@ -168,6 +168,48 @@ exports.getMemorialById = async (req, res) => {
   }
 };
 
+// New function for getting user's own memorial for editing
+exports.getMyMemorialById = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const memorial = await Memorial.findOne({
+      _id: req.params.id,
+      createdBy: userId,
+    })
+    .populate({
+      path: 'purchase',
+      populate: {
+        path: 'planId',
+        model: 'SubscriptionPlan'
+      }
+    });
+
+    if (!memorial) {
+      return res
+        .status(404)
+        .json({ status: false, message: "Memorial not found or you don't have permission to access it." });
+    }
+
+    // Convert to plain object to modify
+    const memorialData = memorial.toObject();
+    
+    // Determine plan name based on the correctly populated path.
+    if (memorial.purchase && memorial.purchase.planId && memorial.purchase.planId.name) {
+      memorialData.planName = memorial.purchase.planId.name;
+      memorialData.allowSlideshow = memorial.purchase.planId.allowSlideshow;
+    } 
+
+    // Remove internal subscription details from response
+    delete memorialData.purchase;
+
+    res.json({ status: true, data: memorialData });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ status: false, message: "Server Error: " + error.message });
+  }
+};
+
 exports.updateMemorial = async (req, res) => {
   try {
     let memorial = await Memorial.findById(req.params.id);
@@ -901,8 +943,13 @@ exports.createOrUpdateMemorial = async (req, res) => {
       delete payload.createdBy;
   
     // --- CONSUME THE CREATION RIGHT ---
-      // When saving successfully for the first time, change the status to 'active'.
-      payload.memorialPaymentStatus = 'active';
+      // Only set to 'active' if memorial has a purchase (payment completed)
+      if (memorial.purchase) {
+        payload.memorialPaymentStatus = 'active';
+      } else {
+        // Keep as draft if no payment has been made
+        payload.memorialPaymentStatus = 'draft';
+      }
 
       const updatedMemorial = await Memorial.findByIdAndUpdate(_id, payload, {
         new: true,
@@ -915,7 +962,7 @@ exports.createOrUpdateMemorial = async (req, res) => {
       await processFiles();
       
       // 2. Create payload from the updated req.body
-      const payload = { ...req.body, familyTree, createdBy: userId };
+      const payload = { ...req.body, familyTree, createdBy: userId, memorialPaymentStatus: 'draft' };
       
       // Ensure GPS coordinates are properly parsed for creation
       if (req.body.gps) {
