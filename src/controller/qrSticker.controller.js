@@ -223,37 +223,104 @@ exports.getAllStickerOrders = async (req, res) => {
       search,
     } = req.query;
 
-    const query = {};
-
-    if (status) {
-      query.orderStatus = status;
-    }
-
-    if (paymentStatus) {
-      query.paymentStatus = paymentStatus;
-    }
-
-    if (search) {
-      query.$or = [
-        { 'shippingAddress.fullName': new RegExp(search, 'i') },
-        { 'shippingAddress.email': new RegExp(search, 'i') },
-        { trackingNumber: new RegExp(search, 'i') },
-      ];
-    }
+    // Status and payment filters are now handled in aggregation pipeline
 
     const limitValue = parseInt(limit);
     const skipValue = (parseInt(page) - 1) * limitValue;
 
-    const [orders, totalItems] = await Promise.all([
-      QRStickerOrder.find(query)
-        .populate('user', 'firstname lastname email phone')
-        .populate('memorial', 'firstName lastName slug')
-        .populate('stickerOption', 'name type size')
-        .sort({ createdAt: -1 })
-        .skip(skipValue)
-        .limit(limitValue),
-      QRStickerOrder.countDocuments(query),
+    let aggregationPipeline = [
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'user',
+          foreignField: '_id',
+          as: 'userData'
+        }
+      },
+      {
+        $lookup: {
+          from: 'memorials',
+          localField: 'memorial',
+          foreignField: '_id',
+          as: 'memorialData'
+        }
+      },
+      {
+        $lookup: {
+          from: 'qrstickeroptions',
+          localField: 'stickerOption',
+          foreignField: '_id',
+          as: 'stickerOptionData'
+        }
+      },
+      {
+        $addFields: {
+          user: { $arrayElemAt: ['$userData', 0] },
+          memorial: { $arrayElemAt: ['$memorialData', 0] },
+          stickerOption: { $arrayElemAt: ['$stickerOptionData', 0] }
+        }
+      },
+      {
+        $project: {
+          userData: 0,
+          memorialData: 0,
+          stickerOptionData: 0
+        }
+      }
+    ];
+
+    // Add search functionality
+    if (search) {
+      aggregationPipeline.push({
+        $match: {
+          $or: [
+            { 'shippingAddress.fullName': new RegExp(search, 'i') },
+            { 'shippingAddress.email': new RegExp(search, 'i') },
+            { trackingNumber: new RegExp(search, 'i') },
+            { _id: new RegExp(search, 'i') },
+            { 'user.firstname': new RegExp(search, 'i') },
+            { 'user.lastname': new RegExp(search, 'i') },
+            { 'user.email': new RegExp(search, 'i') },
+            { 'memorial.firstName': new RegExp(search, 'i') },
+            { 'memorial.lastName': new RegExp(search, 'i') },
+            { 'stickerOption.name': new RegExp(search, 'i') }
+          ]
+        }
+      });
+    }
+
+    // Add status filters
+    if (status) {
+      aggregationPipeline.push({
+        $match: { orderStatus: status }
+      });
+    }
+
+    if (paymentStatus) {
+      aggregationPipeline.push({
+        $match: { paymentStatus: paymentStatus }
+      });
+    }
+
+    // Add sorting and pagination
+    aggregationPipeline.push(
+      { $sort: { createdAt: -1 } },
+      { $skip: skipValue },
+      { $limit: limitValue }
+    );
+
+    // Create a separate pipeline for counting (without pagination)
+    const countPipeline = [...aggregationPipeline];
+    countPipeline.pop(); // Remove $limit
+    countPipeline.pop(); // Remove $skip
+    countPipeline.push({ $count: "total" });
+
+    const [orders, countResult] = await Promise.all([
+      QRStickerOrder.aggregate(aggregationPipeline),
+      QRStickerOrder.aggregate(countPipeline),
     ]);
+
+    const totalItems = countResult[0]?.total || 0;
 
     const pagination = createPaginationObject(totalItems, page, limitValue);
 
