@@ -54,8 +54,26 @@ exports.getMyMemorials = async (req, res) => {
       sortOrder = "desc",
     } = req.query;
 
+    // --- Cleanup: Remove incomplete memorials (no successful payment) ---
+    // This helps clean up ghost memorials that were created but never paid for
+    await Memorial.deleteMany({
+      createdBy: req.user.userId,
+      $or: [
+        { memorialPaymentStatus: { $ne: 'active' } },
+        { purchase: { $exists: false } },
+        { purchase: null }
+      ]
+    });
+
     // --- Build the Search Query ---
-    const query = { createdBy: req.user.userId ,   memorialPaymentStatus: { $ne: 'draft' }};
+    // Only show memorials that have completed payments (either paid or completed status)
+    const query = { 
+      createdBy: req.user.userId,
+      memorialPaymentStatus: 'active',
+      // Ensure memorial has a valid purchase record with successful payment
+      purchase: { $exists: true, $ne: null }
+    };
+    
     if (search) {
       const searchRegex = new RegExp(search?.trim(), "i");
       query.$or = [{ firstName: searchRegex }, { lastName: searchRegex }];
@@ -70,17 +88,19 @@ exports.getMyMemorials = async (req, res) => {
     const [memorials, totalItems] = await Promise.all([
       Memorial.find(query).sort(sortOptions).skip(skipValue).limit(limitValue)
       .populate({
-path:"purchase",
-populate:{
-  path:"planId",
-  model:"SubscriptionPlan",
-  select:"_id name"
-}
-
-
+        path: "purchase",
+        match: { status: { $in: ['paid', 'completed'] } }, // Only populate if payment is successful
+        populate: {
+          path: "planId",
+          model: "SubscriptionPlan",
+          select: "_id name"
+        }
       }),
       Memorial.countDocuments(query),
     ]);
+
+    // Filter out memorials where purchase population failed (no successful payment)
+    const validMemorials = memorials.filter(memorial => memorial.purchase !== null);
 
     // ✅ Step 2: Use the reusable function to generate the pagination object
     const pagination = createPaginationObject(totalItems, page, limitValue);
@@ -88,9 +108,13 @@ populate:{
     // --- Construct the Response ---
     res.json({
       status: true,
-      data: memorials,
+      data: validMemorials, // Only return memorials with successful payments
       // ✅ Step 3: Add the generated pagination object to the response
-      pagination: pagination,
+      pagination: {
+        ...pagination,
+        totalItems: validMemorials.length, // Update total count to reflect actual valid memorials
+        totalPages: Math.ceil(validMemorials.length / limitValue)
+      },
     });
   } catch (error) {
     res
@@ -124,7 +148,36 @@ exports.getPublicMemorialBySlug = async (req, res) => {
 
 exports.getMemorialById = async (req, res) => {
   try {
-    // const userId=req.user.userId
+    // First, check if memorial exists at all
+    const memorialExists = await Memorial.findOne({ _id: req.params.id });
+    
+    if (!memorialExists) {
+      return res
+        .status(404)
+        .json({ status: false, message: "Memorial not found." });
+    }
+
+    // Check if memorial is inactive
+    if (memorialExists.status === 'inactive') {
+      return res
+        .status(403)
+        .json({ 
+          status: false, 
+          message: "This memorial has been deactivated by the administrator. Please contact support for more information." 
+        });
+    }
+
+    // Check if memorial is not public
+    if (!memorialExists.isPublic) {
+      return res
+        .status(403)
+        .json({ 
+          status: false, 
+          message: "This memorial is not publicly accessible." 
+        });
+    }
+
+    // If memorial exists and is active, proceed with normal logic
     const memorial = await Memorial.findOne({
       _id: req.params.id,
       isPublic: true,

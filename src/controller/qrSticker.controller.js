@@ -376,17 +376,16 @@ exports.initiateStickerPayment = async (req, res) => {
     });
     
     // Create BOG payment order
-    // For testing, use 0.01 amount like subscription payments
-    const testAmount = 0.01;
+    // Use actual order total amount
     const orderPayload = {
       callback_url: `${process.env.BACKEND_URL}/api/payments/callback`,
       external_order_id: orderId,
       purchase_units: {
         currency: "GEL",
-        total_amount: testAmount, // Using test amount for now
+        total_amount: order.totalAmount, // Using actual order total
         basket: [{
-          quantity: 1, // Using quantity 1 for testing
-          unit_price: testAmount, // Using test amount for now
+          quantity: order.quantity, // Using actual order quantity
+          unit_price: order.unitPrice, // Using actual unit price
           product_id: process.env.BOG_PRODUCT_ID,
           description: `QR Sticker - ${order.stickerOption.name} for ${order.memorial.firstName} ${order.memorial.lastName}`
         }]
