@@ -91,6 +91,37 @@ const SubscriptionPlanSchema = new mongoose.Schema(
     trim: true,
   },
 
+  // Duration options for this plan
+  durationOptions: [{
+    duration: {
+      type: String,
+      required: true,
+      enum: ['1_month', '3_months', '6_months', '1_year', '2_years']
+    },
+    price: {
+      type: Number,
+      required: true,
+      min: [0, 'Price cannot be negative']
+    },
+    discountPercentage: {
+      type: Number,
+      default: 0,
+      min: [0, 'Discount cannot be negative'],
+      max: [100, 'Discount cannot exceed 100%']
+    },
+    isActive: {
+      type: Boolean,
+      default: true
+    }
+  }],
+
+  // Default duration for this plan
+  defaultDuration: {
+    type: String,
+    enum: ['1_month', '3_months', '6_months', '1_year', '2_years'],
+    default: '1_month'
+  }
+
   },
   {
     timestamps: true,

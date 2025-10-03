@@ -161,31 +161,13 @@ exports.getUserDetails = async (req, res) => {
       return res.status(404).json({ status: false, message: "User not found" });
     }
 
-    // Find all purchases made by this user to determine their effective plan
-    const purchases = await MemorialPurchase.find({ userId: user._id })
-      .populate({
-        path: 'planId',
-        select: 'planType' // We only need the planType field
-      });
-
-    // Determine the highest-tier plan the user has
-    let highestPlan = 'minimal'; // Default plan
-
-    if (purchases && purchases.length > 0) {
-      if (purchases.some(p => p.planId?.planType === 'premium')) {
-        highestPlan = 'premium';
-      } else if (purchases.some(p => p.planId?.planType === 'medium')) {
-        highestPlan = 'medium';
-      }
-    }
-
-    // Add the derived subscriptionPlan field to the user object for the response
-    user.subscriptionPlan = highestPlan;
+    // Note: Subscriptions are now memorial-level, not user-level
+    // No user-level subscription plan is set
 
     res.status(200).json({
       status: true,
       message: "User details fetched successfully",
-      user, // The user object now includes the 'subscriptionPlan' field
+      user, // User object without subscription plan (subscriptions are memorial-level)
     });
   } catch (err) {
     res.status(500).json({ status: false, message: err.message });

@@ -63,13 +63,22 @@ const validatePromoCode = async (promoCode, memorialId, planId) => {
 
   const initiatePayment = async (req, res) => {
     const userId =req.user.userId; // From 'protect' middleware
-    const { planId } = req.body;
-    console.log("🚀 ~ initiatePayment ~ planId:", userId)
+    const { planId, duration = '1_month' } = req.body;
+    console.log("🚀 ~ initiatePayment ~ planId:", userId, "duration:", duration)
 
     try {
       const plan = await SubscriptionPlan.findById(planId);
       if (!plan || plan.price <= 0) {
         return res.status(400).json({ message: "Invalid or free plan selected." });
+      }
+
+      // Find the duration option for this plan
+      const durationOption = plan.durationOptions?.find(option => 
+        option.duration === duration && option.isActive
+      );
+      
+      if (!durationOption) {
+        return res.status(400).json({ message: "Invalid duration selected for this plan." });
       }
 
       const accessToken = await getBogToken();
@@ -82,12 +91,12 @@ const validatePromoCode = async (promoCode, memorialId, planId) => {
         // external_order_id: externalOrderId,
         purchase_units: {
           currency: "GEL",
-          total_amount: plan.price,
+          total_amount: durationOption.price,
           basket: [{
             quantity: 1,
-            unit_price: plan.price,
+            unit_price: durationOption.price,
             product_id: process.env.BOG_PRODUCT_ID, // Use a generic product ID from .env
-            description: `Subscription to ${plan.name}`
+            description: `Subscription to ${plan.name} (${duration})`
           }]
         },
         redirect_urls: {
@@ -124,6 +133,8 @@ const validatePromoCode = async (promoCode, memorialId, planId) => {
       await UserSubscription.create({
         userId,
         planId,
+        duration,
+        durationPrice: durationOption.price,
         bogInitialOrderId: bogOrderId,
         status: 'pending'
       });
@@ -580,7 +591,7 @@ const reTrySubscriptionPayment = async (req, res) => {
 
 const initiateMemorialPayment = async (req, res) => {
     const userId = req.user.userId;
-    const { planId, memorialId, promoCode } = req.body;
+    const { planId, memorialId, promoCode, duration = '1_month' } = req.body;
     let successUrl;
 
     try {
@@ -592,7 +603,18 @@ const initiateMemorialPayment = async (req, res) => {
             console.log("❌ Plan not found:", planId);
             return res.status(400).json({ message: "Invalid plan selected." });
         }
-        console.log("✅ Plan found:", plan.name, "Price:", plan.price);
+        
+        // Find the duration option for this plan
+        const durationOption = plan.durationOptions?.find(option => 
+            option.duration === duration && option.isActive
+        );
+        
+        if (!durationOption) {
+            console.log("❌ Invalid duration selected for this plan:", duration);
+            return res.status(400).json({ message: "Invalid duration selected for this plan." });
+        }
+        
+        console.log("✅ Plan found:", plan.name, "Duration:", duration, "Price:", durationOption.price);
 
         // Verify memorial exists and is in draft status
         console.log("🔍 Finding memorial:", memorialId);
@@ -614,7 +636,7 @@ const initiateMemorialPayment = async (req, res) => {
         const isTestMode = process.env.PAYMENT_TEST_MODE === 'true';
         
         // Calculate amount after applying promo code (if any)
-        let amount = plan.price;
+        let amount = durationOption.price;
         let promoCodeDoc
         console.log("💰 Initial amount:", amount);
         
@@ -627,16 +649,16 @@ const initiateMemorialPayment = async (req, res) => {
             if (promoValidation.isValid) {
                 switch (promoValidation.discountType) {
                     case "percentage":
-                        amount = plan.price * (1 - promoValidation.discountValue / 100);
+                        amount = durationOption.price * (1 - promoValidation.discountValue / 100);
                         break;
                     case "fixed":
-                        amount = Math.max(0, plan.price - promoValidation.discountValue);
+                        amount = Math.max(0, durationOption.price - promoValidation.discountValue);
                         break;
                     case "free":
                         amount = 0;
                         break;
                     default:
-                        amount = plan.price;
+                        amount = durationOption.price;
                 }
                 console.log("💰 Amount after discount:", amount);
 
@@ -657,8 +679,10 @@ const initiateMemorialPayment = async (req, res) => {
                 userId,
                 memorialId,
                 planId,
+                duration,
+                durationPrice: durationOption.price,
                 bogOrderId: `free_${memorialId}_${Date.now()}`,
-                amount: plan.price,
+                amount: durationOption.price,
                 finalPricePaid: amount,
                 ...(promoCodeDoc && {
                     appliedPromoCode: promoCodeDoc._id,
@@ -675,6 +699,8 @@ const initiateMemorialPayment = async (req, res) => {
             await UserSubscription.create({
                 userId,
                 planId,
+                duration,
+                durationPrice: durationOption.price,
                 bogInitialOrderId: `free_${memorialId}_${Date.now()}`,
                 status: 'active',
                 startDate: new Date()
@@ -711,7 +737,7 @@ const initiateMemorialPayment = async (req, res) => {
                     quantity: 1,
                     unit_price: amount,
                     product_id: process.env.BOG_PRODUCT_ID,
-                    description: `Memorial Plan: ${plan.name}`
+                    description: `Memorial Plan: ${plan.name} (${duration})`
                 }]
             },
             redirect_urls: {
@@ -742,8 +768,10 @@ const initiateMemorialPayment = async (req, res) => {
             userId,
             memorialId,
             planId,
+            duration,
+            durationPrice: durationOption.price,
             bogOrderId,
-            amount: plan.price,
+            amount: durationOption.price,
              finalPricePaid: amount,
              ...(promoCodeDoc && {
     appliedPromoCode: promoCodeDoc._id,

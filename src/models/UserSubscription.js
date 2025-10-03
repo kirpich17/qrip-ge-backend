@@ -12,6 +12,16 @@ const userSubscriptionSchema = new mongoose.Schema({
     ref: 'SubscriptionPlan',
     required: true,
   },
+  duration: {
+    type: String,
+    enum: ['1_month', '3_months', '6_months', '1_year', '2_years'],
+    required: true,
+    default: '1_month'
+  },
+  durationPrice: {
+    type: Number,
+    required: true
+  },
   bogInitialOrderId: { // The order ID of the very first payment
     type: String,
     required: true,

@@ -5,6 +5,8 @@ const Memorial = require("../models/memorial.model");
 const SubscriptionPlan = require("../models/SubscriptionPlan");
 const PromoCodeSchema = require("../models/PromoCodeSchema");
 const memorialModel = require("../models/memorial.model");
+const UserSubscription = require("../models/UserSubscription");
+const MemorialPurchase = require("../models/MemorialPurchase");
 
 exports.getUserById = async (req, res) => {
   try {
@@ -19,10 +21,7 @@ exports.getUserById = async (req, res) => {
 };
 exports.createAdminUser = async (req, res) => {
   try {
-    // Get user details from the request body
     const { email, password, firstname, lastname } = req.body;
-
-    // --- Validation ---
     if (!email || !password) {
       return res
         .status(400)
@@ -164,10 +163,84 @@ exports.getAllUsers = async (req, res) => {
       memorialMap[item._id.toString()] = item.count;
     });
 
-    // Add memorial count to each user
+    // Get memorial subscriptions through MemorialPurchase
+    const memorialSubscriptions = await MemorialPurchase.aggregate([
+      {
+        $lookup: {
+          from: 'memorials',
+          localField: 'memorialId',
+          foreignField: '_id',
+          as: 'memorialData'
+        }
+      },
+      {
+        $lookup: {
+          from: 'subscriptionplans',
+          localField: 'planId',
+          foreignField: '_id',
+          as: 'planData'
+        }
+      },
+      {
+        $lookup: {
+          from: 'usersubscriptions',
+          localField: 'memorialId',
+          foreignField: 'userId',
+          as: 'subscriptionData'
+        }
+      },
+      {
+        $match: {
+          status: { $in: ['completed', 'paid'] },
+          'memorialData.status': 'active'
+        }
+      },
+      {
+        $project: {
+          userId: 1,
+          memorialId: 1,
+          planId: 1,
+          duration: 1,
+          durationPrice: 1,
+          finalPricePaid: 1,
+          status: 1,
+          memorialData: { $arrayElemAt: ['$memorialData', 0] },
+          planData: { $arrayElemAt: ['$planData', 0] },
+          subscriptionData: { $arrayElemAt: ['$subscriptionData', 0] }
+        }
+      }
+    ]);
+
+    // Create a map for memorial subscriptions
+    const memorialSubscriptionMap = {};
+    memorialSubscriptions.forEach((purchase) => {
+      const userId = purchase.userId.toString();
+      if (!memorialSubscriptionMap[userId]) {
+        memorialSubscriptionMap[userId] = [];
+      }
+      
+      // Get the most recent active subscription for this memorial
+      const activeSubscription = purchase.subscriptionData;
+      const subscriptionStatus = activeSubscription?.status || 'inactive';
+      
+      memorialSubscriptionMap[userId].push({
+        memorialId: purchase.memorialId,
+        memorialName: `${purchase.memorialData?.firstName || 'Unknown'} ${purchase.memorialData?.lastName || ''}`,
+        planName: purchase.planData?.name || 'Unknown',
+        duration: purchase.duration || '1_month',
+        durationPrice: purchase.durationPrice || 0,
+        finalPricePaid: purchase.finalPricePaid || 0,
+        subscriptionStatus: subscriptionStatus,
+        purchaseStatus: purchase.status,
+        planType: purchase.planData?.planType || 'minimal'
+      });
+    });
+
+    // Add memorial count and subscriptions to each user
     const usersWithMemorialCount = users.map((user) => ({
       ...user,
       memorialCount: memorialMap[user._id.toString()] || 0,
+      memorialSubscriptions: memorialSubscriptionMap[user._id.toString()] || [],
     }));
 
     res.json({
@@ -236,6 +309,13 @@ exports.getAllMemorials = async (req, res) => {
     // Start building the query
     let query = Memorial.find(searchFilter)
       .populate("createdBy")
+      .populate({
+        path: "purchase",
+        populate: {
+          path: "planId",
+          model: "SubscriptionPlan"
+        }
+      })
       .sort(sortOptions); // Apply the sorting to the query
 
     let paginationData = null;
