@@ -13,31 +13,68 @@ exports.getAllStickerOptions = async (req, res) => {
       isActive,
     } = req.query;
 
-    const query = {};
-
-    if (search) {
-      query.$or = [
-        { name: new RegExp(search, 'i') },
-        { description: new RegExp(search, 'i') },
-        { type: new RegExp(search, 'i') },
-      ];
-    }
-
-    if (isActive !== undefined) {
-      query.isActive = isActive === 'true';
-    }
 
     const limitValue = parseInt(limit);
     const skipValue = (parseInt(page) - 1) * limitValue;
 
-    const [stickerOptions, totalItems] = await Promise.all([
-      QRStickerOption.find(query)
-        .populate('type', 'name displayName description')
-        .sort({ createdAt: -1 })
-        .skip(skipValue)
-        .limit(limitValue),
-      QRStickerOption.countDocuments(query),
+    let aggregationPipeline = [
+      {
+        $lookup: {
+          from: 'stickertypes',
+          localField: 'type',
+          foreignField: '_id',
+          as: 'typeData'
+        }
+      },
+      {
+        $addFields: {
+          type: { $arrayElemAt: ['$typeData', 0] }
+        }
+      }
+    ];
+
+    // Add search functionality
+    if (search) {
+      aggregationPipeline.push({
+        $match: {
+          $or: [
+            { name: new RegExp(search, 'i') },
+            { description: new RegExp(search, 'i') },
+            { size: new RegExp(search, 'i') },
+            { material: new RegExp(search, 'i') },
+            { 'type.name': new RegExp(search, 'i') },
+            { 'type.displayName': new RegExp(search, 'i') }
+          ]
+        }
+      });
+    }
+
+    // Add other filters
+    if (isActive !== undefined) {
+      aggregationPipeline.push({
+        $match: { isActive: isActive === 'true' }
+      });
+    }
+
+    // Add sorting and pagination
+    aggregationPipeline.push(
+      { $sort: { createdAt: -1 } },
+      { $skip: skipValue },
+      { $limit: limitValue }
+    );
+
+    // Create a separate pipeline for counting (without pagination)
+    const countPipeline = [...aggregationPipeline];
+    countPipeline.pop(); // Remove $limit
+    countPipeline.pop(); // Remove $skip
+    countPipeline.push({ $count: "total" });
+
+    const [stickerOptions, countResult] = await Promise.all([
+      QRStickerOption.aggregate(aggregationPipeline),
+      QRStickerOption.aggregate(countPipeline),
     ]);
+
+    const totalItems = countResult[0]?.total || 0;
 
     const pagination = createPaginationObject(totalItems, page, limitValue);
 

@@ -17,6 +17,7 @@ const {
   getOrderById,
   getUserOrderById,
   manualUpdatePaymentStatus,
+  verifyOrderExists,
 } = require("../controller/qrSticker.controller");
 const { getStickerTypes } = require("../controller/stickerType.controller");
 
@@ -25,6 +26,10 @@ router.get("/options", getStickerOptions);
 router.get("/types", getStickerTypes);
 // Payment callback (webhook) - must be public for BOG to access
 router.post("/payment/callback", handleStickerPaymentCallback);
+// Public order verification (for payment success page)
+router.get("/orders/verify/:orderId", verifyOrderExists);
+// Public order access (for payment success page - handles both auth and public)
+router.get("/orders/:orderId", getUserOrderById);
 
 // User routes (protected)
 router.use(isAuthenticated); // Apply auth middleware to all routes below
@@ -32,7 +37,6 @@ router.use(isAuthenticated); // Apply auth middleware to all routes below
 // User sticker operations
 router.post("/orders", createStickerOrder);
 router.get("/orders", getUserStickerOrders);
-router.get("/orders/:orderId", getUserOrderById);
 router.put("/orders/payment-status", updateOrderPaymentStatus);
 // Manual payment status update (for testing)
 router.put("/orders/:orderId/manual-payment-status", manualUpdatePaymentStatus);

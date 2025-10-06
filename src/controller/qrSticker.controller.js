@@ -636,16 +636,23 @@ exports.deleteOrder = async (req, res) => {
   }
 };
 
-// Get single order by ID (user accessible)
+// Get single order by ID (user accessible or public verification)
 exports.getUserOrderById = async (req, res) => {
   try {
     const { orderId } = req.params;
-    const userId = req.user.userId;
-
-    const order = await QRStickerOrder.findOne({
-      _id: orderId,
-      user: userId
-    })
+    
+    // Check if user is authenticated
+    const userId = req.user?.userId;
+    
+    let query = { _id: orderId };
+    
+    // If user is authenticated, filter by user ID
+    if (userId) {
+      query.user = userId;
+    }
+    
+    // If no user ID, this is a public verification request
+    const order = await QRStickerOrder.findOne(query)
       .populate('memorial', 'firstName lastName slug')
       .populate({
         path: 'stickerOption',
@@ -663,6 +670,26 @@ exports.getUserOrderById = async (req, res) => {
       });
     }
 
+    // If this is a public request (no user ID), return limited data
+    if (!userId) {
+      return res.json({
+        status: true,
+        data: {
+          _id: order._id,
+          paymentStatus: order.paymentStatus,
+          orderStatus: order.orderStatus,
+          paymentId: order.paymentId,
+          quantity: order.quantity,
+          totalAmount: order.totalAmount,
+          shippingAddress: order.shippingAddress,
+          memorial: order.memorial,
+          stickerOption: order.stickerOption,
+          createdAt: order.createdAt
+        }
+      });
+    }
+
+    // If user is authenticated, return full data
     res.json({
       status: true,
       data: order
@@ -752,6 +779,55 @@ exports.getOrderById = async (req, res) => {
     res.status(500).json({
       status: false,
       message: "Failed to get order: " + error.message
+    });
+  }
+};
+
+// Public endpoint to verify order exists (for payment success page)
+exports.verifyOrderExists = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+
+    const order = await QRStickerOrder.findById(orderId)
+      .populate('memorial', 'firstName lastName slug')
+      .populate({
+        path: 'stickerOption',
+        select: 'name type size price',
+        populate: {
+          path: 'type',
+          select: 'name displayName description'
+        }
+      });
+    
+    if (!order) {
+      return res.status(404).json({
+        status: false,
+        message: "Order not found"
+      });
+    }
+
+    // Return basic order info without sensitive data
+    res.json({
+      status: true,
+      data: {
+        _id: order._id,
+        paymentStatus: order.paymentStatus,
+        orderStatus: order.orderStatus,
+        paymentId: order.paymentId,
+        quantity: order.quantity,
+        totalAmount: order.totalAmount,
+        shippingAddress: order.shippingAddress,
+        memorial: order.memorial,
+        stickerOption: order.stickerOption,
+        createdAt: order.createdAt
+      }
+    });
+
+  } catch (error) {
+    console.error("❌ Verify Order Error:", error);
+    res.status(500).json({
+      status: false,
+      message: "Failed to verify order: " + error.message
     });
   }
 };
