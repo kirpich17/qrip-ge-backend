@@ -32,6 +32,7 @@ exports.getAllStickerOptions = async (req, res) => {
 
     const [stickerOptions, totalItems] = await Promise.all([
       QRStickerOption.find(query)
+        .populate('type', 'name displayName description')
         .sort({ createdAt: -1 })
         .skip(skipValue)
         .limit(limitValue),

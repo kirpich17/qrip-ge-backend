@@ -156,13 +156,13 @@ const paymentCallbackWebhook = async (req, res) => {
   console.log('Full BOG Webhook received:', JSON.stringify(paymentData, null, 2));
 
   try {
-    // 1. Extract data
-    const body = paymentData.body || {};
-    const orderStatus = body.order_status?.key;
-    const orderId = body.order_id;
-    const transactionId = body.payment_detail?.transaction_id;
-    const amount = body.purchase_units?.transfer_amount || body.purchase_units?.request_amount;
-    const externalOrderId = body.external_order_id;
+    // 1. Extract data - handle both possible structures
+    const body = paymentData.body || paymentData;
+    const orderStatus = body.order_status?.key || body.status;
+    const orderId = body.order_id || body.orderId;
+    const transactionId = body.payment_detail?.transaction_id || body.transaction_id;
+    const amount = body.purchase_units?.transfer_amount || body.purchase_units?.request_amount || body.amount;
+    const externalOrderId = body.external_order_id || body.externalOrderId;
     
     // 2. Validate required data
     if (!orderId) {
@@ -173,39 +173,43 @@ const paymentCallbackWebhook = async (req, res) => {
     // 3. Check if this is a sticker order first
     if (externalOrderId) {
       console.log('🔍 Processing sticker order callback:', externalOrderId);
+      console.log('🔍 Webhook data extracted:', { orderStatus, orderId, externalOrderId });
       const QRStickerOrder = require('../models/QRStickerOrder');
       const QRStickerOption = require('../models/QRStickerOption');
       
       const stickerOrder = await QRStickerOrder.findById(externalOrderId);
       
-      if (stickerOrder) {
-        console.log('✅ Found sticker order:', stickerOrder._id);
+      if (!stickerOrder) {
+        console.error('❌ Sticker order not found:', externalOrderId);
+        return res.status(404).send('Sticker order not found');
+      }
+      
+      console.log('✅ Found sticker order:', stickerOrder._id);
+      
+      if (orderStatus === 'completed' || orderStatus === 'APPROVED') {
+        stickerOrder.paymentStatus = 'paid';
+        stickerOrder.paymentId = orderId;
+        stickerOrder.orderStatus = 'processing';
         
-        if (orderStatus === 'completed') {
-          stickerOrder.paymentStatus = 'paid';
-          stickerOrder.paymentId = orderId;
-          stickerOrder.orderStatus = 'processing';
-          
-          // Update stock
-          const stickerOption = await QRStickerOption.findById(stickerOrder.stickerOption);
-          if (stickerOption) {
-            stickerOption.stock = Math.max(0, stickerOption.stock - stickerOrder.quantity);
-            if (stickerOption.stock === 0) {
-              stickerOption.isInStock = false;
-            }
-            await stickerOption.save();
+        // Update stock
+        const stickerOption = await QRStickerOption.findById(stickerOrder.stickerOption);
+        if (stickerOption) {
+          stickerOption.stock = Math.max(0, stickerOption.stock - stickerOrder.quantity);
+          if (stickerOption.stock === 0) {
+            stickerOption.isInStock = false;
           }
-          
-          await stickerOrder.save();
-          console.log('✅ Sticker payment successful:', externalOrderId);
-        } else {
-          stickerOrder.paymentStatus = 'failed';
-          await stickerOrder.save();
-          console.log('❌ Sticker payment failed:', externalOrderId);
+          await stickerOption.save();
         }
         
-        return res.status(200).send('Sticker webhook processed successfully');
+        await stickerOrder.save();
+        console.log('✅ Sticker payment successful:', externalOrderId);
+      } else {
+        stickerOrder.paymentStatus = 'failed';
+        await stickerOrder.save();
+        console.log('❌ Sticker payment failed:', externalOrderId);
       }
+      
+      return res.status(200).send('Sticker webhook processed successfully');
     }
 
     // 4. Handle memorial purchase (existing logic)

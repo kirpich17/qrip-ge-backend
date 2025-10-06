@@ -26,6 +26,15 @@ const {
 const { isAuthenticated, isAdmin } = require("../middlewares/auth.middleware");
 const { adminStats } = require("../controller/admin.stats");
 const { allStatsforUser } = require("../controller/auth.controller");
+const {
+  getAllStickerTypes,
+  createStickerType,
+  updateStickerType,
+  deleteStickerType,
+  toggleStickerTypeStatus,
+  getStickerTypeById,
+  updateSortOrder,
+} = require("../controller/stickerType.controller");
 
 router.get("/get-user/:id", isAuthenticated, isAdmin, getUserById);
 router.post("/signUp", createAdminUser);
@@ -53,5 +62,14 @@ router.delete("/promocode/:id", DeletePromoCode);
 router.put("/promocode/:id", UpdatePromoCode );
 
 router.post("/validate-promo", ValidatePromoCode);
+
+// Sticker Type Management Routes
+router.get("/sticker-types", isAuthenticated, isAdmin, getAllStickerTypes);
+router.post("/sticker-types", isAuthenticated, isAdmin, createStickerType);
+router.get("/sticker-types/:id", isAuthenticated, isAdmin, getStickerTypeById);
+router.put("/sticker-types/:id", isAuthenticated, isAdmin, updateStickerType);
+router.delete("/sticker-types/:id", isAuthenticated, isAdmin, deleteStickerType);
+router.patch("/sticker-types/:id/toggle", isAuthenticated, isAdmin, toggleStickerTypeStatus);
+router.patch("/sticker-types/sort", isAuthenticated, isAdmin, updateSortOrder);
 
 module.exports = router;

@@ -1048,6 +1048,28 @@ exports.viewAndScanMemorialCount = async (req, res) => {
   const { memorialId, isScan } = req.body;
 
   try {
+    // First, check if the memorial exists and is active (not draft)
+    const memorial = await Memorial.findById(memorialId);
+    
+    if (!memorial) {
+      return res
+        .status(404)
+        .json({ status: false, message: "Memorial not found" });
+    }
+
+    // Only count views/scans for active memorials (not drafts)
+    if (memorial.memorialPaymentStatus === 'draft' || memorial.firstName === 'Untitled') {
+      return res.json({
+        status: true,
+        message: "View/Scan not counted for draft memorials",
+        data: {
+          viewsCount: memorial.viewsCount,
+          scanCount: memorial.scanCount,
+        },
+      });
+    }
+
+    // Use atomic update to prevent race conditions and duplicate counting
     const updateFields = {
       $inc: { viewsCount: 1 },
     };
@@ -1056,7 +1078,7 @@ exports.viewAndScanMemorialCount = async (req, res) => {
       updateFields.$inc.scanCount = 1;
     }
 
-    const memorial = await Memorial.findByIdAndUpdate(
+    const updatedMemorial = await Memorial.findByIdAndUpdate(
       memorialId,
       updateFields,
       {
@@ -1065,21 +1087,16 @@ exports.viewAndScanMemorialCount = async (req, res) => {
       }
     );
 
-    if (!memorial) {
-      return res
-        .status(404)
-        .json({ status: false, message: "Memorial not found" });
-    }
-
     res.json({
       status: true,
       message: isScan ? "View & Scan count updated" : "View count updated",
       data: {
-        viewsCount: memorial.viewsCount,
-        scanCount: memorial.scanCount,
+        viewsCount: updatedMemorial.viewsCount,
+        scanCount: updatedMemorial.scanCount,
       },
     });
   } catch (error) {
+    console.error("Error in viewAndScanMemorialCount:", error);
     res.status(500).json({
       status: false,
       message: "Server Error: " + error.message,

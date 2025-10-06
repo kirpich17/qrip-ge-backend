@@ -18,9 +18,11 @@ const {
   getUserOrderById,
   manualUpdatePaymentStatus,
 } = require("../controller/qrSticker.controller");
+const { getStickerTypes } = require("../controller/stickerType.controller");
 
 // Public routes
 router.get("/options", getStickerOptions);
+router.get("/types", getStickerTypes);
 // Payment callback (webhook) - must be public for BOG to access
 router.post("/payment/callback", handleStickerPaymentCallback);
 

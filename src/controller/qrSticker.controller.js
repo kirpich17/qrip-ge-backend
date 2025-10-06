@@ -14,7 +14,9 @@ exports.getStickerOptions = async (req, res) => {
     const stickerOptions = await QRStickerOption.find({ 
       isActive: true,
       isInStock: true 
-    }).sort({ createdAt: -1 });
+    })
+    .populate('type', 'name displayName description specifications')
+    .sort({ createdAt: -1 });
 
     res.json({
       status: true,
@@ -645,7 +647,14 @@ exports.getUserOrderById = async (req, res) => {
       user: userId
     })
       .populate('memorial', 'firstName lastName slug')
-      .populate('stickerOption', 'name type size price');
+      .populate({
+        path: 'stickerOption',
+        select: 'name type size price',
+        populate: {
+          path: 'type',
+          select: 'name displayName description'
+        }
+      });
     
     if (!order) {
       return res.status(404).json({
@@ -717,7 +726,14 @@ exports.getOrderById = async (req, res) => {
     const order = await QRStickerOrder.findById(orderId)
       .populate('user', 'firstname lastname email phone')
       .populate('memorial', 'firstName lastName slug')
-      .populate('stickerOption', 'name type size price');
+      .populate({
+        path: 'stickerOption',
+        select: 'name type size price',
+        populate: {
+          path: 'type',
+          select: 'name displayName description'
+        }
+      });
     
     if (!order) {
       return res.status(404).json({

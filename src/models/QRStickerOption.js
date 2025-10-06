@@ -14,8 +14,8 @@ const QRStickerOptionSchema = new mongoose.Schema(
       trim: true,
     },
     type: {
-      type: String,
-      enum: ['vinyl', 'engraving', 'premium'],
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'StickerType',
       required: [true, 'Sticker type is required'],
     },
     size: {
