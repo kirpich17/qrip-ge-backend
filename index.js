@@ -15,6 +15,7 @@ const userRoutes = require("./src/routes/user.routes");
 const subscriptionRoutes = require("./src/routes/subscriptions.routes");
 const qrStickerRoutes = require("./src/routes/qrSticker.routes");
 const adminStickerRoutes = require("./src/routes/adminSticker.routes");
+const testimonialRoutes = require("./src/routes/testimonial.routes");
 const chargeRecurringSubscriptions = require("./src/service/bog-cron-jobs");
 dotenv.config();
 const app = express();
@@ -55,6 +56,7 @@ app.use("/api/user", userRoutes);
 app.use("/api/subscription", subscriptionRoutes);
 app.use("/api/qrcode", qrCodeRoutes);
 app.use("/api/stickers", qrStickerRoutes);
+app.use("/api/testimonials", testimonialRoutes);
 app.use('/api/payments', paymentRouter);
 app.use('/api/terms', termRouter);
 app.use('/', (req, res) => {

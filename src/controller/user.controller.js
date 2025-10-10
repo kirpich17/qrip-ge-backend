@@ -5,6 +5,7 @@ const UserSubscription = require("../models/UserSubscription");
 const subscriptionModal = require("../models/SubscriptionPlan");
 const { createPaginationObject } = require("../utils/pagination");
 const subscriptionPlan = require("../models/SubscriptionPlan");
+const Memorial = require("../models/memorial.model");
 
 
 
@@ -107,5 +108,88 @@ exports.getUserSubscriptionDetails = async (req, res) => {
   } catch (error) {
     console.error("Error fetching user subscription:", error);
     res.status(500).json({ message: "Failed to fetch subscription details." });
+  }
+};
+
+/**
+ * Get recent activities for the authenticated user
+ */
+exports.getUserActivities = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const limit = parseInt(req.query.limit) || 5;
+
+    // Get user's memorials with recent activity
+    const memorials = await Memorial.find({ createdBy: userId })
+      .sort({ updatedAt: -1 })
+      .limit(limit)
+      .select('firstName lastName _id createdAt updatedAt viewsCount scanCount');
+
+    // Get memorials that were recently viewed/scanned (from other users)
+    const recentViews = await Memorial.find({ 
+      createdBy: userId,
+      $or: [
+        { viewsCount: { $gt: 0 } },
+        { scanCount: { $gt: 0 } }
+      ]
+    })
+      .sort({ updatedAt: -1 })
+      .limit(limit)
+      .select('firstName lastName _id viewsCount scanCount updatedAt');
+
+    // Format activities
+    const activities = [];
+
+    // Add memorial creation activities
+    memorials.forEach(memorial => {
+      activities.push({
+        id: `created_${memorial._id}`,
+        type: 'memorial_created',
+        description: `Created memorial for ${memorial.firstName} ${memorial.lastName}`,
+        memorialName: `${memorial.firstName} ${memorial.lastName}`,
+        memorialId: memorial._id,
+        createdAt: memorial.createdAt
+      });
+    });
+
+    // Add view/scan activities
+    recentViews.forEach(memorial => {
+      if (memorial.scanCount > 0) {
+        activities.push({
+          id: `scanned_${memorial._id}`,
+          type: 'memorial_scanned',
+          description: `QR code scanned for ${memorial.firstName} ${memorial.lastName}`,
+          memorialName: `${memorial.firstName} ${memorial.lastName}`,
+          memorialId: memorial._id,
+          createdAt: memorial.updatedAt
+        });
+      } else if (memorial.viewsCount > 0) {
+        activities.push({
+          id: `viewed_${memorial._id}`,
+          type: 'memorial_viewed',
+          description: `Memorial viewed for ${memorial.firstName} ${memorial.lastName}`,
+          memorialName: `${memorial.firstName} ${memorial.lastName}`,
+          memorialId: memorial._id,
+          createdAt: memorial.updatedAt
+        });
+      }
+    });
+
+    // Sort by creation date and limit
+    activities.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    const limitedActivities = activities.slice(0, limit);
+
+    res.json({
+      status: true,
+      message: "Activities fetched successfully",
+      data: limitedActivities
+    });
+  } catch (error) {
+    console.error("Error fetching user activities:", error);
+    res.status(500).json({
+      status: false,
+      message: "Failed to fetch activities",
+      error: error.message
+    });
   }
 };

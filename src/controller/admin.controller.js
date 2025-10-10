@@ -58,6 +58,7 @@ exports.createAdminUser = async (req, res) => {
       user: newAdmin,
     });
   } catch (err) {
+    
     res
       .status(500)
       .json({ status: false, message: "Server error: " + err.message });

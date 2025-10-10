@@ -78,6 +78,20 @@ exports.signin = async (req, res) => {
 exports.forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
+    
+    // Check if email is provided
+    if (!email) {
+      return res.status(400).json({ status: false, message: "Email is required" });
+    }
+
+    // Check if email credentials are configured
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      return res.status(500).json({ 
+        status: false, 
+        message: "Email service not configured. Please contact administrator." 
+      });
+    }
+
     const user = await User.findOne({ email });
     if (!user)
       return res.status(404).json({ status: false, message: "User not found" });
@@ -86,7 +100,9 @@ exports.forgotPassword = async (req, res) => {
     user.resetPasswordToken = resetToken;
     user.resetPasswordExpires = Date.now() + 3600000;
     await user.save();
+    
     const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+    
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -109,6 +125,16 @@ exports.forgotPassword = async (req, res) => {
     await transporter.sendMail(mailOptions);
     res.json({ status: true, message: "Reset token sent to email" });
   } catch (err) {
+    console.error("Forgot password error:", err);
+    
+    // Handle specific nodemailer errors
+    if (err.code === 'EAUTH' || err.message.includes('Missing credentials')) {
+      return res.status(500).json({ 
+        status: false, 
+        message: "Email service authentication failed. Please contact administrator." 
+      });
+    }
+    
     res.status(500).json({ status: false, message: err.message });
   }
 };
