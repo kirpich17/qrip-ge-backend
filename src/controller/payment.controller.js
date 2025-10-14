@@ -6,6 +6,7 @@ const { restartFreePlan, cancelActiveFreePlan } = require('../service/subscripti
 const MemorialPurchase = require('../models/MemorialPurchase.js');
 const memorialModel = require('../models/memorial.model.js');
 const PromoCodeSchema = require('../models/PromoCodeSchema.js');
+const { sendOrderConfirmationEmail, sendSubscriptionSuccessEmail, sendMemorialCreationConfirmationEmail } = require('../service/unifiedEmailService.js');
 
 // Helper function to validate promo code
 const validatePromoCode = async (promoCode, memorialId, planId) => {
