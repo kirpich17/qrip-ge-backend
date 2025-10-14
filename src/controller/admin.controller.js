@@ -49,6 +49,7 @@ exports.createAdminUser = async (req, res) => {
       userType: "admin", // Explicitly set the role to 'admin'
     });
 
+    
     // Remove the password from the response object for security
     newAdmin.password = undefined;
 
