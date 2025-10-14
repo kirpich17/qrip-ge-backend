@@ -18,6 +18,7 @@ const {
   createOrUpdateMemorial,
   viewAndScanMemorialCount,
   createDraftMemorial,
+  toggleSlideshow,
 } = require("../controller/memorial.controller");
 
 const upload = multer({
@@ -91,6 +92,9 @@ router.get("/my-memorials", isAuthenticated, getMyMemorials);
 router.get("/my-memorial/:id", isAuthenticated, getMyMemorialById);
 
 router.post("/view", viewAndScanMemorialCount);
+
+// Toggle slideshow setting for a memorial (requires active subscription)
+router.put("/:memorialId/toggle-slideshow", isAuthenticated, isUser, toggleSlideshow);
 
 // Get, Update, and Delete a specific memorial by its ID
 router

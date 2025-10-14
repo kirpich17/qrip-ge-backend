@@ -53,6 +53,7 @@
       isPublic: { type: Boolean, default: true },
       allowComments: { type: Boolean, default: true },
       enableEmailNotifications: { type: Boolean, default: true },
+      allowSlideshow: { type: Boolean, default: false },
       achievements: [{ type: String }],
       moderationStatus: {
         type: String,

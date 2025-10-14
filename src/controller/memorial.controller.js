@@ -205,10 +205,15 @@ exports.getMemorialById = async (req, res) => {
     // Convert to plain object to modify
     const memorialData = memorial.toObject();
     
-       // FIX: Determine plan name based on the correctly populated path.
+       // FIX: Determine plan name and type based on the correctly populated path.
     if (memorial.purchase && memorial.purchase.planId && memorial.purchase.planId.name) {
       memorialData.planName = memorial.purchase.planId.name;
-      memorialData.allowSlideshow = memorial.purchase.planId.allowSlideshow;
+      memorialData.planType = memorial.purchase.planId.planType;
+    }
+    
+    // Ensure allowSlideshow is included (defaults to false if not set)
+    if (memorialData.allowSlideshow === undefined) {
+      memorialData.allowSlideshow = false;
     } 
 
     // Remove internal subscription details from response
@@ -247,11 +252,16 @@ exports.getMyMemorialById = async (req, res) => {
     // Convert to plain object to modify
     const memorialData = memorial.toObject();
     
-    // Determine plan name based on the correctly populated path.
+    // Determine plan name and type based on the correctly populated path.
     if (memorial.purchase && memorial.purchase.planId && memorial.purchase.planId.name) {
       memorialData.planName = memorial.purchase.planId.name;
-      memorialData.allowSlideshow = memorial.purchase.planId.allowSlideshow;
-    } 
+      memorialData.planType = memorial.purchase.planId.planType;
+    }
+    
+    // Ensure allowSlideshow is included (defaults to false if not set)
+    if (memorialData.allowSlideshow === undefined) {
+      memorialData.allowSlideshow = false;
+    }
 
     // Remove internal subscription details from response
     delete memorialData.purchase;
@@ -296,6 +306,70 @@ exports.updateMemorial = async (req, res) => {
     res
       .status(500)
       .json({ status: false, message: "Server Error: " + error.message });
+  }
+};
+
+exports.toggleSlideshow = async (req, res) => {
+  try {
+    const { memorialId } = req.params;
+    const { allowSlideshow } = req.body;
+    
+    // Find the memorial
+    const memorial = await Memorial.findById(memorialId);
+    if (!memorial) {
+      return res.status(404).json({
+        status: false,
+        message: "Memorial not found."
+      });
+    }
+
+    // Authorization check
+    if (memorial.createdBy.toString() !== req.user.userId) {
+      return res.status(403).json({
+        status: false,
+        message: "Forbidden: You do not have permission to update this memorial.",
+      });
+    }
+
+    // Check if user has an active subscription (Medium or Premium)
+    const userSubscription = await UserSubscription.findOne({
+      userId: req.user.userId,
+      status: 'active'
+    }).populate('planId');
+
+    if (!userSubscription) {
+      return res.status(403).json({
+        status: false,
+        message: "This feature requires an active subscription (Medium or Premium plan).",
+      });
+    }
+
+    // Check if the plan allows slideshow feature
+    const planType = userSubscription.planId?.planType;
+    if (!planType || (planType !== 'medium' && planType !== 'premium')) {
+      return res.status(403).json({
+        status: false,
+        message: "Slideshow feature is only available for Medium and Premium subscribers.",
+      });
+    }
+
+    // Update the slideshow setting
+    const updatedMemorial = await Memorial.findByIdAndUpdate(
+      memorialId,
+      { allowSlideshow: allowSlideshow },
+      { new: true, runValidators: true }
+    );
+
+    res.json({
+      status: true,
+      message: `Slideshow ${allowSlideshow ? 'enabled' : 'disabled'} successfully`,
+      data: updatedMemorial,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: false,
+      message: "Server Error: " + error.message
+    });
   }
 };
 
