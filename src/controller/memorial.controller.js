@@ -17,6 +17,7 @@ exports.createMemorial = async (req, res) => {
     const memorialImageFile = req.file;
 
     let imageUrl = null;
+    
     if (memorialImageFile) {
       try {
         // 'offers' is the subfolder in your S3 bucket
@@ -740,8 +741,10 @@ exports.createOrUpdateMemorial = async (req, res) => {
      const familyTree = req.body.familyTree || [];
 
     // Check plan restrictions based on one-time purchase model
-    if (userPlan.planType === 'minimal') {
+    // Allow video uploads during creation (createReq = true) but apply restrictions after plan selection
+    if (userPlan.planType === 'minimal' && !createReq) {
       // Minimal plan restrictions (1 photo, no videos, no documents, no family tree)
+      // Only apply these restrictions when NOT creating a new memorial
       if (groupedFiles['videoGallery'] && groupedFiles['videoGallery'].length > 0) {
            const existingVideos = memorial ? memorial.videoGallery.length : 0;
         const newVideos = groupedFiles['videoGallery'].length;
