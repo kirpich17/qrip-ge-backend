@@ -59,9 +59,6 @@ app.use("/api/stickers", qrStickerRoutes);
 app.use("/api/testimonials", testimonialRoutes);
 app.use('/api/payments', paymentRouter);
 app.use('/api/terms', termRouter);
-app.use('/', (req, res) => {
-  res.send("Hello Everyone");
-})
 // ✅ Start Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
