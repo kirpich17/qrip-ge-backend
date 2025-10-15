@@ -95,6 +95,7 @@ exports.adminSignin = async (req, res) => {
         message: "Forbidden: You do not have administrator privileges.",
       });
     }
+    
 
     // 4. If all checks pass, create a token
     const token = jwt.sign(
