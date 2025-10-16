@@ -7,17 +7,13 @@ const SiteSettingsSchema = new mongoose.Schema({
   },
   testimonialsMaxDisplay: {
     type: Number,
-    default: 3,
+    default: 5,
     min: 1,
-    max: 10
+    max: 50
   },
   testimonialsAutoApprove: {
     type: Boolean,
     default: false
-  },
-  testimonialsRequireEmail: {
-    type: Boolean,
-    default: true
   },
   lastUpdated: {
     type: Date,

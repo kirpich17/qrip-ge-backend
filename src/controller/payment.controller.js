@@ -79,7 +79,7 @@ const validatePromoCode = async (promoCode, memorialId, planId) => {
       );
       
       if (!durationOption) {
-        return res.status(400).json({ message: "Invalid duration selected for this plan." });
+        return res.status(400).json({ message: "Plan duration is required." });
       }
 
       const accessToken = await getBogToken();
@@ -616,7 +616,7 @@ const initiateMemorialPayment = async (req, res) => {
         
         if (!durationOption) {
             console.log("❌ Invalid duration selected for this plan:", duration);
-            return res.status(400).json({ message: "Invalid duration selected for this plan." });
+            return res.status(400).json({ message: "Plan duration is required" });
         }
         
         console.log("✅ Plan found:", plan.name, "Duration:", duration, "Price:", durationOption.price);

@@ -56,7 +56,7 @@ exports.submitTestimonial = async (req, res) => {
  */
 exports.getPublicTestimonials = async (req, res) => {
   try {
-    const { limit = 3 } = req.query;
+    const { limit } = req.query;
 
     // Check if testimonials are enabled
     const settings = await SiteSettings.findOne();
@@ -68,12 +68,15 @@ exports.getPublicTestimonials = async (req, res) => {
       });
     }
 
+    // Use the limit from query or fall back to settings max display
+    const displayLimit = limit ? parseInt(limit) : settings.testimonialsMaxDisplay;
+
     const testimonials = await Testimonial.find({
       status: 'approved',
       isActive: true
     })
     .sort({ approvedAt: -1, submittedAt: -1 })
-    .limit(parseInt(limit))
+    .limit(displayLimit)
     .select('-email -__v');
 
     res.json({
@@ -279,7 +282,7 @@ exports.getSiteSettings = async (req, res) => {
  */
 exports.updateSiteSettings = async (req, res) => {
   try {
-    const { testimonialsEnabled, testimonialsMaxDisplay, testimonialsAutoApprove, testimonialsRequireEmail } = req.body;
+    const { testimonialsEnabled, testimonialsMaxDisplay, testimonialsAutoApprove } = req.body;
     const adminId = req.user.userId;
 
     let settings = await SiteSettings.findOne();
@@ -289,14 +292,12 @@ exports.updateSiteSettings = async (req, res) => {
         testimonialsEnabled,
         testimonialsMaxDisplay,
         testimonialsAutoApprove,
-        testimonialsRequireEmail,
         updatedBy: adminId
       });
     } else {
       settings.testimonialsEnabled = testimonialsEnabled;
       settings.testimonialsMaxDisplay = testimonialsMaxDisplay;
       settings.testimonialsAutoApprove = testimonialsAutoApprove;
-      settings.testimonialsRequireEmail = testimonialsRequireEmail;
       settings.updatedBy = adminId;
       settings.lastUpdated = new Date();
       await settings.save();

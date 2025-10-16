@@ -31,6 +31,8 @@ exports.createMemorial = async (req, res) => {
           .json({ message: "Failed to upload offer image. Please try again." });
       }
     }
+    // Set status to active by default for all memorials
+    req.body.status = 'active';
     const memorial = await Memorial.create(req.body);
     res.status(201).json({
       status: true,
@@ -1092,7 +1094,14 @@ exports.createOrUpdateMemorial = async (req, res) => {
       await processFiles();
       
       // 2. Create payload from the updated req.body
-      const payload = { ...req.body, familyTree, createdBy: userId, memorialPaymentStatus: 'draft' };
+      const payload = { 
+        ...req.body, 
+        familyTree, 
+        createdBy: userId, 
+        memorialPaymentStatus: 'draft',
+        // Set status to active by default for all memorials
+        status: 'active'
+      };
       
       // Ensure GPS coordinates are properly parsed for creation
       if (req.body.gps) {
