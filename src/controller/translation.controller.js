@@ -111,14 +111,6 @@ const uploadTranslationFile = async (req, res) => {
         const frontendLocalesPath = process.env.FRONTEND_LOCALES_PATH || path.join(__dirname, '../../../qrip-ge/locales');
         const frontendPath = path.join(frontendLocalesPath, `${language}.json`);
         
-        // Debug logging to help find the correct path
-        console.log('=== TRANSLATION UPLOAD DEBUG ===');
-        console.log('Environment FRONTEND_LOCALES_PATH:', process.env.FRONTEND_LOCALES_PATH);
-        console.log('Calculated frontendLocalesPath:', frontendLocalesPath);
-        console.log('Full frontendPath:', frontendPath);
-        console.log('Current working directory:', process.cwd());
-        console.log('__dirname:', __dirname);
-        
         try {
           fs.writeFileSync(frontendPath, JSON.stringify(jsonData, null, 2));
           
