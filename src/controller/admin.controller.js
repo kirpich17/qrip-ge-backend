@@ -1079,3 +1079,54 @@ exports.deleteLanguageFile = async (req, res) => {
     });
   }
 };
+
+// Serve translation files for frontend
+exports.getTranslationFile = async (req, res) => {
+  try {
+    const { language } = req.params;
+    
+    // Validate language parameter
+    const validLanguages = ['en', 'ka', 'ru'];
+    if (!validLanguages.includes(language)) {
+      return res.status(400).json({ 
+        status: false, 
+        message: "Invalid language code. Must be one of: en, ka, ru" 
+      });
+    }
+
+    // Try to get from uploads directory first (most recent)
+    const uploadsPath = path.join(__dirname, '../../uploads/languages', `${language}.json`);
+    const localesPath = path.join(__dirname, '../../../qrip-ge/locales', `${language}.json`);
+    
+    let filePath;
+    if (fs.existsSync(uploadsPath)) {
+      filePath = uploadsPath;
+    } else if (fs.existsSync(localesPath)) {
+      filePath = localesPath;
+    } else {
+      return res.status(404).json({ 
+        status: false, 
+        message: "Translation file not found" 
+      });
+    }
+
+    // Read and parse the JSON file
+    const fileContent = fs.readFileSync(filePath, 'utf8');
+    const jsonData = JSON.parse(fileContent);
+
+    // Set appropriate headers for JSON response
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+
+    res.status(200).json(jsonData);
+
+  } catch (error) {
+    console.error("Error serving translation file:", error);
+    res.status(500).json({ 
+      status: false, 
+      message: "Server error serving translation file: " + error.message 
+    });
+  }
+};

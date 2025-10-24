@@ -42,6 +42,7 @@ const {
   getLanguageFiles,
   downloadLanguageFile,
   deleteLanguageFile,
+  getTranslationFile,
 } = require("../controller/admin.controller");
 const { isAuthenticated, isAdmin } = require("../middlewares/auth.middleware");
 const { adminStats } = require("../controller/admin.stats");
@@ -96,5 +97,8 @@ router.patch("/sticker-types/sort", isAuthenticated, isAdmin, updateSortOrder);
 router.post("/languages/:language/upload", isAuthenticated, isAdmin, upload.single('file'), uploadLanguageFile);
 router.get("/languages", isAuthenticated, isAdmin, getLanguageFiles);
 router.get("/languages/:language/download", isAuthenticated, isAdmin, downloadLanguageFile);
+
+// Translation serving routes (public endpoints for frontend)
+router.get("/translations/:language", getTranslationFile);
 
 module.exports = router;
