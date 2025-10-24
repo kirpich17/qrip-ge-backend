@@ -36,6 +36,13 @@ const {
   updateSortOrder,
 } = require("../controller/stickerType.controller");
 
+const {
+  getTranslationFiles,
+  uploadTranslationFile,
+  downloadTranslationFile,
+  previewTranslationFile,
+} = require("../controller/translation.controller");
+
 router.get("/get-user/:id", isAuthenticated, isAdmin, getUserById);
 router.post("/signUp", createAdminUser);
 router.post("/signIn", adminSignin);
@@ -71,5 +78,11 @@ router.put("/sticker-types/:id", isAuthenticated, isAdmin, updateStickerType);
 router.delete("/sticker-types/:id", isAuthenticated, isAdmin, deleteStickerType);
 router.patch("/sticker-types/:id/toggle", isAuthenticated, isAdmin, toggleStickerTypeStatus);
 router.patch("/sticker-types/sort", isAuthenticated, isAdmin, updateSortOrder);
+
+// Translation Management Routes
+router.get("/translation-files", isAuthenticated, isAdmin, getTranslationFiles);
+router.post("/upload-translation", isAuthenticated, isAdmin, uploadTranslationFile);
+router.get("/download-translation/:language", isAuthenticated, isAdmin, downloadTranslationFile);
+router.get("/preview-translation/:language", isAuthenticated, isAdmin, previewTranslationFile);
 
 module.exports = router;
