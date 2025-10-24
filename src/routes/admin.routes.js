@@ -1,5 +1,21 @@
 const express = require("express");
+const multer = require("multer");
 const router = express.Router();
+
+// Configure multer for file uploads
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === 'application/json' || file.originalname.endsWith('.json')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only JSON files are allowed'), false);
+    }
+  }
+});
 const {
   getUserById,
   createAdminUser,
@@ -22,6 +38,10 @@ const {
   DeletePromoCode,
   UpdatePromoCode,
   ValidatePromoCode,
+  uploadLanguageFile,
+  getLanguageFiles,
+  downloadLanguageFile,
+  deleteLanguageFile,
 } = require("../controller/admin.controller");
 const { isAuthenticated, isAdmin } = require("../middlewares/auth.middleware");
 const { adminStats } = require("../controller/admin.stats");
@@ -71,5 +91,10 @@ router.put("/sticker-types/:id", isAuthenticated, isAdmin, updateStickerType);
 router.delete("/sticker-types/:id", isAuthenticated, isAdmin, deleteStickerType);
 router.patch("/sticker-types/:id/toggle", isAuthenticated, isAdmin, toggleStickerTypeStatus);
 router.patch("/sticker-types/sort", isAuthenticated, isAdmin, updateSortOrder);
+
+// Language file management routes
+router.post("/languages/:language/upload", isAuthenticated, isAdmin, upload.single('file'), uploadLanguageFile);
+router.get("/languages", isAuthenticated, isAdmin, getLanguageFiles);
+router.get("/languages/:language/download", isAuthenticated, isAdmin, downloadLanguageFile);
 
 module.exports = router;

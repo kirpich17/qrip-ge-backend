@@ -7,6 +7,8 @@ const PromoCodeSchema = require("../models/PromoCodeSchema");
 const memorialModel = require("../models/memorial.model");
 const UserSubscription = require("../models/UserSubscription");
 const MemorialPurchase = require("../models/MemorialPurchase");
+const fs = require("fs");
+const path = require("path");
 
 exports.getUserById = async (req, res) => {
   try {
@@ -823,6 +825,257 @@ exports.ValidatePromoCode = async (req, res) => {
     res.status(500).json({ 
       isValid: false, 
       message: "Server error validating promo code" 
+    });
+  }
+};
+
+// Language file upload functions
+exports.uploadLanguageFile = async (req, res) => {
+  try {
+    const { language } = req.params;
+    const file = req.file;
+
+    if (!file) {
+      return res.status(400).json({ 
+        status: false, 
+        message: "No file uploaded" 
+      });
+    }
+
+    // Validate language parameter
+    const validLanguages = ['en', 'ka', 'ru'];
+    if (!validLanguages.includes(language)) {
+      return res.status(400).json({ 
+        status: false, 
+        message: "Invalid language code. Must be one of: en, ka, ru" 
+      });
+    }
+
+    // Validate file type
+    if (!file.originalname.endsWith('.json')) {
+      return res.status(400).json({ 
+        status: false, 
+        message: "File must be a JSON file" 
+      });
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      return res.status(400).json({ 
+        status: false, 
+        message: "File size must be less than 5MB" 
+      });
+    }
+
+    // Validate JSON content
+    let jsonData;
+    try {
+      jsonData = JSON.parse(file.buffer.toString());
+    } catch (parseError) {
+      return res.status(400).json({ 
+        status: false, 
+        message: "Invalid JSON format: " + parseError.message 
+      });
+    }
+
+    // Validate JSON structure (basic validation)
+    if (typeof jsonData !== 'object' || jsonData === null) {
+      return res.status(400).json({ 
+        status: false, 
+        message: "Invalid JSON structure" 
+      });
+    }
+
+    // Define the target paths for the language file
+    const uploadsPath = path.join(__dirname, '../../uploads/languages', `${language}.json`);
+    const localesPath = path.join(__dirname, '../../../qrip-ge/locales', `${language}.json`);
+    
+    // Ensure the uploads directory exists
+    const uploadsDir = path.dirname(uploadsPath);
+    if (!fs.existsSync(uploadsDir)) {
+      fs.mkdirSync(uploadsDir, { recursive: true });
+    }
+
+    // Ensure the locales directory exists
+    const localesDir = path.dirname(localesPath);
+    if (!fs.existsSync(localesDir)) {
+      fs.mkdirSync(localesDir, { recursive: true });
+    }
+
+    // Write the file to both locations
+    const formattedJson = JSON.stringify(jsonData, null, 2);
+    
+    try {
+      fs.writeFileSync(uploadsPath, formattedJson);
+      console.log(`✅ Uploads file created: ${uploadsPath}`);
+    } catch (error) {
+      console.error(`❌ Error writing to uploads: ${error.message}`);
+    }
+    
+    try {
+      fs.writeFileSync(localesPath, formattedJson);
+      console.log(`✅ Locales file created: ${localesPath}`);
+    } catch (error) {
+      console.error(`❌ Error writing to locales: ${error.message}`);
+      console.error(`❌ Locales path: ${localesPath}`);
+    }
+    
+    console.log(`Language file ${language}.json uploaded successfully to:`);
+    console.log(`- Uploads: ${uploadsPath}`);
+    console.log(`- Locales: ${localesPath}`);
+
+    res.status(200).json({
+      status: true,
+      message: `${language.toUpperCase()} language file uploaded successfully`,
+      data: {
+        language: language,
+        fileName: `${language}.json`,
+        fileSize: file.size,
+        uploadDate: new Date().toISOString()
+      }
+    });
+
+  } catch (error) {
+    console.error("Error uploading language file:", error);
+    res.status(500).json({ 
+      status: false, 
+      message: "Server error uploading language file: " + error.message 
+    });
+  }
+};
+
+exports.getLanguageFiles = async (req, res) => {
+  try {
+    const languagesDir = path.join(__dirname, '../../uploads/languages');
+    const validLanguages = ['en', 'ka', 'ru'];
+    const languageFiles = [];
+
+    for (const lang of validLanguages) {
+      const filePath = path.join(languagesDir, `${lang}.json`);
+      const fileExists = fs.existsSync(filePath);
+      
+      if (fileExists) {
+        const stats = fs.statSync(filePath);
+        languageFiles.push({
+          language: lang,
+          fileName: `${lang}.json`,
+          fileSize: stats.size,
+          lastModified: stats.mtime.toISOString(),
+          exists: true
+        });
+      } else {
+        languageFiles.push({
+          language: lang,
+          fileName: `${lang}.json`,
+          fileSize: 0,
+          lastModified: null,
+          exists: false
+        });
+      }
+    }
+
+    res.status(200).json({
+      status: true,
+      message: "Language files retrieved successfully",
+      data: languageFiles
+    });
+
+  } catch (error) {
+    console.error("Error getting language files:", error);
+    res.status(500).json({ 
+      status: false, 
+      message: "Server error getting language files: " + error.message 
+    });
+  }
+};
+
+exports.downloadLanguageFile = async (req, res) => {
+  try {
+    const { language } = req.params;
+    
+    // Validate language parameter
+    const validLanguages = ['en', 'ka', 'ru'];
+    if (!validLanguages.includes(language)) {
+      return res.status(400).json({ 
+        status: false, 
+        message: "Invalid language code. Must be one of: en, ka, ru" 
+      });
+    }
+
+    const uploadsPath = path.join(__dirname, '../../uploads/languages', `${language}.json`);
+    const localesPath = path.join(__dirname, '../../../qrip-ge/locales', `${language}.json`);
+    
+    // Check if file exists in uploads directory
+    if (!fs.existsSync(uploadsPath)) {
+      return res.status(404).json({ 
+        status: false, 
+        message: "Language file not found" 
+      });
+    }
+
+    // Ensure locales directory is in sync
+    if (fs.existsSync(uploadsPath) && !fs.existsSync(localesPath)) {
+      const fileContent = fs.readFileSync(uploadsPath, 'utf8');
+      const localesDir = path.dirname(localesPath);
+      if (!fs.existsSync(localesDir)) {
+        fs.mkdirSync(localesDir, { recursive: true });
+      }
+      fs.writeFileSync(localesPath, fileContent);
+    }
+
+    res.download(uploadsPath, `${language}.json`);
+
+  } catch (error) {
+    console.error("Error downloading language file:", error);
+    res.status(500).json({ 
+      status: false, 
+      message: "Server error downloading language file: " + error.message 
+    });
+  }
+};
+
+exports.deleteLanguageFile = async (req, res) => {
+  try {
+    const { language } = req.params;
+    
+    // Validate language parameter
+    const validLanguages = ['en', 'ka', 'ru'];
+    if (!validLanguages.includes(language)) {
+      return res.status(400).json({ 
+        status: false, 
+        message: "Invalid language code. Must be one of: en, ka, ru" 
+      });
+    }
+
+    const uploadsPath = path.join(__dirname, '../../uploads/languages', `${language}.json`);
+    const localesPath = path.join(__dirname, '../../../qrip-ge/locales', `${language}.json`);
+    
+    // Check if file exists in uploads directory
+    if (!fs.existsSync(uploadsPath)) {
+      return res.status(404).json({ 
+        status: false, 
+        message: "Language file not found" 
+      });
+    }
+
+    // Delete from both locations
+    if (fs.existsSync(uploadsPath)) {
+      fs.unlinkSync(uploadsPath);
+    }
+    if (fs.existsSync(localesPath)) {
+      fs.unlinkSync(localesPath);
+    }
+
+    res.status(200).json({
+      status: true,
+      message: `${language.toUpperCase()} language file deleted successfully`
+    });
+
+  } catch (error) {
+    console.error("Error deleting language file:", error);
+    res.status(500).json({ 
+      status: false, 
+      message: "Server error deleting language file: " + error.message 
     });
   }
 };
