@@ -79,7 +79,7 @@ router.delete("/sticker-types/:id", isAuthenticated, isAdmin, deleteStickerType)
 router.patch("/sticker-types/:id/toggle", isAuthenticated, isAdmin, toggleStickerTypeStatus);
 router.patch("/sticker-types/sort", isAuthenticated, isAdmin, updateSortOrder);
 
-// Translation Management Routes
+// Translation Management Routes (Admin only)
 router.get("/translation-files", isAuthenticated, isAdmin, getTranslationFiles);
 router.post("/upload-translation", isAuthenticated, isAdmin, uploadTranslationFile);
 router.get("/download-translation/:language", isAuthenticated, isAdmin, downloadTranslationFile);

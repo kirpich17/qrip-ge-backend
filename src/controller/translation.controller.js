@@ -13,8 +13,10 @@ const storage = multer.diskStorage({
     cb(null, uploadPath);
   },
   filename: function (req, file, cb) {
-    const language = req.body.language || 'en';
-    cb(null, `${language}.json`);
+    // Use original filename but ensure it has .json extension
+    const originalName = file.originalname;
+    const nameWithoutExt = originalName.replace(/\.json$/, '');
+    cb(null, `${nameWithoutExt}.json`);
   }
 });
 
@@ -95,6 +97,21 @@ const uploadTranslationFile = async (req, res) => {
 
       const { language } = req.body;
       
+      // Validate language parameter
+      if (!language || !['en', 'ka', 'ru'].includes(language)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid language parameter. Must be en, ka, or ru'
+        });
+      }
+      
+      // Debug logging
+      console.log('=== UPLOAD DEBUG ===');
+      console.log('Language from body:', language);
+      console.log('Original filename:', req.file.originalname);
+      console.log('Saved filename:', req.file.filename);
+      console.log('File path:', req.file.path);
+      
       // Validate JSON file
       try {
         const filePath = req.file.path;
@@ -106,32 +123,25 @@ const uploadTranslationFile = async (req, res) => {
           throw new Error('Invalid JSON structure');
         }
         
-        // Also update the frontend locales
-        // Use environment variable for production, fallback to relative path for development
-        const frontendLocalesPath = process.env.FRONTEND_LOCALES_PATH || path.join(__dirname, '../../../qrip-ge/locales');
-        const frontendPath = path.join(frontendLocalesPath, `${language}.json`);
-        
-        try {
-          fs.writeFileSync(frontendPath, JSON.stringify(jsonData, null, 2));
-          
-          // Clear any potential caching by updating the file timestamp
-          const now = new Date();
-          fs.utimesSync(frontendPath, now, now);
-          
-          console.log(`Successfully updated frontend translation file: ${frontendPath}`);
-        } catch (frontendError) {
-          console.warn(`Failed to update frontend file: ${frontendError.message}`);
-          // Continue with backend update even if frontend update fails
+        // Rename the file to the correct language name
+        const correctFilePath = path.join(path.dirname(filePath), `${language}.json`);
+        if (filePath !== correctFilePath) {
+          fs.renameSync(filePath, correctFilePath);
+          console.log(`File renamed from ${req.file.filename} to ${language}.json`);
         }
+        
+        // Note: Frontend will now load translations directly from API
+        // No need to update frontend files anymore
+        console.log(`Translation file uploaded successfully for ${language}`);
         
         res.json({
           success: true,
           message: `${language} translation file uploaded successfully`,
           data: {
             language,
-            filename: req.file.filename,
+            filename: `${language}.json`,
             size: req.file.size,
-            path: req.file.path
+            path: correctFilePath
           }
         });
         
@@ -222,9 +232,40 @@ const previewTranslationFile = async (req, res) => {
   }
 };
 
+// Get translation file (Public endpoint for all users)
+const getTranslationFile = async (req, res) => {
+  try {
+    const { language } = req.params;
+    const filePath = path.join(__dirname, '../../uploads/languages', `${language}.json`);
+    
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({
+        success: false,
+        message: 'Translation file not found'
+      });
+    }
+
+    const fileContent = fs.readFileSync(filePath, 'utf8');
+    const jsonData = JSON.parse(fileContent);
+
+    res.json({
+      success: true,
+      data: jsonData
+    });
+  } catch (error) {
+    console.error('Error getting translation file:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get translation file',
+      error: error.message
+    });
+  }
+};
+
 module.exports = {
   getTranslationFiles,
   uploadTranslationFile,
   downloadTranslationFile,
-  previewTranslationFile
+  previewTranslationFile,
+  getTranslationFile
 };
