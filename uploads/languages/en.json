@@ -1328,6 +1328,7 @@
     "subscription": "Subscription",
     "profile": "Profile",
     "termsAndCondition": "Terms And Condition",
+    "changePassword": "Change Password",
     "logout": "Logout"
   },
   "subscription_management": {

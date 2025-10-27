@@ -1344,6 +1344,7 @@
     "subscription": "Подписка",
     "profile": "Профиль",
     "termsAndCondition": "Условия использования",
+    "changePassword": "Изменить пароль",
     "logout": "Выйти"
   },
   "subscription_management": {

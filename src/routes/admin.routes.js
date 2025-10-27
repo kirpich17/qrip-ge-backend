@@ -22,6 +22,8 @@ const {
   DeletePromoCode,
   UpdatePromoCode,
   ValidatePromoCode,
+  updateAdminPassword,
+  adminForgotPassword,
 } = require("../controller/admin.controller");
 const { isAuthenticated, isAdmin } = require("../middlewares/auth.middleware");
 const { adminStats } = require("../controller/admin.stats");
@@ -46,6 +48,10 @@ const {
 router.get("/get-user/:id", isAuthenticated, isAdmin, getUserById);
 router.post("/signUp", createAdminUser);
 router.post("/signIn", adminSignin);
+
+// Admin forgot password routes (no authentication required)
+router.post("/forgot-password", adminForgotPassword);
+
 router.get("/stats", adminStats);
 router.get("/allusers", getAllUsers);
 router.get("/allmemorials", getAllMemorials);

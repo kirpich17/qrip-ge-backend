@@ -1,12 +1,14 @@
 const User = require("../models/user.model");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 const Memorial = require("../models/memorial.model");
 const SubscriptionPlan = require("../models/SubscriptionPlan");
 const PromoCodeSchema = require("../models/PromoCodeSchema");
 const memorialModel = require("../models/memorial.model");
 const UserSubscription = require("../models/UserSubscription");
 const MemorialPurchase = require("../models/MemorialPurchase");
+const { sendPasswordResetEmail } = require("../service/unifiedEmailService");
 
 exports.getUserById = async (req, res) => {
   try {
@@ -823,6 +825,73 @@ exports.ValidatePromoCode = async (req, res) => {
     res.status(500).json({ 
       isValid: false, 
       message: "Server error validating promo code" 
+    });
+  }
+};
+
+// Admin forgot password functionality
+exports.adminForgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    // Check if email is provided
+    if (!email) {
+      return res.status(400).json({ status: false, message: "Email is required" });
+    }
+
+    // Check if email credentials are configured
+    if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+      return res.status(500).json({ 
+        status: false, 
+        message: "Email service not configured. Please contact administrator." 
+      });
+    }
+
+    // Find admin user by email
+    const user = await User.findOne({ email, userType: "admin" });
+    if (!user) {
+      return res.status(404).json({ 
+        status: false, 
+        message: "Admin user not found with this email" 
+      });
+    }
+
+    // Generate reset token
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+    await user.save();
+    
+    // Create reset link for admin (using same page as regular users)
+    const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+    
+    // Send password reset email using unified email service
+    const emailSent = await sendPasswordResetEmail(email, resetLink, user.firstname || "Admin");
+    
+    if (emailSent) {
+      res.json({ 
+        status: true, 
+        message: "Password reset link sent to your email" 
+      });
+    } else {
+      res.status(500).json({ 
+        status: false, 
+        message: "Failed to send reset email" 
+      });
+    }
+  } catch (err) {
+    console.error("Admin forgot password error:", err);
+    
+    // Handle specific nodemailer errors
+    if (err.code === 'EAUTH' || err.message.includes('Missing credentials')) {
+      return res.status(500).json({ 
+        status: false, 
+        message: "Email service authentication failed. Please contact administrator." 
+      });
+    }
+    res.status(500).json({ 
+      status: false, 
+      message: "Server error: " + err.message 
     });
   }
 };

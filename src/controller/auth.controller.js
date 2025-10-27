@@ -158,6 +158,60 @@ exports.resetPassword = async (req, res) => {
   }
 };
 
+exports.changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ 
+        status: false, 
+        message: "Current password and new password are required" 
+      });
+    }
+    
+    if (newPassword.length < 8) {
+      return res.status(400).json({ 
+        status: false, 
+        message: "New password must be at least 8 characters long" 
+      });
+    }
+    
+    // Find the user with password field
+    const user = await User.findById(req.user.userId).select("+password");
+    
+    if (!user) {
+      return res.status(404).json({ 
+        status: false, 
+        message: "User not found" 
+      });
+    }
+    
+    // Verify current password
+    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    
+    if (!isCurrentPasswordValid) {
+      return res.status(400).json({ 
+        status: false, 
+        message: "Current password is incorrect" 
+      });
+    }
+    
+    // Hash the new password
+    const hash = await bcrypt.hash(newPassword, 10);
+    await User.findByIdAndUpdate(req.user.userId, { password: hash });
+    
+    res.json({ 
+      status: true, 
+      message: "Password changed successfully" 
+    });
+  } catch (err) {
+    res.status(500).json({ 
+      status: false, 
+      message: "Server error: " + err.message 
+    });
+  }
+};
+
 exports.updatePassword = async (req, res) => {
   try {
     const { password } = req.body;
