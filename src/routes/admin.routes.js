@@ -52,6 +52,9 @@ router.post("/signIn", adminSignin);
 // Admin forgot password routes (no authentication required)
 router.post("/forgot-password", adminForgotPassword);
 
+// Admin password change route (requires authentication)
+router.put("/change-password", isAuthenticated, isAdmin, updateAdminPassword);
+
 router.get("/stats", adminStats);
 router.get("/allusers", getAllUsers);
 router.get("/allmemorials", getAllMemorials);
