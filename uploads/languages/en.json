@@ -1,0 +1,2217 @@
+{
+  "header": {
+    "admin": "Admin",
+    "getStarted": "Get Started"
+  },
+  "home": {
+    "heroTitle": "Honor Memories Forever",
+    "heroDescription": "Join thousands of families who trust QRIP.ge to preserve and share their most precious memories. Create your first memorial in minutes.",
+    "featuresTitle": "Features",
+    "featuresDescription": "Three simple steps to create a lasting digital memorial that honors your loved one's memory",
+    "plansTitle": "Plans",
+    "plansDescription": "Choose the perfect plan to honor your loved ones with dignity and preserve their memories forever",
+    "testimonialsTitle": "Testimonials",
+    "testimonialsDescription": "See what others have to say about QRIP.ge",
+    "memoriesTitle": "Memories",
+    "memoriesDescription": "View and share your created memorials",
+    "faqTitle": "FAQ",
+    "faqDescription": "Frequently asked questions about QRIP.ge",
+    "contactTitle": "Contact Us",
+    "contactDescription": "Get in touch with us to learn more about QRIP.ge"
+  },
+  "hero": {
+    "tagline": "Preserving Memories Forever",
+    "title1": "Honor Their",
+    "title2": "Beautiful Legacy",
+    "description": "Create touching digital memorials that celebrate life, preserve precious memories, and connect families across generations through the simple scan of a QR code.",
+    "createButton": "Create Memorial",
+    "demoButton": "View Demo",
+    "stats": {
+      "memorials": "Memorials Created",
+      "families": "Families Connected",
+      "memories": "Memories Preserved"
+    },
+    "memorialExample": {
+      "name": "Eleanor Grace",
+      "years": "1935 - 2023",
+      "quote": "Beloved Mother & Grandmother",
+      "photos": "Photos",
+      "videos": "Videos",
+      "family": "Family",
+      "scanCta": "Scan to Visit Memorial"
+    }
+  },
+  "memorial": {
+    "header": {
+      "views": " views",
+      "share": "Share"
+    },
+    "inactive": {
+      "title": "Memorial Unavailable",
+      "message": "This memorial profile is currently inactive. Please contact support or the family for more information.",
+      "contact": "Contact Support",
+      "return": "Return Home"
+    },
+    "profile": {
+      "age": "Age {age} years"
+    },
+    "tabs": {
+      "lifeStory": "Life Story",
+      "memories": "Memories",
+      "photos": "Photos",
+      "video": "Video",
+      "locked": "Premium Feature",
+      "description": "Photos and videos celebrating a life well-lived"
+    },
+    "sections": {
+      "family": {
+        "title": "Family",
+        "locked": "Family tree available with premium",
+        "noFamily": "No family members added yet"
+      },
+      "location": {
+        "title": "Memorial Location",
+        "mapPlaceholder": "Interactive Map",
+        "getDirections": "Get Directions",
+        "viewOnGoogleMaps": "View on Google Maps",
+        "copyCoordinates": "Copy Coordinates",
+        "preciseLocation": "Precise Location:",
+        "locked": "GPS location available with premium",
+        "noLocation": "No location data available for this memorial"
+      },
+      "achievements": {
+        "title": "Achievements & Legacy",
+        "noAchievements": "No achievements added yet"
+      },
+      "info": {
+        "title": "Memorial Information",
+        "qrCode": "QR Code:",
+        "plan": "Plan:",
+        "lastUpdated": "Last Updated:",
+        "createMemorial": "Create Your Own Memorial"
+      }
+    },
+    "video": {
+      "description": "A personal message and memories shared",
+      "play": "Play",
+      "pause": "Pause",
+      "mute": "Mute",
+      "unmute": "Unmute"
+    },
+    "premium": {
+      "feature": "Premium Feature",
+      "videoContent": "Video content is available with premium memorials",
+      "learnMore": "Learn More"
+    },
+    "navigation": {
+      "prev": "Prev",
+      "next": "Next"
+    }
+  },
+  "features": {
+    "title": "How QR Memorial Works",
+    "subtitle": "Comprehensive tools to create meaningful, lasting tributes that celebrate life and preserve memories",
+    "items": [
+      {
+        "title": "Photo & Video Galleries",
+        "description": "Upload unlimited photos and videos to create beautiful visual stories of their life"
+      },
+      {
+        "title": "Interactive Family Tree",
+        "description": "Build comprehensive family trees showing relationships and connections across generations"
+      },
+      {
+        "title": "GPS Memorial Locations",
+        "description": "Mark exact memorial locations with GPS coordinates and interactive maps"
+      },
+      {
+        "title": "Custom QR Codes",
+        "description": "Generate beautiful, customizable QR codes that link directly to the memorial page"
+      },
+      {
+        "title": "Global Accessibility",
+        "description": "Memorials are accessible worldwide, allowing distant family to stay connected"
+      },
+      {
+        "title": "Privacy Controls",
+        "description": "Complete control over who can view and contribute to each memorial"
+      }
+    ]
+  },
+  "howItWorks": {
+    "title": "How QRIP.ge Works",
+    "subtitle": "Three simple steps to create a lasting digital memorial that honors your loved one's memory",
+    "steps": [
+      {
+        "step": "01",
+        "title": "Create Memorial",
+        "description": "Share their story, upload photos and videos, build their family tree, and add meaningful details about their life."
+      },
+      {
+        "step": "02",
+        "title": "Generate QR Code",
+        "description": "Get a unique QR code that links to the memorial. Print it on durable material for the gravesite or memorial location."
+      }
+    ]
+  },
+  "plans": {
+    "title": "Honor Their Memory Your Way",
+    "subtitle": "From free basic memorials to comprehensive legacy preservation - find the perfect plan for your needs",
+    "choosePlan": "Choose Your Memorial Plan",
+    "mostPopular": "Most Popular",
+    "lifetimeAccess": "✨ Lifetime Access - Pay Once, Own Forever",
+    "startFree": "Start Free",
+    "choose": "Choose",
+    "viewComparison": "View Detailed Comparison",
+    "free": {
+      "name": "Free",
+      "price": "$0",
+      "period": "forever",
+      "features": [
+        "Biography & photo",
+        "QR code",
+        "Basic memorial"
+      ]
+    },
+    "premium": {
+      "name": "Basic Premium",
+      "price": "$9",
+      "period": "/month",
+      "features": [
+        "Everything Free in Basic Premium",
+        "Video upload",
+        "Family tree",
+        "GPS location"
+      ]
+    },
+    "legacy": {
+      "name": "Legacy+",
+      "price": "$199",
+      "period": "one-time",
+      "features": [
+        "Everything in Premium",
+        "Multiple admins",
+        "Lifetime access",
+        "White-glove setup"
+      ]
+    }
+  },
+  "testimonials": {
+    "title": "Families Trust QRIP.ge",
+    "subtitle": "See how families around the world are preserving and sharing precious memories",
+    "items": [
+      {
+        "name": "Sarah Johnson",
+        "location": "Tbilisi, Georgia",
+        "text": "QRIP.ge helped us create a beautiful memorial for my grandmother. Now our whole family can visit her memorial page and share memories, no matter where they are in the world.",
+        "avatar": "SJ"
+      },
+      {
+        "name": "Michael Chen",
+        "location": "Batumi, Georgia",
+        "text": "The QR code on my father's headstone has been scanned over 200 times. It's amazing how many people have been able to learn about his life and leave their own memories.",
+        "avatar": "MC"
+      },
+      {
+        "name": "Elena Kvirikashvili",
+        "location": "Kutaisi, Georgia",
+        "text": "The family tree feature is incredible. We've connected with distant relatives we never knew existed, all through my uncle's memorial page. It's brought our family closer together.",
+        "avatar": "EK"
+      }
+    ]
+  },
+  "memories": {
+    "title": "Start Honoring Memories Today",
+    "subtitle": "Join thousands of families who trust QRIP.ge to preserve and share their most precious memories. Create your first memorial in minutes.",
+    "primaryButton": "Create Your First Memorial",
+    "secondaryButton": "View Demo Memorial",
+    "benefits": [
+      "Free to start",
+      "No credit card required",
+      "Setup in minutes"
+    ]
+  },
+  "footer": {
+    "copyright": "© 2025 QRIP.ge. All rights reserved."
+  },
+  "auth": {
+    "login": {
+      "welcomeBack": "Welcome Back",
+      "subtitle": "Sign in to manage your memorials",
+      "title": "Sign In",
+      "description": "Enter your credentials to access your account",
+      "emailPlaceholder": "Enter Username",
+      "passwordPlaceholder": "Password",
+      "forgotPassword": "Forgot password?",
+      "signIn": "Sign In",
+      "signingIn": "Signing in...",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign up"
+    },
+    "forgotPassword": {
+      "title": "Forgot your password?",
+      "subtitle": "Enter your email to reset your password",
+      "cardTitle": "Reset Password",
+      "cardDescription": "We'll send you a link to reset your password",
+      "emailPlaceholder": "your@email.com",
+      "sendInstructions": "Send Reset Link",
+      "sending": "Sending...",
+      "successMessage": "Password reset link sent to your email",
+      "checkEmail": "Please check your inbox and follow the instructions",
+      "backToLogin": "Back to Login",
+      "errorMessage": "Failed to send reset link"
+    },
+    "setNewPassword": {
+      "title": "Set New Password",
+      "subtitle": "Create a new password for your account",
+      "cardTitle": "New Password",
+      "cardDescription": "Enter and confirm your new password",
+      "newPasswordLabel": "New Password",
+      "confirmPasswordLabel": "Confirm Password",
+      "passwordPlaceholder": "Enter new password",
+      "confirmPasswordPlaceholder": "Re-enter new password",
+      "updateButton": "Update Password",
+      "updating": "Updating...",
+      "successMessage": "Password updated successfully!",
+      "backToLogin": "Back to Login",
+      "errorMessage": "Failed to update password"
+    },
+    "signup": {
+      "createAccount": "Create Account",
+      "startHonoringMemories": "Start honoring memories today",
+      "signUp": "Sign Up",
+      "createAccountDescription": "Create your QRIP.ge account to get started",
+      "firstName": "First Name",
+      "firstNamePlaceholder": "John",
+      "lastName": "Last Name",
+      "lastNamePlaceholder": "Doe",
+      "email": "Email",
+      "emailPlaceholder": "john@example.com",
+      "password": "Password",
+      "passwordPlaceholder": "Create a strong password",
+      "confirmPassword": "Confirm Password",
+      "confirmPasswordPlaceholder": "Confirm your password",
+      "agreeToTerms": "I agree to the",
+      "termsOfService": "Terms of Service",
+      "privacyPolicy": "Privacy Policy",
+      "and": "and",
+      "creatingAccount": "Creating Account...",
+      "createAccountButton": "Create Account",
+      "alreadyHaveAccount": "Already have an account?",
+      "signIn": "Sign in"
+    },
+    "errors": {
+      "invalidCredentials": "Invalid credentials. Use user@qrip.ge / user123"
+    }
+  },
+  "common": {
+    "email": "Email",
+    "password": "Password"
+  },
+  "dashboard": {
+    "header": {
+      "title": "Dashboard",
+      "settings": "Settings",
+      "welcome": "Welcome back,",
+      "subtitle": "Manage your memorials and honor the memories of your loved ones"
+    },
+    "stats": {
+      "totalMemorials": "Total Memorials",
+      "totalViews": "Total Views",
+      "qrScans": "QR Scans",
+      "familyMembers": "Family Members"
+    },
+    "memorials": {
+      "title": "Your Memorials",
+      "subtitle": "Manage and view your created memorials",
+      "searchPlaceholder": "Search memorials...",
+      "newMemorial": "New Memorial",
+      "viewMemorial": "View Memorial",
+      "edit": "Edit",
+      "downloadQR": "Download QR",
+      "buyQrSticker": "Buy QR Sticker",
+      "delete": "Delete",
+      "deleteConfirm": "Are you sure you want to delete this memorial?",
+      "active": "Active",
+      "draft": "Draft",
+      "managePlan": "Manage Plan",
+      "noMemorialsFound": "No Memorials Found"
+    },
+    "quickActions": {
+      "title": "Quick Actions",
+      "createMemorial": "Create Memorial",
+      "generateQR": "Generate QR Code",
+      "buyQrSticker": "Buy QR Sticker",
+      "manageSubscription": "Manage Subscription",
+      "managePlan": "Manage Plan"
+    },
+    "recentActivity": {
+      "title": "Recent Activity",
+      "qrScanned": "QR code scanned for {name}",
+      "memorialUpdated": "Memorial updated for {name}",
+      "photoAdded": "New photo added to {name}"
+    }
+  },
+  "createMemorial": {
+    "header": {
+      "back": "Back to Dashboard",
+      "preview": "Preview",
+      "save": "Save Memorial"
+    },
+    "title": "Create Memorial",
+    "subtitle": "Honor your loved one with a beautiful digital memorial",
+    "tabs": {
+      "basic": "Basic Info",
+      "media": "Media",
+      "family": "Family Tree",
+      "settings": "Settings"
+    },
+    "basicInfo": {
+      "title": "Basic Information",
+      "description": "Enter the essential details about your loved one",
+      "uploadPhoto": "Upload Photo",
+      "photoDescription": "Choose a beautiful photo to represent your loved one",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "birthDate": "Birth Date",
+      "deathDate": "Date of Passing",
+      "location": {
+        "title": "Memorial Location",
+        "description": "Click on the map to set the exact GPS coordinates for the memorial location.",
+        "searchPlaceholder": "Search for a location (e.g., Amsterdam, Netherlands)",
+        "latitude": "Latitude",
+        "longitude": "Longitude",
+        "latitudePlaceholder": "e.g. 41.7151",
+        "longitudePlaceholder": "e.g. 44.8271",
+        "instructions": {
+          "title": "How to set the precise location:",
+          "clickMap": "Click anywhere on the map to place the memorial marker",
+          "searchLocation": "Search for a location using the search bar",
+          "currentLocation": "Use the navigation button to get your current location",
+          "manualCoordinates": "Enter exact coordinates manually in the input fields"
+        }
+      },
+      "biography": "Life Story",
+      "biographyPlaceholder": "Share the beautiful story of your loved one's life..."
+    },
+    "media": {
+      "title": "Photos & Videos",
+      "description": "Add meaningful photos and videos to celebrate their life",
+      "photos": {
+        "title": "Add Photos",
+        "description": "Upload cherished memories",
+        "button": "Choose Photos"
+      },
+      "videos": {
+        "title": "Add Videos",
+        "description": "Share video memories",
+        "button": "Choose Videos"
+      },
+      "documents": {
+        "title": "Documents",
+        "description": "Add important documents",
+        "button": "Choose Files"
+      }
+    },
+    "familyTree": {
+      "title": "Family Tree",
+      "description": "Build a family tree to show relationships and connections",
+      "familyMember": "Family Member Name",
+      "relationship": "Relationship",
+      "placeholder": {
+        "name": "Add Family Member Name",
+        "relationship": "Add Relationship",
+        "title": "Family Tree Builder",
+        "description": "Create connections between family members and show relationships",
+        "button": "Start Building Family Tree"
+      }
+    },
+    "settings": {
+      "title": "Privacy & Settings",
+      "description": "Control who can view and interact with this memorial",
+      "publicMemorial": {
+        "label": "Public Memorial",
+        "description": "Allow this memorial to appear in public directory"
+      },
+      "allowComments": {
+        "label": "Allow Comments",
+        "description": "Let visitors leave condolences and memories"
+      },
+      "emailNotifications": {
+        "label": "Email Notifications",
+        "description": "Get notified when someone visits or comments"
+      }
+    },
+    "buttons": {
+      "removeImage": "Remove Image",
+      "add": "Add",
+      "saving": "Saving...",
+      "updateMemorial": "Update Memorial"
+    },
+    "location": {
+      "setPreciseLocation": "Set Precise Location"
+    },
+    "mediaSupport": {
+      "photos": "Supported: JPEG, PNG, WebP",
+      "videos": "Supported: MP4, MOV • Max 1min",
+      "documents": "Supported: PDF, DOC, DOCX, TXT"
+    },
+    "validation": {
+      "fillRequiredFields": "Please fill in all required fields to save the memorial"
+    },
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "autoFillGPS": "Auto-fill GPS"
+  },
+  "qrGenerator": {
+    "header": {
+      "back": "Back to Dashboard",
+      "title": "QR Generator"
+    },
+    "title": "QR Code Generator",
+    "subtitle": "Generate and manage QR codes for your memorials",
+    "selectMemorial": {
+      "title": "Select Memorial",
+      "description": "Choose which memorial to generate a QR code for",
+      "placeholder": "Select a memorial"
+    },
+    "customization": {
+      "title": "Customization",
+      "description": "Customize your QR code appearance",
+      "size": "Size",
+      "style": "Style",
+      "sizes": {
+        "small": "Small (200x200px)",
+        "medium": "Medium (400x400px)",
+        "large": "Large (600x600px)",
+        "xlarge": "Extra Large (800x800px)"
+      },
+      "styles": {
+        "standard": "Standard",
+        "rounded": "Rounded Corners",
+        "dots": "Dots Style",
+        "branded": "Branded (with logo)"
+      }
+    },
+    "memorialUrl": {
+      "title": "Memorial URL",
+      "description": "This is the URL that the QR code will link to",
+      "preview": "Preview Memorial",
+      "share": "Share Link"
+    },
+    "preview": {
+      "title": "QR Code Preview",
+      "description": "Preview and download your QR code",
+      "downloadPng": "Download PNG",
+      "downloadSvg": "Download SVG",
+      "print": "Print QR Code"
+    },
+    "instructions": {
+      "title": "Usage Instructions",
+      "steps": [
+        "Download and print the QR code on durable material",
+        "Place it on the memorial site (gravestone, plaque, etc.)",
+        "Visitors can scan with any smartphone camera to view the memorial",
+        "No app download required - works with built-in camera apps"
+      ]
+    },
+    "stats": {
+      "title": "QR Code Statistics",
+      "totalScans": "Total Scans",
+      "thisMonth": "This Month"
+    }
+  },
+  "subscription": {
+    "header": {
+      "back": "Back to Dashboard",
+      "title": "Subscription Plans"
+    },
+    "title": "Choose Your Memorial Plan",
+    "description": "Select the perfect plan to honor your loved ones with dignity and preserve their memories forever",
+    "billing": {
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "save": "Save 20%"
+    },
+    "currentPlan": {
+      "title": "Current Plan: Free",
+      "description": "Upgrade to unlock premium features",
+      "status": "Active"
+    },
+    "plans": {
+      "current": "Current Plan",
+      "choose": "Choose Plan",
+      "free": {
+        "name": "Free",
+        "description": "Basic memorial features",
+        "price": "$0",
+        "period": "forever",
+        "features": [
+          "Biography & photo",
+          "QR code generation",
+          "Basic memorial page",
+          "Public directory listing"
+        ],
+        "limitations": [
+          "No video upload",
+          "No family tree/genealogy",
+          "No GPS location & map pin",
+          "No lifetime access"
+        ],
+        "button": "Current Plan"
+      },
+      "basic": {
+        "name": "Basic Premium",
+        "description": "Enhanced memorial experience",
+        "price": "$9",
+        "period": "/month",
+        "features": [
+          "Biography & photo",
+          "QR code generation",
+          "Video upload",
+          "Family tree / genealogy",
+          "GPS location & map pin",
+          "Advanced customization",
+          "Priority support"
+        ],
+        "limitations": [
+          "No lifetime access"
+        ],
+        "button": "Upgrade to Basic Premium",
+        "popular": "Most Popular",
+        "yearlySave": "Save $18 per year"
+      },
+      "legacy": {
+        "name": "Legacy+",
+        "description": "Complete memorial solution",
+        "price": "$199",
+        "period": "one-time",
+        "features": [
+          "Biography & photo",
+          "QR code generation",
+          "Video upload",
+          "Family tree / genealogy",
+          "GPS location & map pin",
+          "Lifetime access (one-time pay)",
+          "Premium customization",
+          "White-glove setup service",
+          "Dedicated support"
+        ],
+        "limitations": [],
+        "button": "Get Legacy+ (Lifetime)",
+        "lifetime": "Lifetime Access - Pay Once, Own Forever"
+      }
+    },
+    "comparison": {
+      "title": "Feature Comparison",
+      "description": "Compare what's included with each plan",
+      "notincluded": "Not Included",
+      "features": [
+        {
+          "name": "Biography & photo"
+        },
+        {
+          "name": "QR code"
+        },
+        {
+          "name": "Video upload"
+        },
+        {
+          "name": "Family tree / genealogy"
+        },
+        {
+          "name": "GPS location & map pin"
+        },
+        {
+          "name": "Lifetime access (one-time pay)"
+        }
+      ]
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "questions": [
+        {
+          "question": "What's the difference between plans?",
+          "answer": "Free includes basic features, Basic Premium adds video and family tree, Legacy+ includes everything plus lifetime access and multiple collaborators."
+        },
+        {
+          "question": "Is Legacy+ really lifetime access?",
+          "answer": "Yes! Legacy+ is a one-time payment of $199 that gives you lifetime access to all features with no recurring fees."
+        },
+        {
+          "question": "Can I upgrade or downgrade anytime?",
+          "answer": "Yes, you can change your plan at any time. Upgrades take effect immediately, and we'll prorate any billing differences."
+        },
+        {
+          "question": "What happens if I don't pay my subscription?",
+          "answer": "Your memorial will show as \"unavailable\" to visitors. You'll have 30 days to update payment before premium features are disabled."
+        }
+      ]
+    }
+  },
+  "editMemorial": {
+    "header": {
+      "back": "Back to Dashboard",
+      "preview": "Preview",
+      "save": "Save Changes",
+      "delete": "Delete"
+    },
+    "title": "Edit Memorial",
+    "description": "Update the memorial information",
+    "tabs": {
+      "basic": "Basic Info",
+      "media": "Media",
+      "family": "Family Tree",
+      "settings": "Settings"
+    },
+    "basicInfo": {
+      "title": "Basic Information",
+      "description": "Update the essential details about your loved one",
+      "profileImage": {
+        "change": "Change Photo",
+        "description": "Choose a beautiful photo to represent your loved one"
+      },
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "birthDate": "Birth Date",
+      "deathDate": "Date of Passing",
+      "biography": "Life Story",
+      "biographyPlaceholder": "Share the beautiful story of your loved one's life...",
+      "location": {
+        "title": "Memorial Location",
+        "description": "Click on the map to set the exact GPS coordinates for the memorial location.",
+        "searchPlaceholder": "Search for a location (e.g., Amsterdam, Netherlands)",
+        "latitude": "Latitude",
+        "longitude": "Longitude",
+        "latitudePlaceholder": "e.g. 41.7151",
+        "longitudePlaceholder": "e.g. 44.8271",
+        "instructions": {
+          "title": "How to set the precise location:",
+          "clickMap": "Click anywhere on the map to place the memorial marker",
+          "searchLocation": "Search for a location using the search bar",
+          "currentLocation": "Use the navigation button to get your current location",
+          "manualCoordinates": "Enter exact coordinates manually in the input fields"
+        }
+      },
+      "achievements": "Achievements",
+      "awards": "Add notable achievements or awards",
+      "nobelPrice": "Nobel Prize in Physics",
+      "achievement": "Add notable achievements or awards (e.g., \"Nobel Prize\", \"Olympic Gold Medal\")"
+    },
+    "media": {
+      "title": "Photos & Videos",
+      "description": "Manage photos and videos for this memorial",
+      "photos": {
+        "title": "Manage Photos",
+        "description": "Add or remove photos",
+        "button": "Manage Photos"
+      },
+      "videos": {
+        "title": "Manage Videos",
+        "description": "Add or remove videos",
+        "button": "Manage Videos"
+      },
+      "documents": {
+        "title": "Documents",
+        "description": "Manage documents",
+        "button": "Manage Files"
+      },
+      "videosCard": {
+        "videos": "Videos",
+        "upload": "Upload video memories",
+        "uploadVideo": "Upload Videos",
+        "existingVideos": "Existing Videos",
+        "newVideos": "New Videos"
+      },
+      "documentCard": {
+        "document": "Documents",
+        "upload": "Upload important documents",
+        "uploadDocument": "Upload Documents",
+        "existingDocument": "Existing Documents"
+      }
+    },
+    "familyTree": {
+      "updateFamilyMember": "Add Family Member Name",
+      "updateRelationship": "Add Relationship"
+    },
+    "settings": {
+      "title": "Privacy & Settings",
+      "description": "Update privacy and visibility settings",
+      "publicMemorial": {
+        "label": "Public Memorial",
+        "description": "Allow this memorial to appear in public directory"
+      },
+      "allowComments": {
+        "label": "Allow Comments",
+        "description": "Let visitors leave condolences and memories"
+      },
+      "emailNotifications": {
+        "label": "Email Notifications",
+        "description": "Get notified when someone visits or comments"
+      }
+    },
+    "deleteConfirm": "Are you sure you want to delete this memorial? This action cannot be undone.",
+    "subscriptionRestricted": {
+      "premiumFeature": "Premium Feature",
+      "upgradeRequired": "Upgrade Required",
+      "premiumDescription": "This feature is only available with a Premium subscription.",
+      "upgradeDescription": "Upgrade to Plus or Premium to access this feature.",
+      "upgradeButton": "Upgrade to"
+    },
+    "displaySettings": {
+      "title": "Display Settings",
+      "description": "Control how your memorial is displayed to visitors",
+      "enableSlideshow": "Enable Photo Slideshow",
+      "slideshowDescription": "Allow visitors to see a slideshow of photos instead of a static cover image"
+    }
+  },
+  "directory": {
+    "header": {
+      "title": "Memorial Directory",
+      "description": "Browse and honor the memories of loved ones. Each memorial tells a unique story of a life well-lived."
+    },
+    "search": {
+      "placeholder": "Search by name, location, or description...",
+      "locationFilter": {
+        "label": "Filter by location",
+        "options": {
+          "all": "All Locations",
+          "tbilisi": "Tbilisi",
+          "batumi": "Batumi",
+          "kutaisi": "Kutaisi",
+          "rustavi": "Rustavi",
+          "gori": "Gori"
+        }
+      },
+      "yearFilter": {
+        "label": "Year",
+        "options": {
+          "2022": "2022",
+          "2023": "2023",
+          "2024": "2024",
+          "all": "All Years"
+        }
+      }
+    },
+    "results": {
+      "count": "Showing {count} memorials"
+    },
+    "memorialCard": {
+      "visitButton": "Visit Memorial",
+      "views": "views"
+    },
+    "memorials": {
+      "johnSmith": {
+        "name": "John Smith",
+        "dates": "1945 - 2023",
+        "location": "Tbilisi, Georgia",
+        "description": "Beloved father, grandfather, and community leader who dedicated his life to education.",
+        "tags": [
+          "Teacher",
+          "Community Leader"
+        ]
+      },
+      "maryJohnson": {
+        "name": "Mary Johnson",
+        "dates": "1952 - 2024",
+        "location": "Batumi, Georgia",
+        "description": "Loving mother and talented artist who brought beauty to the world through her paintings.",
+        "tags": [
+          "Artist",
+          "Mother"
+        ]
+      },
+      "robertWilson": {
+        "name": "Robert Wilson",
+        "dates": "1938 - 2023",
+        "location": "Kutaisi, Georgia",
+        "description": "War veteran and devoted husband who served his country with honor and dignity.",
+        "tags": [
+          "Veteran",
+          "Husband"
+        ]
+      },
+      "annaGeorgadze": {
+        "name": "Anna Georgadze",
+        "dates": "1960 - 2024",
+        "location": "Tbilisi, Georgia",
+        "description": "Renowned doctor who saved countless lives and mentored young medical professionals.",
+        "tags": [
+          "Doctor",
+          "Mentor"
+        ]
+      },
+      "davidKvirikashvili": {
+        "name": "David Kvirikashvili",
+        "dates": "1955 - 2023",
+        "location": "Rustavi, Georgia",
+        "description": "Passionate musician and composer who enriched Georgian cultural heritage.",
+        "tags": [
+          "Musician",
+          "Composer"
+        ]
+      },
+      "elenaChavchavadze": {
+        "name": "Elena Chavchavadze",
+        "dates": "1948 - 2024",
+        "location": "Gori, Georgia",
+        "description": "Dedicated teacher and children's book author who inspired generations of young minds.",
+        "tags": [
+          "Teacher",
+          "Author"
+        ]
+      }
+    },
+    "loadMore": "Load More Memorials"
+  },
+  "demomemorial": {
+    "demoBanner": {
+      "title": "This is how your memorial will look to visitors",
+      "backButton": "Back to Home"
+    },
+    "header": {
+      "views": "views",
+      "share": "Share"
+    },
+    "hero": {
+      "age": "Age {age} years"
+    },
+    "biography": {
+      "title": "Life Story"
+    },
+    "mediaGallery": {
+      "title": "Memories",
+      "description": "Photos and videos celebrating a life well-lived",
+      "photosTab": "Photos",
+      "videoTab": "Video",
+      "videoDescription": "A heartfelt message recorded for the family"
+    },
+    "family": {
+      "title": "Family"
+    },
+    "location": {
+      "title": "Memorial Location",
+      "getDirections": "Get Directions"
+    },
+    "achievements": {
+      "title": "Achievements & Legacy"
+    },
+    "memorialInfo": {
+      "title": "Memorial Information",
+      "qrCode": "QR Code:",
+      "plan": "Plan:",
+      "lastUpdated": "Last Updated:",
+      "createButton": "Create Your Own Memorial",
+      "demoNote": "This is a demo memorial showing premium features"
+    }
+  },
+  "profile": {
+    "header": {
+      "backButton": "Back to Dashboard",
+      "title": "Profile Settings"
+    },
+    "page": {
+      "title": "Profile Settings",
+      "description": "Manage your account information and preferences"
+    },
+    "profileOverview": {
+      "title": "Profile Overview",
+      "changeAvatar": "Change Avatar"
+    },
+    "accountStats": {
+      "title": "Account Stats",
+      "memberSince": "Member since",
+      "memorialsCreated": "Memorials created",
+      "totalViews": "Total views",
+      "manageSubscription": "Manage Subscription"
+    },
+    "personalInfo": {
+      "title": "Personal Information",
+      "description": "Update your personal details and contact information",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email Address",
+      "phone": "Phone Number",
+      "location": "Location",
+      "bio": "Bio",
+      "bioPlaceholder": "Tell us a bit about yourself...",
+      "saveChanges": "Save Changes"
+    },
+    "shippingInfo": {
+      "title": "Shipping Address",
+      "description": "Update your shipping address for physical deliveries.",
+      "fullName": "Full Name",
+      "address": "Street Address",
+      "phone": "Phone Number",
+      "zipCode": "ZIP / Postal Code",
+      "city": "City",
+      "country": "Country"
+    }
+  },
+  "setting": {
+    "header": {
+      "backButton": "Back to Dashboard",
+      "title": "Settings"
+    },
+    "page": {
+      "title": "Settings",
+      "description": "Manage your account preferences and privacy settings"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "description": "Choose how you want to be notified about memorial activity",
+      "email": "Email Notifications",
+      "emailDescription": "Receive notifications via email",
+      "push": "Push Notifications",
+      "pushDescription": "Receive push notifications on your device",
+      "visits": "Memorial Visits",
+      "visitsDescription": "Get notified when someone visits your memorials",
+      "comments": "New Comments",
+      "commentsDescription": "Get notified about new comments on your memorials",
+      "digest": "Weekly Digest",
+      "digestDescription": "Receive a weekly summary of memorial activity"
+    },
+    "privacy": {
+      "title": "Privacy",
+      "description": "Control your privacy and what others can see",
+      "publicProfile": "Public Profile",
+      "publicProfileDescription": "Allow others to find your profile in search",
+      "showEmail": "Show Email Address",
+      "showEmailDescription": "Display your email on your public profile",
+      "allowComments": "Allow Comments",
+      "allowCommentsDescription": "Let visitors leave comments on your memorials"
+    },
+    "preferences": {
+      "title": "Preferences",
+      "description": "Set your language and display preferences",
+      "language": "Language",
+      "timezone": "Timezone",
+      "theme": "Theme",
+      "themeOptions": {
+        "light": "Light",
+        "dark": "Dark",
+        "system": "System"
+      }
+    },
+    "saveButton": "Save Settings"
+  },
+  "admindash": {
+    "header": {
+      "title": "Admin Dashboard",
+      "notifications": "Notifications"
+    },
+    "welcome": {
+      "title": "Welcome back, Admin",
+      "description": "Monitor and manage the QRIP.ge memorial platform"
+    },
+    "stats": {
+      "totalUsers": "Total Users",
+      "activeMemorials": "Active Memorials",
+      "monthlyRevenue": "Monthly Revenue",
+      "qrScans": "QR Scans",
+      "changeFromLastMonth": "from last month",
+      "lastUpdated": "Last updated",
+      "refresh": "Refresh",
+      "refreshing": "Refreshing..."
+    },
+    "tabs": {
+      "users": "Users",
+      "memorials": "Memorials",
+      "qrCodes": "QR Codes",
+      "analytics": "Analytics",
+      "settings": "Settings"
+    },
+    "userManagement": {
+      "title": "User Management",
+      "description": "Manage user accounts and subscriptions",
+      "searchPlaceholder": "Search users...",
+      "noResults": "No users found",
+      "tableHeaders": {
+        "user": "User",
+        "plan": "Plan",
+        "memorials": "Memorials",
+        "status": "Status",
+        "joined": "Joined",
+        "actions": "Actions"
+      },
+      "status": {
+        "active": "Active",
+        "suspended": "Suspended"
+      },
+      "actionsMenu": {
+        "viewProfile": "View Profile",
+        "suspend": "Suspend",
+        "activate": "Activate",
+        "delete": "Delete"
+      },
+      "confirmSuspend": "Are you sure you want to suspend this user?",
+      "confirmDelete": "Are you sure you want to delete {name}? This action cannot be undone."
+    },
+    "recentMemorials": {
+      "title": "Recent Memorials",
+      "description": "Review and moderate memorial submissions",
+      "searchPlaceholder": "Search memorials...",
+      "tableHeaders": {
+        "memorial": "Memorial",
+        "creator": "Creator",
+        "subscriptionPlan": "Subscription Plan",
+        "status": "Status",
+        "views": "Views",
+        "created": "Created",
+        "actions": "Actions"
+      },
+      "approve": "Approve",
+      "reject": "Reject"
+    },
+    "qrManagement": {
+      "title": "QR Code Management",
+      "description": "Monitor QR code usage and generate new codes",
+      "totalQrCodes": "Total QR Codes",
+      "totalScans": "Total Scans",
+      "thisMonth": "This Month",
+      "analyticsText": "QR Code analytics and management tools"
+    },
+    "quickAccess": {
+      "title": "Quick Access",
+      "manageTestimonials": "Manage Testimonials",
+      "subscriptionPlans": "Subscription Plans",
+      "qrStickers": "QR Stickers"
+    },
+    "analytics": {
+      "platformGrowth": "Platform Growth",
+      "revenueTrends": "Revenue Trends"
+    },
+    "platformSettings": {
+      "title": "Platform Settings",
+      "description": "Configure platform-wide settings and preferences",
+      "generalSettings": "General Settings",
+      "publicDirectory": {
+        "label": "Allow Public Directory",
+        "description": "Enable public browsing of memorials"
+      },
+      "emailNotifications": {
+        "label": "Email Notifications",
+        "description": "System-wide notification settings"
+      },
+      "configure": "Configure"
+    }
+  },
+  "adminlogin": {
+    "login": {
+      "welcomeBack": "Administrator Access",
+      "subtitle": "Secure login for system administrators",
+      "title": "Admin Sign In",
+      "description": "Enter your administrator credentials",
+      "email": "Admin Email",
+      "emailPlaceholder": "Enter Username",
+      "password": "Password",
+      "passwordPlceholder": "Password",
+      "logButton": "Access Admin Panel"
+    }
+  },
+  "adsubscription": {
+    "header": {
+      "back": "Back to Dashboard",
+      "title": "Subscription Management"
+    },
+    "title": "Manage Subscription Plans",
+    "description": "Configure and customize all subscription plans for your platform",
+    "billing": {
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "save": "Save 30%"
+    },
+    "currentPlan": {
+      "title": "Current Plan: {plan}",
+      "description": "Upgrade to unlock premium features",
+      "status": "Active"
+    },
+    "plans": {
+      "free": {
+        "name": "Free",
+        "description": "Basic memorial features",
+        "price": "$0",
+        "period": "/month",
+        "features": [
+          "Biography & photo",
+          "QR code generation",
+          "Basic memorial page",
+          "Public directory listing"
+        ],
+        "limitations": [
+          "No video upload",
+          "No family tree/genealogy",
+          "No QR location & map pin",
+          "No multiple administrators",
+          "No lifetime access"
+        ],
+        "button": "Current Plan"
+      },
+      "basic": {
+        "name": "Basic Premium",
+        "description": "Enhanced memorial experience",
+        "price": "$9",
+        "period": "/month",
+        "features": [
+          "Biography & photo",
+          "QR code generation",
+          "Video upload",
+          "Family tree / genealogy",
+          "GPS location & map pin",
+          "Advanced customization",
+          "Priority support"
+        ],
+        "limitations": [
+          "No multiple administrators",
+          "No lifetime access"
+        ],
+        "button": "Upgrade to Basic Premium",
+        "popular": "Most Popular",
+        "yearlySave": "Save $18 per year"
+      },
+      "legacy": {
+        "name": "Legacy+",
+        "description": "Complete memorial solution",
+        "price": "$199",
+        "period": "one-time",
+        "features": [
+          "Biography & photo",
+          "QR code generation",
+          "Video upload",
+          "Family tree / genealogy",
+          "GPS location & map pin",
+          "Multiple administrators",
+          "Lifetime access (one-time pay)",
+          "Premium customization",
+          "White-glove setup service",
+          "Dedicated support"
+        ],
+        "limitations": [],
+        "button": "Purchase Legacy+ (Forever)",
+        "lifetime": "Lifetime Access - Pay Once, Own Forever"
+      }
+    },
+    "comparison": {
+      "title": "Feature Comparison",
+      "description": "Compare what's included with each plan",
+      "notincluded": "Not Included",
+      "features": [
+        {
+          "name": "Biography & photo"
+        },
+        {
+          "name": "QR code generation"
+        },
+        {
+          "name": "Video upload"
+        },
+        {
+          "name": "Family tree / genealogy"
+        },
+        {
+          "name": "GPS location & map pin"
+        },
+        {
+          "name": "Multiple administrators"
+        },
+        {
+          "name": "Lifetime access (one-time pay)"
+        }
+      ]
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "questions": [
+        {
+          "question": "What's the difference between plans?",
+          "answer": "Free includes basic features, Basic Premium adds video and family tree, Legacy+ includes everything plus lifetime access and multiple collaborators."
+        },
+        {
+          "question": "Is Legacy+ really lifetime access?",
+          "answer": "Yes! Legacy+ is a one-time payment of $199 that gives you lifetime access to all features with no recurring fees."
+        },
+        {
+          "question": "Can I upgrade or downgrade anytime?",
+          "answer": "Yes, you can change your plan at any time. Upgrades take effect immediately."
+        },
+        {
+          "question": "What happens if I don't pay my subscription?",
+          "answer": "Your memorial will show as \"unavailable\" to visitors. You'll have 30 days to update payment before premium features are disabled."
+        }
+      ]
+    },
+    "admin": {
+      "addPlan": "Add New Plan",
+      "editPlan": "Edit Plan",
+      "savePlan": "Save Plan",
+      "deletePlan": "Delete Plan",
+      "activatePlan": "Activate Plan",
+      "deactivatePlan": "Deactivate Plan",
+      "planName": "Plan Name",
+      "planDescription": "Description",
+      "price": "Price (₾)",
+      "oneTimePayment": "One-time Payment Plan",
+      "markPopular": "Mark as Popular",
+      "planActive": "Plan Active",
+      "features": "Features",
+      "addFeature": "Add Feature",
+      "limitations": "Limitations",
+      "addLimitation": "Add Limitation",
+      "subscribers": {
+        "title": "Subscribers",
+        "description": "View and manage all active subscriptions",
+        "user": "User",
+        "plan": "Plan",
+        "status": "Status",
+        "billing": "Billing",
+        "startDate": "Start Date",
+        "endDate": "End Date",
+        "actions": "Actions"
+      }
+    }
+  },
+  "adminprofile": {
+    "header": {
+      "back": "Back to Dashboard",
+      "title": "Admin Profile"
+    },
+    "profileOverview": {
+      "title": "Profile Overview",
+      "accountStats": "Account Stats",
+      "memberSince": "Member Since",
+      "lastActive": "Last Active"
+    },
+    "personalInfo": {
+      "title": "Personal Information",
+      "fullName": "Full Name",
+      "email": "Email",
+      "phone": "Phone",
+      "location": "Location",
+      "bio": "Bio",
+      "saveChanges": "Save Changes",
+      "editProfile": "Edit Profile"
+    },
+    "security": {
+      "title": "Security",
+      "changePassword": "Change Password",
+      "currentPassword": "Current Password",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm New Password",
+      "savePassword": "Save Password",
+      "cancel": "Cancel",
+      "twoFactorAuth": "Two-Factor Authentication",
+      "twoFactorDesc": "Add an extra layer of security to your account",
+      "verificationCode": "Verification Code",
+      "verify": "Verify",
+      "done": "Done",
+      "loginActivity": "Login Activity",
+      "recentLoginActivity": "Recent Login Activity"
+    },
+    "notifications": {
+      "title": "Notification Settings",
+      "emailNotifications": "Email Notifications",
+      "emailDesc": "Receive important updates via email",
+      "pushNotifications": "Push Notifications",
+      "pushDesc": "Get alerts on your device",
+      "systemAlerts": "System Alerts",
+      "systemDesc": "Critical system notifications",
+      "userActivity": "User Activity",
+      "userActivityDesc": "Notifications about user actions"
+    },
+    "common": {
+      "administrator": "Administrator",
+      "device": "Device",
+      "ip": "IP"
+    }
+  },
+  "Profiledropdown": {
+    "subscription": "Subscription",
+    "profile": "Profile",
+    "termsAndCondition": "Terms And Condition",
+    "changePassword": "Change Password",
+    "logout": "Logout"
+  },
+  "subscription_management": {
+    "my_subscription_tab": "My Subscription",
+    "manage_plans_tab": "Manage Plans",
+    "payment_success": "Payment Successful!",
+    "thank_you": "Thank you for your purchase. You can now create a beautiful memorial for your loved one",
+    "create_memorial": "Create Your Memorial",
+    "loading": "Loading...",
+    "paymentFailed": {
+      "payment_failed": "Payment Failed",
+      "msg": "Unfortunately, we couldn't process your payment. This can happen for a few reasons.",
+      "troubleshooting_title": "Please check the following:",
+      "check_card_details": "Your card details (number, expiry date, CVC) are correct.",
+      "check_sufficient_funds": "You have sufficient funds in your account.",
+      "check_card_expiry": "Your card has not expired.",
+      "check_bank_block": "Your bank has not blocked the transaction.",
+      "try_again_button": "Try Again"
+    },
+    "plan_updated_success": "Plan Updated Successfully!",
+    "plan_updated_msg": "Your subscription plan has been successfully updated.",
+    "go_to_dashboard": "Go to Dashboard"
+  },
+  "selectPlanPage": {
+    "header": {
+      "back": "Back to Dashboard",
+      "title": "Choose a Plan"
+    },
+    "main": {
+      "title": "Select a Plan for Your Memorial",
+      "description": "Choose one of the one-time payment plans below to create a beautiful and lasting digital memorial."
+    },
+    "loading": {
+      "text": "Loading Plans..."
+    }
+  },
+  "planSelection": {
+    "loading": "Loading Plans...",
+    "error": "Failed to load plans. Please try again later.",
+    "selectDuration": "Select Duration",
+    "paymentError": {
+      "initiate": "Could not initiate payment. Please try again.",
+      "process": "Failed to start payment process."
+    },
+    "badgePopular": "Popular",
+    "oneTimePayment": "/ one-time",
+    "features": {
+      "photoUploads": "{count} Photo Uploads",
+      "unlimitedPhotos": "Unlimited Photo Uploads",
+      "slideshow": "Photo Slideshow",
+      "videoUploads": "Video Uploads (Max {duration}s)",
+      "documentUpload": "Document Upload",
+      "familyTree": "Family Tree"
+    },
+    "cta": {
+      "processing": "Processing...",
+      "selectPlan": "Select Plan",
+      "getStarted": "Get Started",
+      "goPremium": "Go Premium",
+      "medium": "Select Plan"
+    },
+    "preselected": {
+      "title": "Plan Preselected",
+      "description": "Your memorial has been created and a plan has been preselected. You can proceed with payment or choose a different plan below.",
+      "badge": "Preselected"
+    },
+    "promoCode": {
+      "applyButton": "Apply",
+      "applying": "Applying...",
+      "placeholder": "Enter promo code",
+      "success": "Promo code applied successfully!",
+      "invalid": "Invalid promo code",
+      "failed": "Failed to apply promo code",
+      "tooltip": "Enter a promo code to get discounts on this plan.",
+      "sectionTitle": "Apply Promo Code",
+      "applied": "Promo code applied: {code}",
+      "discountPercentage": "{value}% off",
+      "discountFixed": "{value} GEL off",
+      "discountFree": "100% off - FREE",
+      "removeButton": "Remove",
+      "youSave": "You save",
+      "getForFree": "Get For Free",
+      "memorialIdRequired": "Memorial ID is required to apply promo code",
+      "enterCode": "Please enter a promo code"
+    }
+  },
+  "adminSubscriptionPage": {
+    "header": {
+      "back": "Back",
+      "title": "Manage Subscription Plans"
+    },
+    "main": {
+      "title": "Subscription Plans",
+      "description": "Configure and customize all subscription plans for your platform.",
+      "addNewPlan": "Add New Plan"
+    },
+    "states": {
+      "loading": "Loading plans...",
+      "retry": "Retry",
+      "error": {
+        "fetch": "Failed to fetch plans",
+        "create": "Failed to create new plan",
+        "update": "Failed to update plan"
+      }
+    },
+    "modal": {
+      "titleAdd": "Add New Plan",
+      "titleEdit": "Edit Plan",
+      "sectionBasic": "Basic Details",
+      "placeholders": {
+        "name": "Plan Name",
+        "description": "Plan Description",
+        "price": "Price",
+        "cta": "CTA Button Text (e.g., Get Started)",
+        "feature": "e.g., QR Code Generation"
+      },
+      "currency": "GEL",
+      "planTypes": {
+        "minimal": "Minimal",
+        "medium": "Medium",
+        "premium": "Premium"
+      },
+      "sectionCoreFeatures": "Core Feature Configuration",
+      "photos": {
+        "label": "Allow Photo Uploads",
+        "maxLabel": "Max Photos:",
+        "slideshowLabel": "Enable Slideshow:"
+      },
+      "videos": {
+        "label": "Allow Video Uploads",
+        "maxDurationLabel": "Max Duration (seconds):"
+      },
+      "sectionAdditionalFeatures": "Additional Features List",
+      "addFeature": "Add Feature",
+      "sectionSettings": "Plan Settings",
+      "markPopular": "Mark as Popular",
+      "setActive": "Set Plan as Active",
+      "buttonSaveNew": "Save New Plan",
+      "buttonSaveChanges": "Save Changes"
+    },
+    "card": {
+      "popular": "Popular",
+      "inactive": "Inactive",
+      "oneTime": "/ one-time",
+      "editPlan": "Edit Plan",
+      "features": {
+        "photoUploads": "{count} Photo Uploads",
+        "unlimitedPhotos": "Unlimited Photo Uploads",
+        "slideshow": "Photo Slideshow",
+        "videoUploads": "Video Uploads (Max {duration}s)"
+      }
+    }
+  },
+  "userMenu": {
+    "logoutConfirm": "Are you sure you want to sign out?",
+    "planSuffix": " Plan",
+    "profile": "Profile",
+    "subscription": "Subscription",
+    "settings": "Settings",
+    "signOut": "Sign out"
+  },
+  "publicMemorials": {
+    "title": "Shared Library",
+    "description": "Browse and discover the stories of lives celebrated on our platform.",
+    "searchPlaceholder": "Search by name...",
+    "sortByLabel": "Sort by:",
+    "sortOptions": {
+      "recent": "Most Recent",
+      "az": "A-Z"
+    },
+    "loading": "Loading memorials...",
+    "error": "An error occurred while fetching data.",
+    "noMemorials": "No memorials found.",
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next",
+      "pageInfo": "Page {currentPage} of {totalPages}"
+    }
+  },
+  "promoCodeManagement": {
+    "title": "Promo Code Management",
+    "description": "Create and manage promotional codes for discounts or free plans.",
+    "addNewButton": "Add New Promo Code",
+    "tableHeaders": {
+      "code": "Code",
+      "discount": "Discount",
+      "expires": "Expires",
+      "usage": "Usage",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "modal": {
+      "addTitle": "Add New Promo Code",
+      "editTitle": "Edit Promo Code",
+      "codeLabel": "Promo Code",
+      "codePlaceholder": "SUMMER20",
+      "discountTypeLabel": "Discount Type",
+      "discountTypeOptions": {
+        "percentage": "Percentage Discount (%)",
+        "fixed": "Fixed Amount Discount ({currency})",
+        "free": "100% Off (Free Plan)"
+      },
+      "selectPlanLabel": "Select Plan",
+      "selectPlanPlaceholder": "Select Plan",
+      "discountValueLabel": "Discount Value ({symbol})",
+      "discountValuePlaceholderPercentage": "e.g., 20",
+      "discountValuePlaceholderFixed": "e.g., 10",
+      "expiryDateLabel": "Expiry Date",
+      "maxUsageLabel": "Max Usage (Optional)",
+      "maxUsagePlaceholder": "e.g., 100 (leave empty for unlimited)",
+      "activeLabel": "Set Active",
+      "saveButtonAdd": "Save Promo Code",
+      "saveButtonEdit": "Update Promo Code",
+      "quickExpiryOptions": {
+        "1day": "1 Day",
+        "1week": "1 Week",
+        "1month": "1 Month"
+      }
+    },
+    "errors": {
+      "selectPlanFirst": "Please select plan first.",
+      "failedCreate": "Failed to create promo code",
+      "failedUpdate": "Failed to update promo code",
+      "failedDelete": "Failed to delete promo code",
+      "failedFetch": "Failed to fetch promo codes"
+    },
+    "deleteConfirm": "Are you sure you want to delete this promo code?",
+    "noPromoCodes": "No promo codes found."
+  },
+  "homePagePlan": {
+    "heading": "Choose Your Plan",
+    "title": " Select the perfect plan to honor your loved ones"
+  },
+  "plansTranslations": {
+    "minimal": {
+      "name": "Minimal Plan",
+      "description": "1 photo + biography",
+      "features": {
+        "photoUploads": "1 Photo Uploads",
+        "slideshow": "Photo Slideshow",
+        "videoUploads": "Video Uploads (Max 0s)",
+        "documentUpload": "Document Upload",
+        "familyTree": "Family Tree"
+      }
+    },
+    "medium": {
+      "name": "Medium Plan",
+      "description": "Up to 10 photos per memorial with slideshow",
+      "features": {
+        "photoUploads": "10 Photo Uploads",
+        "slideshow": "Photo Slideshow",
+        "videoUploads": "Video Uploads (Max 0s)",
+        "documentUpload": "Document Upload",
+        "familyTree": "Family Tree"
+      }
+    },
+    "premium": {
+      "name": "Premium Plan",
+      "description": "Unlimited photos, slideshow, videos",
+      "features": {
+        "photoUploads": "Unlimited Photo Uploads",
+        "slideshow": "Photo Slideshow",
+        "videoUploads": "Video Uploads (Max 60s)",
+        "documentUpload": "Document Upload",
+        "familyTree": "Family Tree"
+      }
+    }
+  },
+  "help": {
+    "helpButton": "help"
+  },
+  "TermsPage": {
+    "manage": "Manage Terms And Conditions",
+    "termAndCondition": "Terms And Conditions",
+    "heading": "Terms & Conditions Editor",
+    "Preview": "Preview",
+    "ExitPreview": "Exit Preview",
+    "NoteSection": "Note Section",
+    "NoteTitle": "Note Title",
+    "NoteContent": "Note Content",
+    "Sections": "Sections",
+    "AddSections": "Add New Sections",
+    "TermsConditions": "Terms & Conditions",
+    "SectionTitle": "Section Title",
+    "SectionType": "Section Type",
+    "Content": "Content",
+    "characters": "characters",
+    "Introduction": "Introduction (Optional)",
+    "EnterTitle": "Enter title",
+    "Entercontent": "Enter content...",
+    "EnterIntroduction": "Enter introduction text (optional)",
+    "EnterListItem": "Enter list item",
+    "ListItems": "List Items",
+    "AddItam": "Add Item",
+    "List": "List",
+    "Text": "Text",
+    "Saving": "Saving",
+    "Save": "Save",
+    "ResetAll": "Reset All"
+  },
+  "adminStickers": {
+    "header": {
+      "back": "Back to Admin Dashboard",
+      "title": "QR Sticker Options"
+    },
+    "main": {
+      "title": "QR Sticker Options",
+      "description": "Manage available QR sticker types and pricing",
+      "addButton": "Add Sticker Option"
+    },
+    "search": {
+      "placeholder": "Search sticker options..."
+    },
+    "table": {
+      "title": "Sticker Options ({count})",
+      "description": "Manage all available QR sticker options",
+      "headers": {
+        "name": "Name",
+        "type": "Type",
+        "size": "Size",
+        "price": "Price",
+        "stock": "Stock",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      }
+    },
+    "createDialog": {
+      "title": "Create New Sticker Option",
+      "description": "Add a new QR sticker option with pricing and specifications.",
+      "form": {
+        "name": "Name",
+        "namePlaceholder": "Standard Vinyl QR Sticker",
+        "type": "Type",
+        "typePlaceholder": "Select type",
+        "description": "Description",
+        "descriptionPlaceholder": "High-quality vinyl QR code sticker...",
+        "size": "Size",
+        "sizePlaceholder": "3x3 inches",
+        "price": "Price (₾)",
+        "pricePlaceholder": "25.00",
+        "stock": "Stock",
+        "stockPlaceholder": "100",
+        "material": "Material",
+        "materialPlaceholder": "Premium Vinyl",
+        "dimensions": "Dimensions",
+        "dimensionsPlaceholder": "3\" x 3\" (76mm x 76mm)",
+        "durability": "Durability",
+        "durabilityPlaceholder": "2-3 years outdoor",
+        "weatherResistance": "Weather Resistance",
+        "weatherResistancePlaceholder": "Waterproof, UV resistant"
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "create": "Create"
+      }
+    },
+    "editDialog": {
+      "title": "Edit Sticker Option",
+      "description": "Update the sticker option details and specifications.",
+      "buttons": {
+        "cancel": "Cancel",
+        "update": "Update"
+      }
+    },
+    "types": {
+      "vinyl": "Vinyl",
+      "engraving": "Engraving",
+      "premium": "Premium"
+    },
+    "messages": {
+      "loading": "Loading sticker options...",
+      "createSuccess": "Sticker option created successfully",
+      "updateSuccess": "Sticker option updated successfully",
+      "deleteSuccess": "Sticker option deleted successfully",
+      "statusUpdateSuccess": "Status updated successfully",
+      "createError": "Failed to create sticker option",
+      "updateError": "Failed to update sticker option",
+      "deleteError": "Failed to delete sticker option",
+      "statusUpdateError": "Failed to update status",
+      "loadError": "Failed to load sticker options",
+      "deleteConfirm": "Are you sure you want to delete this sticker option?"
+    }
+  },
+  "adminStickerTypes": {
+    "header": {
+      "back": "Back to Admin Dashboard",
+      "title": "Sticker Types",
+      "description": "Manage available sticker types"
+    },
+    "loading": {
+      "message": "Loading sticker types..."
+    },
+    "search": {
+      "placeholder": "Search sticker types..."
+    },
+    "table": {
+      "title": "Sticker Types ({count})",
+      "description": "Manage all available sticker types",
+      "headers": {
+        "name": "Name",
+        "displayName": "Display Name",
+        "description": "Description",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      }
+    },
+    "createDialog": {
+      "title": "Create New Sticker Type",
+      "description": "Add a new sticker type with specifications.",
+      "form": {
+        "name": "Name",
+        "namePlaceholder": "vinyl",
+        "displayName": "Display Name",
+        "displayNamePlaceholder": "Vinyl",
+        "description": "Description",
+        "descriptionPlaceholder": "High-quality vinyl material...",
+        "material": "Material",
+        "materialPlaceholder": "Premium Vinyl",
+        "durability": "Durability",
+        "durabilityPlaceholder": "2-3 years outdoor",
+        "weatherResistance": "Weather Resistance",
+        "weatherResistancePlaceholder": "Waterproof, UV resistant",
+        "specialFeatures": "Special Features",
+        "specialFeaturesPlaceholder": "Custom colors available"
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "create": "Create"
+      }
+    },
+    "editDialog": {
+      "title": "Edit Sticker Type",
+      "description": "Update the sticker type details and specifications.",
+      "buttons": {
+        "cancel": "Cancel",
+        "update": "Update"
+      }
+    },
+    "messages": {
+      "loading": "Loading sticker types...",
+      "createSuccess": "Sticker type created successfully",
+      "updateSuccess": "Sticker type updated successfully",
+      "deleteSuccess": "Sticker type deleted successfully",
+      "statusUpdateSuccess": "Status updated successfully",
+      "createError": "All fields are required",
+      "updateError": "Failed to update sticker type",
+      "deleteError": "Failed to delete sticker type",
+      "statusUpdateError": "Failed to update status",
+      "loadError": "Failed to load sticker types",
+      "deleteConfirm": "Are you sure you want to delete this sticker type?"
+    }
+  },
+  "adminOrders": {
+    "header": {
+      "back": "Back to Admin Dashboard",
+      "title": "QR Sticker Orders"
+    },
+    "main": {
+      "title": "QR Sticker Orders",
+      "description": "Manage all QR sticker orders and track their status"
+    },
+    "stats": {
+      "totalOrders": "Total Orders",
+      "pending": "Pending",
+      "paid": "Paid",
+      "shipped": "Shipped",
+      "totalRevenue": "Total Revenue"
+    },
+    "filters": {
+      "searchPlaceholder": "Search by name, email, or tracking number...",
+      "orderStatus": "Order Status",
+      "paymentStatus": "Payment Status",
+      "allStatuses": "All Statuses",
+      "allPayments": "All Payments"
+    },
+    "status": {
+      "pending": "Pending",
+      "processing": "Processing",
+      "shipped": "Shipped",
+      "delivered": "Delivered",
+      "cancelled": "Cancelled"
+    },
+    "paymentStatus": {
+      "pending": "Pending",
+      "paid": "Paid",
+      "failed": "Failed",
+      "refunded": "Refunded"
+    },
+    "table": {
+      "title": "Orders ({count})",
+      "description": "Manage and track all QR sticker orders",
+      "headers": {
+        "orderId": "Order ID",
+        "customer": "Customer",
+        "memorial": "Memorial",
+        "sticker": "Sticker",
+        "quantity": "Quantity",
+        "total": "Total",
+        "payment": "Payment",
+        "status": "Status",
+        "date": "Date",
+        "actions": "Actions"
+      },
+      "actions": {
+        "ship": "Ship",
+        "markDelivered": "Mark Delivered",
+        "viewDetails": "View Details & Download QR",
+        "deleteOrder": "Delete Order"
+      }
+    },
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page",
+      "of": "of",
+      "showing": "Showing",
+      "to": "to",
+      "results": "results"
+    },
+    "messages": {
+      "loading": "Loading orders...",
+      "loadError": "Failed to load orders",
+      "updateSuccess": "Order status updated successfully",
+      "updateError": "Failed to update order status",
+      "deleteSuccess": "Order deleted successfully",
+      "deleteError": "Failed to delete order",
+      "deleteConfirm": "Are you sure you want to delete this order?\n\nThis action cannot be undone and will permanently remove:\n• Order details\n• Payment information\n• Shipping address\n• All associated data\n\nClick OK to confirm deletion.",
+      "trackingPrompt": "Enter tracking number:"
+    }
+  },
+  "adminOrderDetail": {
+    "header": {
+      "back": "Back to Orders",
+      "title": "Order Details"
+    },
+    "loading": {
+      "message": "Loading order details..."
+    },
+    "notFound": {
+      "title": "Order Not Found",
+      "message": "The order you're looking for doesn't exist.",
+      "backButton": "Back to Orders"
+    },
+    "orderHeader": {
+      "orderNumber": "Order #{orderId}",
+      "createdOn": "Created on {date}"
+    },
+    "sections": {
+      "customerInfo": {
+        "title": "Customer Information",
+        "name": "Name",
+        "email": "Email",
+        "phone": "Phone",
+        "userId": "User ID"
+      },
+      "memorialInfo": {
+        "title": "Memorial Information",
+        "memorialName": "Memorial Name",
+        "slug": "Slug",
+        "memorialId": "Memorial ID"
+      },
+      "shippingAddress": {
+        "title": "Shipping Address",
+        "phone": "Phone"
+      },
+      "orderSummary": {
+        "title": "Order Summary",
+        "sticker": "Sticker",
+        "type": "Type",
+        "size": "Size",
+        "quantity": "Quantity",
+        "unitPrice": "Unit Price",
+        "total": "Total"
+      },
+      "qrCodeDownload": {
+        "title": "QR Code Download",
+        "description": "Download the QR code for this memorial",
+        "memorialLabel": "Memorial: {name}",
+        "qualityNote": "High quality QR codes suitable for printing on stickers"
+      },
+      "paymentInfo": {
+        "title": "Payment Information",
+        "status": "Status",
+        "paymentId": "Payment ID"
+      },
+      "orderActions": {
+        "title": "Order Actions",
+        "deleteOrder": "Delete Order"
+      },
+      "timeline": {
+        "title": "Timeline",
+        "orderCreated": "Order Created",
+        "lastUpdated": "Last Updated"
+      }
+    },
+    "status": {
+      "pending": "Pending",
+      "processing": "Processing",
+      "shipped": "Shipped",
+      "delivered": "Delivered",
+      "cancelled": "Cancelled"
+    },
+    "paymentStatus": {
+      "pending": "Pending",
+      "paid": "Paid",
+      "failed": "Failed",
+      "refunded": "Refunded"
+    },
+    "messages": {
+      "orderNotFound": "Order not found",
+      "loadError": "Failed to load order details",
+      "deleteConfirm": "Are you sure you want to delete this order?\n\nThis action cannot be undone and will permanently remove all order data.",
+      "deleteSuccess": "Order deleted successfully",
+      "deleteError": "Failed to delete order",
+      "notLoggedIn": "You are not logged in",
+      "downloadSuccess": "QR code downloaded as {fileName}",
+      "downloadError": "Failed to generate QR code"
+    }
+  },
+  "adminDashboard": {
+    "orders": {
+      "tabTitle": "Orders",
+      "title": "QR Sticker Orders",
+      "description": "Manage and track all QR sticker orders",
+      "viewAllOrders": "View All Orders",
+      "manageStickers": "Manage Stickers",
+      "manageTypes": "Manage Types",
+      "orderManagement": "Order Management",
+      "orderManagementDescription": "View and manage all QR sticker orders in the dedicated orders page.",
+      "goToOrders": "Go to Orders"
+    }
+  },
+  "adminStickersPage": {
+    "header": {
+      "back": "Back to Admin Dashboard",
+      "title": "QR Sticker Options",
+      "description": "Manage available QR sticker types and pricing"
+    },
+    "loading": {
+      "message": "Loading sticker options..."
+    },
+    "search": {
+      "placeholder": "Search sticker options..."
+    },
+    "table": {
+      "title": "Sticker Options ({count})",
+      "description": "Manage all available QR sticker options",
+      "headers": {
+        "name": "Name",
+        "type": "Type",
+        "size": "Size",
+        "price": "Price",
+        "stock": "Stock",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      }
+    },
+    "createDialog": {
+      "title": "Create New Sticker Option",
+      "description": "Add a new QR sticker option with pricing and specifications.",
+      "form": {
+        "name": "Name",
+        "namePlaceholder": "Standard Vinyl QR Sticker",
+        "type": "Type",
+        "typePlaceholder": "Select type",
+        "description": "Description",
+        "descriptionPlaceholder": "High-quality vinyl QR code sticker...",
+        "size": "Size",
+        "sizePlaceholder": "3x3 inches",
+        "price": "Price (₾)",
+        "pricePlaceholder": "25.00",
+        "stock": "Stock",
+        "stockPlaceholder": "100",
+        "material": "Material",
+        "materialPlaceholder": "Premium Vinyl",
+        "dimensions": "Dimensions",
+        "dimensionsPlaceholder": "3\" x 3\" (76mm x 76mm)",
+        "durability": "Durability",
+        "durabilityPlaceholder": "2-3 years outdoor",
+        "weatherResistance": "Weather Resistance",
+        "weatherResistancePlaceholder": "Waterproof, UV resistant"
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "create": "Create"
+      }
+    },
+    "editDialog": {
+      "title": "Edit Sticker Option",
+      "description": "Update the sticker option details and specifications.",
+      "buttons": {
+        "cancel": "Cancel",
+        "update": "Update"
+      }
+    },
+    "types": {
+      "vinyl": "Vinyl",
+      "engraving": "Engraving",
+      "premium": "Premium"
+    },
+    "messages": {
+      "loading": "Loading sticker options...",
+      "createSuccess": "Sticker option created successfully",
+      "updateSuccess": "Sticker option updated successfully",
+      "deleteSuccess": "Sticker option deleted successfully",
+      "statusUpdateSuccess": "Status updated successfully",
+      "createError": "Failed to create sticker option",
+      "updateError": "Failed to update sticker option",
+      "deleteError": "Failed to delete sticker option",
+      "statusUpdateError": "Failed to update status",
+      "loadError": "Failed to load sticker options",
+      "deleteConfirm": "Are you sure you want to delete this sticker option?",
+      "noStickerOptionsFound": "No sticker options found"
+    }
+  },
+  "testimonialForm": {
+    "title": "Share Your Experience",
+    "description": "Help others by sharing your experience with our memorial services",
+    "form": {
+      "fullName": "Full Name *",
+      "fullNamePlaceholder": "Enter your full name",
+      "emailAddress": "Email Address *",
+      "emailPlaceholder": "Enter your email address",
+      "location": "Location *",
+      "locationPlaceholder": "City, Country",
+      "rating": "Rating *",
+      "testimonial": "Your Testimonial *",
+      "testimonialPlaceholder": "Share your experience with our memorial services...",
+      "characterCount": "characters",
+      "submitButton": "Submit Testimonial",
+      "submitting": "Submitting...",
+      "submitAnother": "Submit Another Testimonial"
+    },
+    "success": {
+      "title": "Thank You!",
+      "message": "Your testimonial has been submitted successfully. It will be reviewed before being published."
+    },
+    "errors": {
+      "nameRequired": "Name is required",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Please enter a valid email",
+      "locationRequired": "Location is required",
+      "testimonialRequired": "Testimonial text is required",
+      "testimonialMinLength": "Testimonial must be at least 10 characters long"
+    },
+    "button": "Share Your Experience",
+    "noTestimonials": {
+      "title": "No Testimonials Yet",
+      "message": "Be the first to share your experience with our memorial services"
+    }
+  },
+  "stickerPurchase": {
+    "header": {
+      "back": "Back to Dashboard",
+      "title": "Buy QR Sticker",
+      "description": "Order a physical QR code sticker for your memorial"
+    },
+    "loading": {
+      "message": "Loading..."
+    },
+    "comingSoon": {
+      "title": "Coming Soon",
+      "message": "QR Stickers are not available at the moment. Please check back later.",
+      "backButton": "Back to Dashboard"
+    },
+    "sections": {
+      "memorialSelection": {
+        "title": "Select Memorial",
+        "description": "Choose which memorial this sticker will be for"
+      },
+      "stickerOptions": {
+        "title": "Choose Sticker Type",
+        "description": "Select the type and size of QR sticker you want",
+        "specifications": {
+          "material": "Material:",
+          "dimensions": "Dimensions:",
+          "durability": "Durability:"
+        }
+      },
+      "quantity": {
+        "title": "Quantity",
+        "description": "How many stickers would you like?"
+      },
+      "shippingAddress": {
+        "title": "Shipping Address",
+        "description": "Confirm your shipping details",
+        "form": {
+          "fullName": "Full Name *",
+          "fullNamePlaceholder": "John Doe",
+          "address": "Address *",
+          "addressPlaceholder": "123 Main Street, Apartment 4B",
+          "city": "City *",
+          "cityPlaceholder": "Tbilisi",
+          "zipCode": "ZIP Code",
+          "zipCodePlaceholder": "0100",
+          "country": "Country",
+          "countryPlaceholder": "Georgia",
+          "phone": "Phone Number *",
+          "phonePlaceholder": "+995 555 123 456"
+        }
+      },
+      "orderSummary": {
+        "title": "Order Summary",
+        "quantity": "Quantity:",
+        "total": "Total",
+        "proceedToPayment": "Proceed to Payment",
+        "processing": "Processing...",
+        "securePayment": "Secure payment processing"
+      }
+    },
+    "messages": {
+      "loadError": "Failed to load data",
+      "selectMemorialAndSticker": "Please select a memorial and sticker option",
+      "fillShippingDetails": "Please fill in all required shipping details",
+      "orderCreated": "Order created successfully! Initiating payment...",
+      "paymentInitiationFailed": "Payment initiation failed. Please try again.",
+      "orderCreationFailed": "Failed to create order"
+    }
+  },
+  "adminTestimonials": {
+    "header": {
+      "title": "Testimonials Management",
+      "back": "Back"
+    },
+    "table": {
+      "headers": {
+        "testimonial": "Testimonials",
+        "submitted": "Submitted"
+      },
+      "status": {
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "pending": "Pending"
+      },
+      "actions": {
+        "approve": "Approve",
+        "reject": "Reject",
+        "markPending": "Mark as Pending",
+        "delete": "Delete"
+      }
+    },
+    "search": {
+      "placeholder": "Search testimonials...",
+      "filterByStatus": "Filter by status",
+      "allStatus": "All Status",
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "empty": {
+      "title": "No Testimonials Found",
+      "description": "There are no testimonials to display at the moment."
+    },
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next",
+      "pageInfo": "Page {currentPage} of {totalPages}"
+    },
+    "settings": {
+      "title": "Testimonials Settings",
+      "enableSection": "Enable Testimonials Section",
+      "enableSectionDescription": "Allow users to submit testimonials on the website",
+      "autoApprove": "Auto-approve Testimonials",
+      "autoApproveDescription": "Automatically approve new testimonials without manual review",
+      "requireEmail": "Require Email Address",
+      "requireEmailDescription": "Make email address mandatory for testimonial submissions",
+      "maxDisplay": "Maximum Display Count"
+    }
+  }
+}

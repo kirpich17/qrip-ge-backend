@@ -1,5 +1,8 @@
 const userModel = require("../models/user.model");
 const memorialModel = require("../models/memorial.model");
+const UserSubscription = require("../models/UserSubscription");
+const MemorialPurchase = require("../models/MemorialPurchase");
+const QRStickerOrder = require("../models/QRStickerOrder");
 
 exports.adminStats = async (req, res) => {
   try {
@@ -18,12 +21,16 @@ exports.adminStats = async (req, res) => {
       userType: "user",
       createdAt: { $gte: startOfCurrentMonth },
     });
-    const userGrowth =
-      usersLastMonth === 0
-        ? usersThisMonth > 0
-          ? 100
-          : 0
-        : ((usersThisMonth - usersLastMonth) / usersLastMonth) * 100;
+    let userGrowth = 0;
+    if (usersLastMonth === 0) {
+      userGrowth = usersThisMonth > 0 ? 100 : 0;
+    } else {
+      userGrowth = ((usersThisMonth - usersLastMonth) / usersLastMonth) * 100;
+      // Cap the percentage at reasonable limits
+      if (userGrowth > 1000) {
+        userGrowth = 1000;
+      }
+    }
 
     // === ACTIVE MEMORIAL STATS ===
     const totalActiveMemorials = await memorialModel.countDocuments({
@@ -37,14 +44,161 @@ exports.adminStats = async (req, res) => {
       status: "active",
       createdAt: { $gte: startOfCurrentMonth },
     });
-    const memorialGrowth =
-      activeMemorialsLastMonth === 0
-        ? activeMemorialsThisMonth > 0
-          ? 100
-          : 0
-        : ((activeMemorialsThisMonth - activeMemorialsLastMonth) /
-            activeMemorialsLastMonth) *
-          100;
+    let memorialGrowth = 0;
+    if (activeMemorialsLastMonth === 0) {
+      memorialGrowth = activeMemorialsThisMonth > 0 ? 100 : 0;
+    } else {
+      memorialGrowth = ((activeMemorialsThisMonth - activeMemorialsLastMonth) / activeMemorialsLastMonth) * 100;
+      // Cap the percentage at reasonable limits
+      if (memorialGrowth > 1000) {
+        memorialGrowth = 1000;
+      }
+    }
+
+    // === REVENUE STATS ===
+    // Calculate subscription revenue (based on payment date, not creation date)
+    const subscriptionRevenueThisMonth = await UserSubscription.aggregate([
+      {
+        $match: {
+          status: 'active',
+          $or: [
+            { lastPaymentDate: { $gte: startOfCurrentMonth } },
+            { createdAt: { $gte: startOfCurrentMonth } }
+          ]
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          totalRevenue: { $sum: '$durationPrice' }
+        }
+      }
+    ]);
+
+    const subscriptionRevenueLastMonth = await UserSubscription.aggregate([
+      {
+        $match: {
+          status: 'active',
+          $or: [
+            { lastPaymentDate: { $gte: startOfLastMonth, $lte: endOfLastMonth } },
+            { createdAt: { $gte: startOfLastMonth, $lte: endOfLastMonth } }
+          ]
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          totalRevenue: { $sum: '$durationPrice' }
+        }
+      }
+    ]);
+
+    // Calculate memorial purchase revenue (based on payment date)
+    const memorialRevenueThisMonth = await MemorialPurchase.aggregate([
+      {
+        $match: {
+          status: 'completed',
+          $or: [
+            { paymentDate: { $gte: startOfCurrentMonth } },
+            { createdAt: { $gte: startOfCurrentMonth } }
+          ]
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          totalRevenue: { $sum: '$finalPricePaid' }
+        }
+      }
+    ]);
+
+    const memorialRevenueLastMonth = await MemorialPurchase.aggregate([
+      {
+        $match: {
+          status: 'completed',
+          $or: [
+            { paymentDate: { $gte: startOfLastMonth, $lte: endOfLastMonth } },
+            { createdAt: { $gte: startOfLastMonth, $lte: endOfLastMonth } }
+          ]
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          totalRevenue: { $sum: '$finalPricePaid' }
+        }
+      }
+    ]);
+
+    // Calculate QR sticker order revenue (based on payment date)
+    const stickerRevenueThisMonth = await QRStickerOrder.aggregate([
+      {
+        $match: {
+          paymentStatus: 'paid',
+          $or: [
+            { updatedAt: { $gte: startOfCurrentMonth } },
+            { createdAt: { $gte: startOfCurrentMonth } }
+          ]
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          totalRevenue: { $sum: '$totalAmount' }
+        }
+      }
+    ]);
+
+    const stickerRevenueLastMonth = await QRStickerOrder.aggregate([
+      {
+        $match: {
+          paymentStatus: 'paid',
+          $or: [
+            { updatedAt: { $gte: startOfLastMonth, $lte: endOfLastMonth } },
+            { createdAt: { $gte: startOfLastMonth, $lte: endOfLastMonth } }
+          ]
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          totalRevenue: { $sum: '$totalAmount' }
+        }
+      }
+    ]);
+
+    // Calculate total revenue
+    const totalRevenueThisMonth = 
+      (subscriptionRevenueThisMonth[0]?.totalRevenue || 0) +
+      (memorialRevenueThisMonth[0]?.totalRevenue || 0) +
+      (stickerRevenueThisMonth[0]?.totalRevenue || 0);
+
+    const totalRevenueLastMonth = 
+      (subscriptionRevenueLastMonth[0]?.totalRevenue || 0) +
+      (memorialRevenueLastMonth[0]?.totalRevenue || 0) +
+      (stickerRevenueLastMonth[0]?.totalRevenue || 0);
+
+    // Calculate revenue growth with better handling of edge cases
+    let revenueGrowth = 0;
+    if (totalRevenueLastMonth === 0) {
+      revenueGrowth = totalRevenueThisMonth > 0 ? 100 : 0;
+    } else {
+      revenueGrowth = ((totalRevenueThisMonth - totalRevenueLastMonth) / totalRevenueLastMonth) * 100;
+      // Cap the percentage at reasonable limits to avoid extreme values
+      if (revenueGrowth > 1000) {
+        revenueGrowth = 1000; // Cap at 1000% for display purposes
+      }
+    }
+
+    // Debug logging
+    console.log('Revenue Debug:', {
+      totalRevenueThisMonth,
+      totalRevenueLastMonth,
+      revenueGrowth,
+      subscriptionThisMonth: subscriptionRevenueThisMonth[0]?.totalRevenue || 0,
+      memorialThisMonth: memorialRevenueThisMonth[0]?.totalRevenue || 0,
+      stickerThisMonth: stickerRevenueThisMonth[0]?.totalRevenue || 0
+    });
 
     // === RESPONSE ===
     res.json({
@@ -63,6 +217,14 @@ exports.adminStats = async (req, res) => {
           memorialGrowth >= 0
             ? `📈 +${memorialGrowth.toFixed(2)}% from last month`
             : `📉 ${memorialGrowth.toFixed(2)}% from last month`,
+      },
+      revenue: {
+        total: totalRevenueThisMonth,
+        percentageChange: revenueGrowth.toFixed(2),
+        message:
+          revenueGrowth >= 0
+            ? `📈 +${revenueGrowth.toFixed(2)}% from last month`
+            : `📉 ${revenueGrowth.toFixed(2)}% from last month`,
       },
     });
   } catch (error) {

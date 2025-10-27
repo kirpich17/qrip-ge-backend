@@ -6,6 +6,7 @@ const {
   forgotPassword,
   resetPassword,
   updatePassword,
+  changePassword,
   getUserDetails,
   updateUser,
   allStatsforUser,
@@ -30,6 +31,7 @@ router.get("/details", isAuthenticated, getUserDetails);
 
 // Common Password Update (Admin/User both)
 router.put("/update-password", isAuthenticated, isUser, updatePassword);
+router.put("/change-password", isAuthenticated, isUser, changePassword);
 router.put("/users/:userId", updateUser);
 router.get("/users/subscription", adminGetAllPlans);
 router.get("/stats/:userId", allStatsforUser);

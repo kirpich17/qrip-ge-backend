@@ -1,12 +1,13 @@
 const User = require("../models/user.model");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const nodemailer = require("nodemailer");
 const crypto = require("crypto");
 const memorialModel = require("../models/memorial.model");
 const { default: mongoose } = require("mongoose");
 const { log } = require("console");
 const { uploadFileToS3 } = require("../config/configureAWS");
+const { assignFreePlan } = require("../service/subscriptionService");
+const { sendPasswordResetEmail, sendWelcomeEmail } = require("../service/unifiedEmailService");
 
 exports.signup = async (req, res) => {
   try {
@@ -33,6 +34,17 @@ exports.signup = async (req, res) => {
       userType,
       shippingDetails,
     });
+
+    // await assignFreePlan(user._id);
+
+    // Send welcome email
+    try {
+      await sendWelcomeEmail(user.email, user.firstname);
+    } catch (emailError) {
+      console.error("Failed to send welcome email:", emailError);
+      // Don't fail the signup if email fails
+    }
+
     res.status(201).json({ status: true, message: "Signup successful", user });
   } catch (err) {
     res.status(500).json({ status: false, message: err.message });
@@ -74,6 +86,21 @@ exports.signin = async (req, res) => {
 exports.forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
+    
+    // Check if email is provided
+    if (!email) {
+      return res.status(400).json({ status: false, message: "Email is required" });
+    }
+
+    // Check if email credentials are configured
+    if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+      return res.status(500).json({ 
+        status: false, 
+        message: "Email service not configured. Please contact administrator." 
+      });
+    }
+
+
     const user = await User.findOne({ email });
     if (!user)
       return res.status(404).json({ status: false, message: "User not found" });
@@ -82,29 +109,27 @@ exports.forgotPassword = async (req, res) => {
     user.resetPasswordToken = resetToken;
     user.resetPasswordExpires = Date.now() + 3600000;
     await user.save();
-    const resetLink = `${process.env.FRONTEND_BASE_URL}/reset-password?token=${resetToken}`;
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-
-    const mailOptions = {
-      to: email,
-      subject: "Reset your QRIP password",
-      html: `
-<p>Hello ${user.firstname || "User"},</p>
-<p>You requested to reset your password. Click the button below:</p>
-<a href="${resetLink}" style="background:#547455;color:#fff;padding:10px 15px;border-radius:5px;text-decoration:none;">Reset Password</a>
-<p>This link will expire in 1 hour.</p>
-      `,
-    };
-
-    await transporter.sendMail(mailOptions);
-    res.json({ status: true, message: "Reset token sent to email" });
+    
+    const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+    
+    // Use unified email service
+    const emailSent = await sendPasswordResetEmail(email, resetLink, user.firstname);
+    
+    if (emailSent) {
+      res.json({ status: true, message: "Reset token sent to email" });
+    } else {
+      res.status(500).json({ status: false, message: "Failed to send reset email" });
+    }
   } catch (err) {
+    console.error("Forgot password error:", err);
+    
+    // Handle specific nodemailer errors
+    if (err.code === 'EAUTH' || err.message.includes('Missing credentials')) {
+      return res.status(500).json({ 
+        status: false, 
+        message: "Email service authentication failed. Please contact administrator." 
+      });
+    }
     res.status(500).json({ status: false, message: err.message });
   }
 };
@@ -133,6 +158,60 @@ exports.resetPassword = async (req, res) => {
   }
 };
 
+exports.changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ 
+        status: false, 
+        message: "Current password and new password are required" 
+      });
+    }
+    
+    if (newPassword.length < 8) {
+      return res.status(400).json({ 
+        status: false, 
+        message: "New password must be at least 8 characters long" 
+      });
+    }
+    
+    // Find the user with password field
+    const user = await User.findById(req.user.userId).select("+password");
+    
+    if (!user) {
+      return res.status(404).json({ 
+        status: false, 
+        message: "User not found" 
+      });
+    }
+    
+    // Verify current password
+    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    
+    if (!isCurrentPasswordValid) {
+      return res.status(400).json({ 
+        status: false, 
+        message: "Current password is incorrect" 
+      });
+    }
+    
+    // Hash the new password
+    const hash = await bcrypt.hash(newPassword, 10);
+    await User.findByIdAndUpdate(req.user.userId, { password: hash });
+    
+    res.json({ 
+      status: true, 
+      message: "Password changed successfully" 
+    });
+  } catch (err) {
+    res.status(500).json({ 
+      status: false, 
+      message: "Server error: " + err.message 
+    });
+  }
+};
+
 exports.updatePassword = async (req, res) => {
   try {
     const { password } = req.body;
@@ -144,16 +223,26 @@ exports.updatePassword = async (req, res) => {
   }
 };
 
+// Add this at the top of your controller file
+const MemorialPurchase = require('../models/MemorialPurchase'); // Adjust path as needed
+
+// Replace your existing function with this one
 exports.getUserDetails = async (req, res) => {
   try {
-    const user = await User.findById(req.user.userId).select("-password");
+    // Use .lean() to get a plain JavaScript object, which is easier to modify
+    const user = await User.findById(req.user.userId).select("-password").lean();
+
     if (!user) {
       return res.status(404).json({ status: false, message: "User not found" });
     }
+
+    // Note: Subscriptions are now memorial-level, not user-level
+    // No user-level subscription plan is set
+
     res.status(200).json({
       status: true,
       message: "User details fetched successfully",
-      user,
+      user, // User object without subscription plan (subscriptions are memorial-level)
     });
   } catch (err) {
     res.status(500).json({ status: false, message: err.message });
@@ -195,7 +284,11 @@ exports.allStatsforUser = async (req, res) => {
 
     const stats = await memorialModel.aggregate([
       {
-        $match: { createdBy: new mongoose.Types.ObjectId(userId) },
+        $match: { 
+          createdBy: new mongoose.Types.ObjectId(userId),
+          firstName: { $ne: "Untitled" },
+          memorialPaymentStatus: { $ne: "draft" }
+        },
       },
       {
         $group: {
