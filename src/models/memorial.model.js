@@ -32,10 +32,10 @@
 
       // --- Tab 1: Basic Information ---
       firstName: { type: String, required: true, trim: true },
-      lastName: { type: String, required: true, trim: true },
-      profileImage: { type: String }, // URL to the main photo
-      birthDate: { type: Date, required: true },
-      deathDate: { type: Date, required: true },
+      lastName: { type: String, trim: true },
+      profileImage: { type: String }, // URL to the main photo (optional during draft creation)
+      birthDate: { type: Date },
+      deathDate: { type: Date },
       location: { type: String, trim: true }, // e.g., "Tbilisi, Georgia"
       gps: {
         lat: { type: Number },
@@ -113,9 +113,12 @@
 
   // Middleware to automatically create a slug from the name before saving
   MemorialSchema.pre("validate", function (next) {
-    if (this.isModified("firstName") || this.isModified("lastName")) {
+    // Only generate slug if it's not already set
+    if (!this.slug || this.isModified("firstName") || this.isModified("lastName")) {
       const randomString = Math.random().toString(36).substring(2, 7); // To ensure uniqueness
-      this.slug = slugify(`${this.firstName} ${this.lastName} ${randomString}`, {
+      // firstName is required, lastName is optional
+      const name = this.lastName ? `${this.firstName} ${this.lastName}` : this.firstName;
+      this.slug = slugify(`${name} ${randomString}`, {
         lower: true,
         strict: true,
       });

@@ -3,6 +3,63 @@
     "admin": "Admin",
     "getStarted": "Get Started"
   },
+  "languageManagement": {
+    "title": "Language Management",
+    "description": "Upload and manage translation files for your application",
+    "backToDashboard": "Back to Admin Dashboard",
+    "tabs": {
+      "uploadFiles": "Upload Files",
+      "manageFiles": "Manage Files"
+    },
+    "languages": {
+      "english": "English",
+      "georgian": "Georgian",
+      "russian": "Russian"
+    },
+    "upload": {
+      "title": "Upload Translation Files",
+      "description": "Upload JSON translation files for each language. Files will be validated and applied immediately.",
+      "selectFile": "Select File",
+      "uploading": "Uploading...",
+      "uploadDescription": "Upload {language} translation file",
+      "progress": "{progress}% uploaded",
+      "success": "File uploaded successfully!",
+      "error": "Upload failed",
+      "guidelines": {
+        "title": "Upload Guidelines",
+        "jsonFormat": "Files must be in JSON format (.json extension)",
+        "fileSize": "Maximum file size: 5MB",
+        "validJson": "JSON structure must be valid and properly formatted",
+        "replacement": "Uploading a new file will replace the existing one",
+        "immediateEffect": "Changes will be reflected immediately across the application"
+      }
+    },
+    "manage": {
+      "title": "Manage Translation Files",
+      "description": "View, download, and manage existing translation files.",
+      "loading": "Loading files...",
+      "previewTitle": "Preview",
+      "previewDescription": "Preview of the translation file content",
+      "fileUploaded": "File uploaded",
+      "noFileUploaded": "No file uploaded",
+      "active": "Active",
+      "inactive": "Inactive",
+      "download": "Download",
+      "uploadFile": "Upload File",
+      "file": "File",
+      "size": "Size",
+      "updated": "Updated",
+      "preview": "Preview"
+    },
+    "messages": {
+      "uploadSuccess": "{language} language file uploaded successfully!",
+      "downloadSuccess": "{language} file downloaded successfully!",
+      "uploadError": "Failed to upload file: {error}",
+      "downloadError": "Failed to download file: {error}",
+      "invalidJsonFile": "Please select a valid JSON file",
+      "fileSizeError": "File size must be less than 5MB"
+    }
+  },
   "home": {
     "heroTitle": "Honor Memories Forever",
     "heroDescription": "Join thousands of families who trust QRIP.ge to preserve and share their most precious memories. Create your first memorial in minutes.",
@@ -1075,7 +1132,8 @@
       "title": "Quick Access",
       "manageTestimonials": "Manage Testimonials",
       "subscriptionPlans": "Subscription Plans",
-      "qrStickers": "QR Stickers"
+      "qrStickers": "QR Stickers",
+      "translations": "Language Management"
     },
     "analytics": {
       "platformGrowth": "Platform Growth",
@@ -1106,7 +1164,22 @@
       "emailPlaceholder": "Enter Username",
       "password": "Password",
       "passwordPlceholder": "Password",
-      "logButton": "Access Admin Panel"
+      "logButton": "Access Admin Panel",
+      "forgotPassword": "Forgot your password?"
+    },
+    "forgotPassword": {
+      "title": "Forgot Password",
+      "subtitle": "Enter your email address and we'll send you a link to reset your password.",
+      "cardTitle": "Reset Admin Password",
+      "cardDescription": "Enter your admin email address",
+      "emailLabel": "Email Address",
+      "emailPlaceholder": "Enter your admin email",
+      "submitButton": "Send Reset Link",
+      "sendingButton": "Sending...",
+      "backToLogin": "Back to Login",
+      "successTitle": "Check Your Email",
+      "successDescription": "We've sent a password reset link to your email address.",
+      "successAlert": "If you don't see the email, please check your spam folder."
     }
   },
   "adsubscription": {
@@ -1396,15 +1469,18 @@
       "badge": "Preselected"
     },
     "promoCode": {
-      "applyButton": "Apply",
+      "title": "Promo Code",
+      "apply": "Apply",
+      "applied": "Applied",
       "applying": "Applying...",
       "placeholder": "Enter promo code",
+      "remove": "Remove",
+      "applyButton": "Apply",
       "success": "Promo code applied successfully!",
       "invalid": "Invalid promo code",
       "failed": "Failed to apply promo code",
       "tooltip": "Enter a promo code to get discounts on this plan.",
       "sectionTitle": "Apply Promo Code",
-      "applied": "Promo code applied: {code}",
       "discountPercentage": "{value}% off",
       "discountFixed": "{value} GEL off",
       "discountFree": "100% off - FREE",
@@ -1412,7 +1488,8 @@
       "youSave": "You save",
       "getForFree": "Get For Free",
       "memorialIdRequired": "Memorial ID is required to apply promo code",
-      "enterCode": "Please enter a promo code"
+      "enterCode": "Please enter a promo code",
+      "save": "Save"
     }
   },
   "adminSubscriptionPage": {
