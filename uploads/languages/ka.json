@@ -96,6 +96,7 @@
       "contact": "დახმარების მიღება",
       "return": "მთავარ გვერდზე დაბრუნება"
     },
+    "inLovingMemory": "სიყვარულით მოგონებას",
     "profile": {
       "age": "{age} წლის"
     },
@@ -147,6 +148,10 @@
       "videoContent": "ვიდეო კონტენტი ხელმისაწვდომია პრემიუმ მემორიალებთან",
       "learnMore": "მეტი ინფორმაცია"
     },
+    "premiumSlides": {
+      "tapToView": "დააჭირეთ მემორიალის სანახავად"
+    },
+    "tapToViewMemorial": "დააჭირეთ მემორიალის სანახავად",
     "navigation": {
       "prev": "წინა",
       "next": "შემდეგი"
@@ -1170,18 +1175,23 @@
       "forgotPassword": "დაგავიწყდათ პაროლი?"
     },
     "forgotPassword": {
-      "title": "პაროლის აღდგენა",
-      "subtitle": "შეიყვანეთ თქვენი ელ.ფოსტა და ჩვენ გამოგიგზავნით პაროლის აღდგენის ლინკს.",
-      "cardTitle": "ადმინისტრატორის პაროლის აღდგენა",
-      "cardDescription": "შეიყვანეთ თქვენი ელ.ფოსტა",
+      "title": "დაგავიწყდათ პაროლი?",
+      "subtitle": "შეიყვანეთ თქვენი ადმინისტრატორის ელ.ფოსტა და ჩვენ გამოგიგზავნით ბმულს პაროლის აღსადგენად.",
+      "pageTitle": "დაგავიწყდათ პაროლი",
+      "description": "შეიყვანეთ ადმინისტრატორის ელ.ფოსტა",
       "emailLabel": "ელ.ფოსტის მისამართი",
-      "emailPlaceholder": "შეიყვანეთ ელ.ფოსტა",
-      "submitButton": "გაგზავნა",
-      "sendingButton": "იგზავნება...",
-      "backToLogin": "დაბრუნება შესვლაზე",
-      "successTitle": "შეამოწმეთ ელ.ფოსტა",
-      "successDescription": "პაროლის აღდგენის ლინკი გამოგიგზავნათ ელ.ფოსტაზე.",
-      "successAlert": "თუ ვერ ხედავთ წერილს, შეამოწმეთ სპამის საქაღალდე."
+      "emailPlaceholder": "შეიყვანეთ ადმინისტრატორის ელ.ფოსტა",
+      "sendButton": "გაგზავნა",
+      "sending": "იგზავნება...",
+      "successTitle": "შეამოწმეთ თქვენი ელ.ფოსტა",
+      "successMessage": "ჩვენ გამოგიგზავნეთ ბმული პაროლის აღსადგენად თქვენს ელ.ფოსტაზე.",
+      "checkSpam": "თუ ელ.ფოსტა არ ხედავთ, გთხოვთ შეამოწმოთ სპამის საქაღალდე.",
+      "backToLogin": "ავტორიზაციაზე დაბრუნება",
+      "resetTitle": "ადმინისტრატორის პაროლის აღდგენა",
+      "enterEmail": "გთხოვთ შეიყვანოთ თქვენი ელ.ფოსტის მისამართი",
+      "emailSentSuccess": "პაროლის აღდგენის ბმული გამოგზავნილია თქვენს ელ.ფოსტაზე",
+      "emailSentError": "ბმულის გაგზავნა ვერ მოხერხდა",
+      "errorOccurred": "შეცდომა მოხდა ბმულის გაგზავნისას"
     }
   },
   "adsubscription": {
@@ -1389,7 +1399,23 @@
       "verify": "დადასტურება",
       "done": "დასრულება",
       "loginActivity": "შესვლის აქტივობა",
-      "recentLoginActivity": "შესვლის ბოლო აქტივობები"
+      "recentLoginActivity": "შესვლის ბოლო აქტივობები",
+      "enterCurrentPasswordAndChooseNew": "შეიყვანეთ მიმდინარე პაროლი და აირჩიეთ ახალი, უსაფრთხო პაროლი.",
+      "enterCurrentPassword": "მიმდინარე პაროლის შეყვანა",
+      "enterNewPassword": "ახალი პაროლის შეყვანა",
+      "confirmNewPassword": "ახალი პაროლის დადასტურება",
+      "currentPasswordRequired": "მიმდინარე პაროლი აუცილებელია",
+      "newPasswordRequired": "ახალი პაროლი აუცილებელია",
+      "passwordMinLength": "ახალი პაროლი უნდა იყოს მინიმუმ 8 სიმბოლო",
+      "passwordsDontMatch": "ახალი პაროლები არ ემთხვევა",
+      "passwordMustBeDifferent": "ახალი პაროლი უნდა განსხვავდებოდეს მიმდინარე პაროლისგან",
+      "passwordChangedSuccessfully": "პაროლი წარმატებით შეიცვალა!",
+      "failedToChangePassword": "პაროლის შეცვლა ვერ მოხერხდა",
+      "errorOccurredWhileChangingPassword": "პაროლის შეცვლისას მოხდა შეცდომა",
+      "passwordRequirements": "პაროლის მოთხოვნები:",
+      "atLeast8Characters": "არანაკლებ 8 სიმბოლოსა",
+      "differentFromCurrent": "განსხვავდება მიმდინარე პაროლისგან",
+      "changing": "იცვლება..."
     },
     "notifications": {
       "title": "შეტყობინებების პარამეტრები",
@@ -1582,6 +1608,7 @@
     "planSuffix": " პაკეტი",
     "profile": "პროფილი",
     "subscription": "გამოწერა",
+    "changePassword": "პაროლის შეცვლა",
     "settings": "პარამეტრები",
     "signOut": "გასვლა"
   },
