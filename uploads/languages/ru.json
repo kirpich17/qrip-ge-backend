@@ -109,6 +109,7 @@
       "contact": "Связаться с поддержкой",
       "return": "Вернуться на главную"
     },
+    "inLovingMemory": "С любовью в память",
     "profile": {
       "age": "Возраст: {age} лет"
     },
@@ -160,6 +161,10 @@
       "videoContent": "Видео контент доступен с премиум мемориалами",
       "learnMore": "Узнать больше"
     },
+    "premiumSlides": {
+      "tapToView": "Нажмите для просмотра мемориала"
+    },
+    "tapToViewMemorial": "Нажмите для просмотра мемориала",
     "navigation": {
       "prev": "Пред",
       "next": "След"
@@ -1134,18 +1139,23 @@
       "forgotPassword": "Забыли пароль?"
     },
     "forgotPassword": {
-      "title": "Забыли пароль",
-      "subtitle": "Введите ваш адрес электронной почты, и мы отправим вам ссылку для сброса пароля.",
-      "cardTitle": "Сброс пароля администратора",
-      "cardDescription": "Введите email администратора",
-      "emailLabel": "Адрес электронной почты",
+      "title": "Забыли пароль?",
+      "subtitle": "Введите email администратора, и мы отправим вам ссылку для сброса пароля.",
+      "pageTitle": "Забыли пароль",
+      "description": "Введите email администратора",
+      "emailLabel": "Email адрес",
       "emailPlaceholder": "Введите email администратора",
-      "submitButton": "Отправить ссылку для сброса",
-      "sendingButton": "Отправка...",
-      "backToLogin": "Вернуться к входу",
-      "successTitle": "Проверьте почту",
-      "successDescription": "Мы отправили ссылку для сброса пароля на ваш адрес электронной почты.",
-      "successAlert": "Если вы не видите письмо, проверьте папку со спамом."
+      "sendButton": "Отправить ссылку",
+      "sending": "Отправка...",
+      "successTitle": "Проверьте вашу почту",
+      "successMessage": "Мы отправили ссылку для сброса пароля на вашу почту.",
+      "checkSpam": "Если вы не получили письмо, проверьте папку спам.",
+      "backToLogin": "Вернуться ко входу",
+      "resetTitle": "Сброс пароля администратора",
+      "enterEmail": "Пожалуйста, введите ваш email адрес",
+      "emailSentSuccess": "Ссылка для сброса пароля отправлена на вашу почту",
+      "emailSentError": "Не удалось отправить ссылку для сброса",
+      "errorOccurred": "Произошла ошибка при отправке ссылки для сброса"
     }
   },
   "adsubscription": {
@@ -1344,7 +1354,23 @@
       "verify": "Подтвердить",
       "done": "Готово",
       "loginActivity": "История входов",
-      "recentLoginActivity": "Недавние входы в систему"
+      "recentLoginActivity": "Недавние входы в систему",
+      "enterCurrentPasswordAndChooseNew": "Введите текущий пароль и выберите новый надёжный пароль.",
+      "enterCurrentPassword": "Введите текущий пароль",
+      "enterNewPassword": "Введите новый пароль",
+      "confirmNewPassword": "Подтвердите новый пароль",
+      "currentPasswordRequired": "Требуется текущий пароль",
+      "newPasswordRequired": "Требуется новый пароль",
+      "passwordMinLength": "Новый пароль должен содержать не менее 8 символов",
+      "passwordsDontMatch": "Новые пароли не совпадают",
+      "passwordMustBeDifferent": "Новый пароль должен отличаться от текущего",
+      "passwordChangedSuccessfully": "Пароль успешно изменён!",
+      "failedToChangePassword": "Не удалось изменить пароль",
+      "errorOccurredWhileChangingPassword": "Произошла ошибка при смене пароля",
+      "passwordRequirements": "Требования к паролю:",
+      "atLeast8Characters": "Не менее 8 символов",
+      "differentFromCurrent": "Отличается от текущего пароля",
+      "changing": "Изменение..."
     },
     "notifications": {
       "title": "Настройки уведомлений",
@@ -1523,6 +1549,7 @@
     "planSuffix": " план",
     "profile": "Профиль",
     "subscription": "Подписка",
+    "changePassword": "Изменить пароль",
     "settings": "Настройки",
     "signOut": "Выйти"
   },

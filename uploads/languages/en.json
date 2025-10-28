@@ -109,6 +109,7 @@
       "contact": "Contact Support",
       "return": "Return Home"
     },
+    "inLovingMemory": "In Loving Memory",
     "profile": {
       "age": "Age {age} years"
     },
@@ -160,6 +161,10 @@
       "videoContent": "Video content is available with premium memorials",
       "learnMore": "Learn More"
     },
+    "premiumSlides": {
+      "tapToView": "Tap to view memorial"
+    },
+    "tapToViewMemorial": "Tap to view memorial",
     "navigation": {
       "prev": "Prev",
       "next": "Next"
@@ -1165,21 +1170,26 @@
       "password": "Password",
       "passwordPlceholder": "Password",
       "logButton": "Access Admin Panel",
-      "forgotPassword": "Forgot your password?"
+      "forgotPassword": "Forgot Password?"
     },
     "forgotPassword": {
-      "title": "Forgot Password",
-      "subtitle": "Enter your email address and we'll send you a link to reset your password.",
-      "cardTitle": "Reset Admin Password",
-      "cardDescription": "Enter your admin email address",
+      "title": "Forgot Password?",
+      "subtitle": "Enter your admin email and we'll send you a link to reset your password.",
+      "pageTitle": "Forgot Password",
+      "description": "Enter your admin email address",
       "emailLabel": "Email Address",
       "emailPlaceholder": "Enter your admin email",
-      "submitButton": "Send Reset Link",
-      "sendingButton": "Sending...",
-      "backToLogin": "Back to Login",
+      "sendButton": "Send Reset Link",
+      "sending": "Sending...",
       "successTitle": "Check Your Email",
-      "successDescription": "We've sent a password reset link to your email address.",
-      "successAlert": "If you don't see the email, please check your spam folder."
+      "successMessage": "We've sent a password reset link to your email address.",
+      "checkSpam": "If you don't see the email, please check your spam folder.",
+      "backToLogin": "Back to Login",
+      "resetTitle": "Reset Admin Password",
+      "enterEmail": "Please enter your email address",
+      "emailSentSuccess": "Password reset link sent to your email",
+      "emailSentError": "Failed to send reset email",
+      "errorOccurred": "An error occurred while sending reset email"
     }
   },
   "adsubscription": {
@@ -1378,7 +1388,23 @@
       "verify": "Verify",
       "done": "Done",
       "loginActivity": "Login Activity",
-      "recentLoginActivity": "Recent Login Activity"
+      "recentLoginActivity": "Recent Login Activity",
+      "enterCurrentPasswordAndChooseNew": "Enter your current password and choose a new secure password.",
+      "enterCurrentPassword": "Enter current password",
+      "enterNewPassword": "Enter new password",
+      "confirmNewPassword": "Confirm new password",
+      "currentPasswordRequired": "Current password is required",
+      "newPasswordRequired": "New password is required",
+      "passwordMinLength": "New password must be at least 8 characters long",
+      "passwordsDontMatch": "New passwords don't match",
+      "passwordMustBeDifferent": "New password must be different from current password",
+      "passwordChangedSuccessfully": "Password changed successfully!",
+      "failedToChangePassword": "Failed to change password",
+      "errorOccurredWhileChangingPassword": "An error occurred while changing password",
+      "passwordRequirements": "Password requirements:",
+      "atLeast8Characters": "At least 8 characters long",
+      "differentFromCurrent": "Different from current password",
+      "changing": "Changing..."
     },
     "notifications": {
       "title": "Notification Settings",
@@ -1564,6 +1590,7 @@
     "planSuffix": " Plan",
     "profile": "Profile",
     "subscription": "Subscription",
+    "changePassword": "Change Password",
     "settings": "Settings",
     "signOut": "Sign out"
   },
