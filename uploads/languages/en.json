@@ -122,6 +122,9 @@
       "description": "Photos and videos celebrating a life well-lived"
     },
     "sections": {
+      "biography": {
+        "noBiography": "No biography available"
+      },
       "family": {
         "title": "Family",
         "locked": "Family tree available with premium",
@@ -154,7 +157,9 @@
       "play": "Play",
       "pause": "Pause",
       "mute": "Mute",
-      "unmute": "Unmute"
+      "unmute": "Unmute",
+      "noVideosTitle": "No Videos Available",
+      "noVideosMessage": "This memorial doesn't have any videos yet"
     },
     "premium": {
       "feature": "Premium Feature",
