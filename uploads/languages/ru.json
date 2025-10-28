@@ -17,6 +17,8 @@
       "russian": "Русский"
     },
     "upload": {
+      "title": "Загрузка Файлов Переводов",
+      "description": "Загрузите JSON-файлы переводов для каждого языка. Файлы будут проверены и применены немедленно.",
       "selectFile": "Выбрать Файл",
       "uploading": "Загрузка...",
       "uploadDescription": "Загрузить файл перевода {language}",
@@ -33,6 +35,11 @@
       }
     },
     "manage": {
+      "title": "Управление Файлами Переводов",
+      "description": "Просмотрите, скачайте и управляйте существующими файлами переводов.",
+      "loading": "Загрузка файлов...",
+      "previewTitle": "Предпросмотр",
+      "previewDescription": "Предпросмотр содержимого файла переводов",
       "fileUploaded": "Файл загружен",
       "noFileUploaded": "Файл не загружен",
       "active": "Активный",
@@ -41,7 +48,8 @@
       "uploadFile": "Загрузить Файл",
       "file": "Файл",
       "size": "Размер",
-      "updated": "Обновлено"
+      "updated": "Обновлено",
+      "preview": "Предпросмотр"
     },
     "messages": {
       "uploadSuccess": "Файл языка {language} успешно загружен!",
@@ -1109,7 +1117,7 @@
       "manageTestimonials": "Управление отзывами",
       "subscriptionPlans": "Тарифные планы",
       "qrStickers": "QR стикеры",
-      "languageFiles": "Языковые файлы"
+      "translations": "Управление переводами"
     }
   },
   "adminlogin": {
@@ -1122,7 +1130,22 @@
       "emailPlaceholder": "Имя пользователя",
       "password": "Пароль",
       "passwordPlceholder": "Пароль",
-      "logButton": "Войти в панель администратора"
+      "logButton": "Войти в панель администратора",
+      "forgotPassword": "Забыли пароль?"
+    },
+    "forgotPassword": {
+      "title": "Забыли пароль",
+      "subtitle": "Введите ваш адрес электронной почты, и мы отправим вам ссылку для сброса пароля.",
+      "cardTitle": "Сброс пароля администратора",
+      "cardDescription": "Введите email администратора",
+      "emailLabel": "Адрес электронной почты",
+      "emailPlaceholder": "Введите email администратора",
+      "submitButton": "Отправить ссылку для сброса",
+      "sendingButton": "Отправка...",
+      "backToLogin": "Вернуться к входу",
+      "successTitle": "Проверьте почту",
+      "successDescription": "Мы отправили ссылку для сброса пароля на ваш адрес электронной почты.",
+      "successAlert": "Если вы не видите письмо, проверьте папку со спамом."
     }
   },
   "adsubscription": {
@@ -1405,15 +1428,18 @@
       "medium": "Перейти на Премиум"
     },
     "promoCode": {
-      "applyButton": "Применить",
+      "title": "Промокод",
+      "apply": "Применить",
+      "applied": "Применено",
       "applying": "Применение...",
       "placeholder": "Введите промокод",
+      "remove": "Удалить",
+      "applyButton": "Применить",
       "success": "Промокод успешно применен!",
       "invalid": "Неверный промокод",
       "failed": "Не удалось применить промокод",
       "tooltip": "Введите промокод, чтобы получить скидки на этот план.",
       "sectionTitle": "Применить промокод",
-      "applied": "Промокод применен: {code}",
       "discountPercentage": "{value}% скидка",
       "discountFixed": "{value} GEL скидка",
       "discountFree": "100% скидка - БЕСПЛАТНО",
@@ -1421,7 +1447,8 @@
       "youSave": "Вы экономите",
       "getForFree": "Получить бесплатно",
       "memorialIdRequired": "Для применения промокода требуется ID мемориала",
-      "enterCode": "Пожалуйста, введите промокод"
+      "enterCode": "Пожалуйста, введите промокод",
+      "save": "Сохранить"
     }
   },
   "adminSubscriptionPage": {

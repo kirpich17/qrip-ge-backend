@@ -800,6 +800,17 @@ exports.createOrUpdateMemorial = async (req, res) => {
     const isDocumentUploadIncluded = userPlan.features.some(
   feature => feature.text === "Document Upload" && feature.included === true
 );
+
+    // Validate required fields: firstName and profileImage (for non-draft memorials)
+    if (!_id || (memorial && memorial.firstName !== 'Untitled')) {
+      if (!req.body.firstName || req.body.firstName.trim() === '') {
+        return res.status(400).json({ 
+          status: false, 
+          message: "First name is required" 
+        });
+      }
+    }
+    
     // Parse deleted files from request body
     const deletedFiles = {
       photos: req.body.deletedPhotos ? JSON.parse(req.body.deletedPhotos) : [],
@@ -1092,6 +1103,14 @@ exports.createOrUpdateMemorial = async (req, res) => {
     } else {
       // 1. Process files first
       await processFiles();
+      
+      // Validate that profileImage is provided for new memorials
+      if (!req.body.profileImage && files.filter(f => f.fieldname === 'profileImage').length === 0) {
+        return res.status(400).json({ 
+          status: false, 
+          message: "Profile image is required" 
+        });
+      }
       
       // 2. Create payload from the updated req.body
       const payload = { 

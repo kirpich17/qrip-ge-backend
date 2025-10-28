@@ -6,16 +6,17 @@ const isValidEmail = (email) => {
   return emailRegex.test(email);
 };
 
-// Format date helper
+// Format date helper (Georgian locale)
 const formatDate = (date) => {
-  return new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    timeZone: 'Asia/Tbilisi'
-  }).format(new Date(date)).replace('GMT+4', 'GET');
+  const months = ['იანვარი', 'თებერვალი', 'მარტი', 'აპრილი', 'მაისი', 'ივნისი', 
+    'ივლისი', 'აგვისტო', 'სექტემბერი', 'ოქტომბერი', 'ნოემბერი', 'დეკემბერი'];
+  const d = new Date(date);
+  const day = d.getDate();
+  const month = months[d.getMonth()];
+  const year = d.getFullYear();
+  const hours = String(d.getHours()).padStart(2, '0');
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  return `${day} ${month}, ${year}, ${hours}:${minutes}`;
 };
 
 // Create transporter with Hetzner SMTP configuration
@@ -67,10 +68,6 @@ const getBaseEmailTemplate = (title, content, actionButton = null) => {
           text-align: center; 
           padding: 20px 0;
           border-bottom: 2px solid #547455;
-        }
-        .logo {
-          max-width: 180px;
-          margin-bottom: 10px;
         }
         .content { 
           padding: 30px 0; 
@@ -128,7 +125,6 @@ const getBaseEmailTemplate = (title, content, actionButton = null) => {
     <body>
       <div class="container">
         <div class="header">
-          <img src="${process.env.FRONTEND_URL}/placeholder-logo.svg" alt="Qrip.ge" class="logo">
           <h1 style="color: #547455; margin: 0;">${title}</h1>
         </div>
         <div class="content">
@@ -136,9 +132,9 @@ const getBaseEmailTemplate = (title, content, actionButton = null) => {
           ${actionButton ? `<div style="text-align: center; margin: 30px 0;">${actionButton}</div>` : ''}
         </div>
         <div class="footer">
-          <p>© ${new Date().getFullYear()} Qrip.ge All rights reserved.</p>
-          <p>This is an automated message. Please do not reply directly to this email.</p>
-          <p>Need help? Contact us at <a href="mailto:info@qrip.ge">info@qrip.ge</a></p>
+          <p>© ${new Date().getFullYear()} QRIP.ge ყველა უფლება დაცულია.</p>
+          <p>ეს არის ავტომატური შეტყობინება. გთხოვთ არ უპასუხოთ პირდაპირ ამ ელფოსტას.</p>
+          <p>საჭიროა დახმარება? დაუკავშირდით გვენ: <a href="mailto:info@qrip.ge">info@qrip.ge</a></p>
         </div>
       </div>
     </body>
@@ -160,7 +156,7 @@ const sendEmail = async (to, subject, html, text = null) => {
     
     const mailOptions = {
       from: {
-        name: process.env.EMAIL_FROM_NAME || 'Qrip.ge Support',
+        name: process.env.EMAIL_FROM_NAME || 'QRIP.ge Support',
         address: process.env.EMAIL_FROM_ADDRESS || 'info@qrip.ge'
       },
       to: normalizedEmail,
@@ -184,30 +180,30 @@ const sendEmail = async (to, subject, html, text = null) => {
 const sendWelcomeEmail = async (userEmail, firstName) => {
   const content = `
     <div class="success">
-      <h2>Welcome to Qrip.ge!</h2>
-      <p>Hello ${firstName || 'User'},</p>
-      <p>Thank you for joining Qrip.ge! We're excited to help you create meaningful digital memorials for your loved ones.</p>
-      <p>With your account, you can:</p>
+      <h2>QRIP.ge-ში მოგესალმებათ!</h2>
+      <p>გამარჯობა ${firstName || 'მომხმარებელო'},</p>
+      <p>გმადლობთ QRIP.ge-სთან შემოგვერთავს! მშურდება დავეხმაროთ ხელს შექმნით მნიშვნელოვან ციფრულ მემორიალებს თქვენი ახლობლებისთვის.</p>
+      <p>თქვენი ანგარიშით, შეძლებთ:</p>
       <ul>
-        <li>Create beautiful digital memorials</li>
-        <li>Generate QR codes for physical memorials</li>
-        <li>Share memories with family and friends</li>
-        <li>Manage your memorials from anywhere</li>
+        <li>შექმნათ ლამაზი ციფრული მემორიალები</li>
+        <li>გენერირება გაუკეთოთ QR კოდები ფიზიკურ მემორიალებზე</li>
+        <li>გააზიაროთ მოგონებები ოჯახთან და მეგობრებთან</li>
+        <li>მართოთ თქვენი მემორიალები სადმე</li>
       </ul>
     </div>
   `;
 
   const actionButton = `
     <a href="${process.env.FRONTEND_URL}/" class="action-btn">
-      Create Your First Memorial
+      შექმენით თქვენი პირველი მემორიალი
     </a>
   `;
 
   return await sendEmail(
     userEmail,
-    'Welcome to Qrip.ge - Start Creating Memorials',
-    getBaseEmailTemplate('Welcome to Qrip.ge!', content, actionButton),
-    `Welcome to Qrip.ge!\n\nHello ${firstName || 'User'},\n\nThank you for joining Qrip.ge! We're excited to help you create meaningful digital memorials for your loved ones.\n\nGet started by creating your first memorial: ${process.env.FRONTEND_URL}/memorial/create\n\nBest regards,\nThe Qrip.ge Team`
+    'QRIP.ge-ში მოგესალმებათ - დაწყება მემორიალების შექმნით',
+    getBaseEmailTemplate('QRIP.ge-ში მოგესალმებათ!', content, actionButton),
+    `QRIP.ge-ში მოგესალმებათ!\n\nგამარჯობა ${firstName || 'მომხმარებელო'},\n\nგმადლობთ QRIP.ge-სთან შემოგვერთავს! მშურდება დავეხმაროთ ხელს შექმნით მნიშვნელოვან ციფრულ მემორიალებს.\n\nდაიწყეთ თქვენი პირველი მემორიალის შექმნით: ${process.env.FRONTEND_URL}/memorial/create\n\nპატივისცემით,\nQRIP.ge გუნდი`
   );
 };
 
@@ -223,31 +219,31 @@ const sendOrderConfirmationEmail = async (userEmail, orderDetails) => {
 
   const content = `
     <div class="success">
-      <h2>Order Confirmation</h2>
-      <p>Thank you for your purchase! Your order has been confirmed.</p>
+      <h2>შეკვეთა დადასტურებულია</h2>
+      <p>გმადლობთ თქვენი შესყიდვისთვის! თქვენი შეკვეთა დადასტურდა.</p>
       <div style="background: #f9f9f9; padding: 20px; border-radius: 5px; margin: 20px 0;">
-        <h3>Order Details:</h3>
-        <p><strong>Plan:</strong> ${planName}</p>
-        <p><strong>Duration:</strong> ${duration}</p>
-        <p><strong>Amount:</strong> ${formattedPrice}</p>
-        <p><strong>Order ID:</strong> ${orderId}</p>
-        <p><strong>Transaction ID:</strong> ${transactionId}</p>
-        <p><strong>Date:</strong> ${formatDate(new Date())}</p>
+        <h3>შეკვეთის დეტალები:</h3>
+        <p><strong>გეგმა:</strong> ${planName}</p>
+        <p><strong>ხანგრძლივობა:</strong> ${duration}</p>
+        <p><strong>თანხა:</strong> ${formattedPrice}</p>
+        <p><strong>შეკვეთის ID:</strong> ${orderId}</p>
+        <p><strong>ტრანზაქციის ID:</strong> ${transactionId}</p>
+        <p><strong>თარიღი:</strong> ${formatDate(new Date())}</p>
       </div>
     </div>
   `;
 
   const actionButton = `
     <a href="${process.env.FRONTEND_URL}/dashboard" class="action-btn">
-      View Your Dashboard
+      ნახეთ თქვენი ცენტრალური პანელი
     </a>
   `;
 
   return await sendEmail(
     userEmail,
-    `Order Confirmation - ${planName} Subscription`,
-    getBaseEmailTemplate('Order Confirmed!', content, actionButton),
-    `Order Confirmation\n\nThank you for your purchase! Your order has been confirmed.\n\nOrder Details:\nPlan: ${planName}\nDuration: ${duration}\nAmount: ${formattedPrice}\nOrder ID: ${orderId}\nTransaction ID: ${transactionId}\nDate: ${formatDate(new Date())}\n\nView your dashboard: ${process.env.FRONTEND_URL}/dashboard`
+    `შეკვეთა დადასტურებულია - ${planName} გამოწერა`,
+    getBaseEmailTemplate('შეკვეთა დადასტურებულია!', content, actionButton),
+    `შეკვეთა დადასტურებულია\n\nგმადლობთ თქვენი შესყიდვისთვის! თქვენი შეკვეთა დადასტურდა.\n\nშეკვეთის დეტალები:\nგეგმა: ${planName}\nხანგრძლივობა: ${duration}\nთანხა: ${formattedPrice}\nშეკვეთის ID: ${orderId}\nტრანზაქციის ID: ${transactionId}\nთარიღი: ${formatDate(new Date())}\n\nნახეთ თქვენი ცენტრალური პანელი: ${process.env.FRONTEND_URL}/dashboard`
   );
 };
 
@@ -263,29 +259,29 @@ const sendSubscriptionRenewalReminderEmail = async (userEmail, subscriptionDetai
 
   const content = `
     <div class="warning">
-      <h2>Subscription Renewal Reminder</h2>
-      <p>Your ${planName} subscription will expire on ${formatDate(expiryDate)}.</p>
-      <p>To continue enjoying our services, please ensure your payment method is up to date.</p>
+      <h2>გამოწერის განახლების შეხსენება</h2>
+      <p>თქვენი ${planName} გამოწერა ვადას გაუვა ${formatDate(expiryDate)}.</p>
+      <p>სერვისით განძიერთ გამოყენების გასაგრძელებლად, გთხოვთ დარწმუნდეთ, რომ თქვენი გადახდის მეთოდი განახლებულია.</p>
       <div style="background: #f9f9f9; padding: 20px; border-radius: 5px; margin: 20px 0;">
-        <h3>Renewal Details:</h3>
-        <p><strong>Plan:</strong> ${planName}</p>
-        <p><strong>Expiry Date:</strong> ${formatDate(expiryDate)}</p>
-        <p><strong>Renewal Amount:</strong> ${formattedPrice}</p>
+        <h3>განახლების დეტალები:</h3>
+        <p><strong>გეგმა:</strong> ${planName}</p>
+        <p><strong>ვადის გასვლა:</strong> ${formatDate(expiryDate)}</p>
+        <p><strong>განახლების თანხა:</strong> ${formattedPrice}</p>
       </div>
     </div>
   `;
 
   const actionButton = `
     <a href="${process.env.FRONTEND_URL}/dashboard?tab=subscriptionManager" class="action-btn">
-      Manage Subscription
+      გარკვეული გამოწერა
     </a>
   `;
 
   return await sendEmail(
     userEmail,
-    `Subscription Renewal Reminder - ${planName}`,
-    getBaseEmailTemplate('Subscription Renewal Reminder', content, actionButton),
-    `Subscription Renewal Reminder\n\nYour ${planName} subscription will expire on ${formatDate(expiryDate)}.\n\nRenewal Details:\nPlan: ${planName}\nExpiry Date: ${formatDate(expiryDate)}\nRenewal Amount: ${formattedPrice}\n\nManage your subscription: ${process.env.FRONTEND_URL}/dashboard?tab=subscriptionManager`
+    `გამოწერის განახლების შეხსენება - ${planName}`,
+    getBaseEmailTemplate('გამოწერის განახლების შეხსენება', content, actionButton),
+    `გამოწერის განახლების შეხსენება\n\nთქვენი ${planName} გამოწერა ვადას გაუვა ${formatDate(expiryDate)}.\n\nგანახლების დეტალები:\nგეგმა: ${planName}\nვადის გასვლა: ${formatDate(expiryDate)}\nგანახლების თანხა: ${formattedPrice}\n\nგარკვეული გამოწერა: ${process.env.FRONTEND_URL}/dashboard?tab=subscriptionManager`
   );
 };
 
@@ -301,29 +297,29 @@ const sendSubscriptionSuccessEmail = async (userEmail, subscriptionDetails) => {
 
   const content = `
     <div class="success">
-      <h2>Subscription Activated Successfully!</h2>
-      <p>Your ${planName} subscription is now active and you can start using all the features.</p>
+      <h2>გამოწერა წარმატებით გააქტიურებულია!</h2>
+      <p>თქვენი ${planName} გამოწერა ახლა აქტიურია და შეგიძლიათ დაიწყოთ გამოყენება ყველა ფუნქციის.</p>
       <div style="background: #f9f9f9; padding: 20px; border-radius: 5px; margin: 20px 0;">
-        <h3>Subscription Details:</h3>
-        <p><strong>Plan:</strong> ${planName}</p>
-        <p><strong>Amount:</strong> ${formattedPrice}</p>
-        <p><strong>Next Billing:</strong> ${formatDate(nextBillingDate)}</p>
-        <p><strong>Status:</strong> Active</p>
+        <h3>გამოწერის დეტალები:</h3>
+        <p><strong>გეგმა:</strong> ${planName}</p>
+        <p><strong>თანხა:</strong> ${formattedPrice}</p>
+        <p><strong>შემდეგი გადახდა:</strong> ${formatDate(nextBillingDate)}</p>
+        <p><strong>სტატუსი:</strong> აქტიური</p>
       </div>
     </div>
   `;
 
   const actionButton = `
     <a href="${process.env.FRONTEND_URL}/memorial/create" class="action-btn">
-      Create Your Memorial
+      შექმენით თქვენი მემორიალი
     </a>
   `;
 
   return await sendEmail(
     userEmail,
-    `Subscription Activated - ${planName}`,
-    getBaseEmailTemplate('Subscription Activated!', content, actionButton),
-    `Subscription Activated Successfully!\n\nYour ${planName} subscription is now active.\n\nSubscription Details:\nPlan: ${planName}\nAmount: ${formattedPrice}\nNext Billing: ${formatDate(nextBillingDate)}\nStatus: Active\n\nCreate your memorial: ${process.env.FRONTEND_URL}/memorial/create`
+    `გამოწერა გააქტიურებულია - ${planName}`,
+    getBaseEmailTemplate('გამოწერა გააქტიურებულია!', content, actionButton),
+    `გამოწერა წარმატებით გააქტიურებულია!\n\nთქვენი ${planName} გამოწერა ახლა აქტიურია.\n\nგამოწერის დეტალები:\nგეგმა: ${planName}\nთანხა: ${formattedPrice}\nშემდეგი გადახდა: ${formatDate(nextBillingDate)}\nსტატუსი: აქტიური\n\nშექმენით თქვენი მემორიალი: ${process.env.FRONTEND_URL}/memorial/create`
   );
 };
 
@@ -333,28 +329,28 @@ const sendMemorialCreationConfirmationEmail = async (userEmail, memorialDetails)
 
   const content = `
     <div class="success">
-      <h2>Memorial Created Successfully!</h2>
-      <p>Your digital memorial "${memorialName}" has been created and is now live.</p>
+      <h2>მემორიალი წარმატებით შეიქმნა!</h2>
+      <p>თქვენი ციფრული მემორიალი "${memorialName}" შექმნილია და ახლა ცოცხალია.</p>
       <div style="background: #f9f9f9; padding: 20px; border-radius: 5px; margin: 20px 0;">
-        <h3>Memorial Details:</h3>
-        <p><strong>Name:</strong> ${memorialName}</p>
+        <h3>მემორიალის დეტალები:</h3>
+        <p><strong>სახელი:</strong> ${memorialName}</p>
         <p><strong>URL:</strong> <a href="${memorialUrl}">${memorialUrl}</a></p>
-        ${qrCodeUrl ? `<p><strong>QR Code:</strong> <a href="${qrCodeUrl}">Download QR Code</a></p>` : ''}
+        ${qrCodeUrl ? `<p><strong>QR კოდი:</strong> <a href="${qrCodeUrl}">ჩამოწერა QR კოდი</a></p>` : ''}
       </div>
     </div>
   `;
 
   const actionButton = `
     <a href="${memorialUrl}" class="action-btn">
-      View Memorial
+      იხილეთ მემორიალი
     </a>
   `;
 
   return await sendEmail(
     userEmail,
-    `Memorial Created - ${memorialName}`,
-    getBaseEmailTemplate('Memorial Created!', content, actionButton),
-    `Memorial Created Successfully!\n\nYour digital memorial "${memorialName}" has been created and is now live.\n\nMemorial Details:\nName: ${memorialName}\nURL: ${memorialUrl}\n${qrCodeUrl ? `QR Code: ${qrCodeUrl}` : ''}\n\nView your memorial: ${memorialUrl}`
+    `მემორიალი შეიქმნა - ${memorialName}`,
+    getBaseEmailTemplate('მემორიალი შეიქმნა!', content, actionButton),
+    `მემორიალი წარმატებით შეიქმნა!\n\nთქვენი ციფრული მემორიალი "${memorialName}" შექმნილია და ახლა ცოცხალია.\n\nმემორიალის დეტალები:\nსახელი: ${memorialName}\nURL: ${memorialUrl}\n${qrCodeUrl ? `QR კოდი: ${qrCodeUrl}` : ''}\n\nიხილეთ თქვენი მემორიალი: ${memorialUrl}`
   );
 };
 
@@ -370,29 +366,29 @@ const sendQRStickerOrderConfirmationEmail = async (userEmail, orderDetails) => {
 
   const content = `
     <div class="success">
-      <h2>QR Sticker Order Confirmed!</h2>
-      <p>Thank you for your QR sticker order. Your stickers will be shipped to the provided address.</p>
+      <h2>QR სტიკერის შეკვეთა დადასტურებულია!</h2>
+      <p>გმადლობთ თქვენი QR სტიკერის შეკვეთისთვის. თქვენი სტიკერები გაიგზავნება მითითებულ მისამართზე.</p>
       <div style="background: #f9f9f9; padding: 20px; border-radius: 5px; margin: 20px 0;">
-        <h3>Order Details:</h3>
-        <p><strong>Sticker Type:</strong> ${stickerType}</p>
-        <p><strong>Quantity:</strong> ${quantity}</p>
-        <p><strong>Amount:</strong> ${formattedPrice}</p>
-        <p><strong>Shipping Address:</strong> ${shippingAddress}</p>
+        <h3>შეკვეთის დეტალები:</h3>
+        <p><strong>სტიკერის ტიპი:</strong> ${stickerType}</p>
+        <p><strong>რაოდენობა:</strong> ${quantity}</p>
+        <p><strong>თანხა:</strong> ${formattedPrice}</p>
+        <p><strong>მიწოდების მისამართი:</strong> ${shippingAddress}</p>
       </div>
     </div>
   `;
 
   const actionButton = `
     <a href="${process.env.FRONTEND_URL}/dashboard" class="action-btn">
-      Track Your Order
+      თვალყურის დევნა თქვენი შეკვეთის
     </a>
   `;
 
   return await sendEmail(
     userEmail,
-    `QR Sticker Order Confirmation`,
-    getBaseEmailTemplate('Order Confirmed!', content, actionButton),
-    `QR Sticker Order Confirmed!\n\nThank you for your QR sticker order.\n\nOrder Details:\nSticker Type: ${stickerType}\nQuantity: ${quantity}\nAmount: ${formattedPrice}\nShipping Address: ${shippingAddress}\n\nTrack your order: ${process.env.FRONTEND_URL}/dashboard`
+    `QR სტიკერის შეკვეთა დადასტურებულია`,
+    getBaseEmailTemplate('შეკვეთა დადასტურებულია!', content, actionButton),
+    `QR სტიკერის შეკვეთა დადასტურებულია!\n\nგმადლობთ თქვენი QR სტიკერის შეკვეთისთვის.\n\nშეკვეთის დეტალები:\nსტიკერის ტიპი: ${stickerType}\nრაოდენობა: ${quantity}\nთანხა: ${formattedPrice}\nმიწოდების მისამართი: ${shippingAddress}\n\nთვალყურის დევნა თქვენი შეკვეთის: ${process.env.FRONTEND_URL}/dashboard`
   );
 };
 
@@ -417,25 +413,25 @@ const sendPaymentFailureEmail = async (
 
     const content = `
       <div class="error">
-        <h2>${userActionRequired ? 'Action Required: Payment Failed' : 'Payment Issue with Your Subscription'}</h2>
-        <p>We couldn't process your payment of ${formattedPrice} for ${planName}.</p>
+        <h2>${userActionRequired ? 'საჭიროა ქმედება: გადახდა ვერ განხორციელდა' : 'გადახდის პრობლემა თქვენი გამოწერასთან'}</h2>
+        <p>ჩვენ ვერ შევძელით დავამუშავოთ თქვენი გადახდა ${formattedPrice} ${planName}-ზე.</p>
         ${isFinalAttempt 
-          ? '<p><strong>FINAL ATTEMPT FAILED! Your subscription has been suspended.</strong></p>' 
-          : `<p>We'll automatically retry on: ${formatDate(nextRetryDate)}<br>Attempt: ${retryCount} of ${maxRetries}</p>`
+          ? '<p><strong>ბოლო მცდელობა ჩაიშალა! თქვენი გამოწერა შეჩერებულია.</strong></p>' 
+          : `<p>ჩვენ ავტომატურად გავიმეორებთ: ${formatDate(nextRetryDate)}<br>მცდელობა: ${retryCount} ${maxRetries}-დან</p>`
         }
         <div style="background: #f9f9f9; padding: 20px; border-radius: 5px; margin: 20px 0;">
-          <h3>To resolve this:</h3>
+          <h3>პრობლემის გადასაჭრელად:</h3>
           <ol>
-            <li>Visit Subscription Manager: <a href="${process.env.FRONTEND_URL}/dashboard?tab=subscriptionManager">Manage Subscription</a></li>
-            <li>Cancel your current subscription</li>
-            <li>Resubscribe with new payment details</li>
+            <li>ეწვიეთ გამოწერების მენეჯერს: <a href="${process.env.FRONTEND_URL}/dashboard?tab=subscriptionManager">გამოწერის მართვა</a></li>
+            <li>გააუქმეთ თქვენი ამჟამინდელი გამოწერა</li>
+            <li>დააწერეთ თქვენი ახალი გადახდის დეტალებით</li>
           </ol>
-          <h3>Common Solutions:</h3>
+          <h3>საერთო გადაწყვეტილებები:</h3>
           <ul>
-            <li>Ensure sufficient funds are available</li>
-            <li>Contact your bank if transactions are blocked</li>
-            <li>Try a different payment card</li>
-            <li>Verify card expiration date and CVV</li>
+            <li>დარწმუნდით, რომ საკმარისი თანხა ხელმისაწვდომია</li>
+            <li>დაუკავშირდით თქვენს ბანკს, თუ ტრანზაქციები დაბლოკილია</li>
+            <li>გამოიყენეთ სხვა გადახდის ბარათი</li>
+            <li>შეამოწმეთ ბარათის ვადის გასვლის თარიღი და CVV</li>
           </ul>
         </div>
       </div>
@@ -443,25 +439,25 @@ const sendPaymentFailureEmail = async (
 
     const actionButton = `
       <a href="${process.env.FRONTEND_URL}/dashboard?tab=subscriptionManager" class="action-btn">
-        Update Payment Method
+        განახლება გადახდის მეთოდი
       </a>
     `;
 
     return await sendEmail(
       recipientEmail,
       userActionRequired
-        ? `❗ Action Required: Payment Failed for ${planName}`
-        : `Payment Issue with Your ${planName} Subscription`,
+        ? `❗ საჭიროა ქმედება: გადახდა ვერ განხორციელდა ${planName}-ზე`
+        : `გადახდის პრობლემა თქვენი ${planName} გამოწერასთან`,
       getBaseEmailTemplate(
-        userActionRequired ? 'Action Required: Payment Failed' : 'Payment Issue',
+        userActionRequired ? 'საჭიროა ქმედება: გადახდა ვერ განხორციელდა' : 'გადახდის პრობლემა',
         content,
         actionButton
       ),
-      `Payment Notification\n\nDear Valued Customer,\n\nWe couldn't process your payment of ${formattedPrice} for ${planName}.\n${
+      `გადახდის შეტყობინება\n\nპატივისცემით, ვაღმამ ბიზნესის კლიენტო,\n\nჩვენ ვერ შევძელით დავამუშავოთ თქვენი გადახდა ${formattedPrice} ${planName}-ზე.\n${
         isFinalAttempt 
-          ? "FINAL ATTEMPT FAILED! Your subscription has been suspended.\n" 
-          : `We'll automatically retry on: ${formatDate(nextRetryDate)}\nAttempt: ${retryCount} of ${maxRetries}\n`
-      }\nUpdate Payment Method:\n${process.env.FRONTEND_URL}/dashboard?tab=subscriptionManager\n\nTo resolve this:\n1. Visit Subscription Manager: ${process.env.FRONTEND_URL}/dashboard?tab=subscriptionManager\n2. Cancel your current subscription\n3. Resubscribe with new payment details\n\nCommon Solutions:\n• Ensure sufficient funds are available\n• Contact your bank if transactions are blocked\n• Try a different payment card\n• Verify card expiration date and CVV\n\nNeed immediate help? Contact support:\nEmail: info@qrip.ge`
+          ? "ბოლო მცდელობა ჩაიშალა! თქვენი გამოწერა შეჩერებულია.\n" 
+          : `ჩვენ ავტომატურად გავიმეორებთ: ${formatDate(nextRetryDate)}\nმცდელობა: ${retryCount} ${maxRetries}-დან\n`
+      }\nგანახლება გადახდის მეთოდი:\n${process.env.FRONTEND_URL}/dashboard?tab=subscriptionManager\n\nპრობლემის გადასაჭრელად:\n1. ეწვიეთ გამოწერების მენეჯერს: ${process.env.FRONTEND_URL}/dashboard?tab=subscriptionManager\n2. გააუქმეთ თქვენი ამჟამინდელი გამოწერა\n3. დააწერეთ თქვენი ახალი გადახდის დეტალებით\n\nსაერთო გადაწყვეტილებები:\n• დარწმუნდით, რომ საკმარისი თანხა ხელმისაწვდომია\n• დაუკავშირდით თქვენს ბანკს, თუ ტრანზაქციები დაბლოკილია\n• გამოიყენეთ სხვა გადახდის ბარათი\n• შეამოწმეთ ბარათის ვადის გასვლის თარიღი და CVV\n\nსაჭიროა დაუყოვნებლივი დახმარება? დაუკავშირდით მხარდაჭერას:\nელფოსტა: info@qrip.ge`
     );
     
   } catch (error) {
@@ -474,24 +470,24 @@ const sendPaymentFailureEmail = async (
 const sendPasswordResetEmail = async (userEmail, resetLink, firstName) => {
   const content = `
     <div class="warning">
-      <h2>Password Reset Request</h2>
-      <p>Hello ${firstName || 'User'},</p>
-      <p>You requested to reset your password. Click the button below to reset it:</p>
-      <p><strong>This link will expire in 1 hour.</strong></p>
+      <h2>პაროლის გადაყენების მოთხოვნა</h2>
+      <p>გამარჯობა ${firstName || 'მომხმარებელო'},</p>
+      <p>თქვენ მოითხოვეთ თქვენი პაროლის გადაყენება. დააჭირეთ ქვემოთ მოცემულ ღილაკს რომ გადააყენოთ იგი:</p>
+      <p><strong>ეს ლინკი ერთ საათში გაუქმდება.</strong></p>
     </div>
   `;
 
   const actionButton = `
     <a href="${resetLink}" class="action-btn">
-      Reset Password
+      პაროლის გადაყენება
     </a>
   `;
 
   return await sendEmail(
     userEmail,
-    'Reset your Qrip.ge password',
-    getBaseEmailTemplate('Password Reset Request', content, actionButton),
-    `Password Reset Request\n\nHello ${firstName || 'User'},\n\nYou requested to reset your password. Click the link below to reset it:\n\n${resetLink}\n\nThis link will expire in 1 hour.\n\nIf you didn't request this, please ignore this email.`
+    'გადააყენეთ თქვენი QRIP.ge პაროლი',
+    getBaseEmailTemplate('პაროლის გადაყენების მოთხოვნა', content, actionButton),
+    `პაროლის გადაყენების მოთხოვნა\n\nგამარჯობა ${firstName || 'მომხმარებელო'},\n\nთქვენ მოითხოვეთ თქვენი პაროლის გადაყენება. დააჭირეთ ქვემოთ მოცემულ ლინკს რომ გადააყენოთ იგი:\n\n${resetLink}\n\nეს ლინკი ერთ საათში გაუქმდება.\n\nთუ ამას არ მოითხოვეთ, გთხოვთ იგნორირება გააკეთოთ ამ ელფოსტას.`
   );
 };
 
