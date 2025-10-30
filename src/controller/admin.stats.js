@@ -56,15 +56,12 @@ exports.adminStats = async (req, res) => {
     }
 
     // === REVENUE STATS ===
-    // Calculate subscription revenue (based on payment date, not creation date)
+    // Calculate subscription revenue strictly from verified payments (payment date only)
     const subscriptionRevenueThisMonth = await UserSubscription.aggregate([
       {
         $match: {
           status: 'active',
-          $or: [
-            { lastPaymentDate: { $gte: startOfCurrentMonth } },
-            { createdAt: { $gte: startOfCurrentMonth } }
-          ]
+          lastPaymentDate: { $gte: startOfCurrentMonth }
         }
       },
       {
@@ -79,10 +76,7 @@ exports.adminStats = async (req, res) => {
       {
         $match: {
           status: 'active',
-          $or: [
-            { lastPaymentDate: { $gte: startOfLastMonth, $lte: endOfLastMonth } },
-            { createdAt: { $gte: startOfLastMonth, $lte: endOfLastMonth } }
-          ]
+          lastPaymentDate: { $gte: startOfLastMonth, $lte: endOfLastMonth }
         }
       },
       {
