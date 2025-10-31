@@ -1592,13 +1592,29 @@
       "markPopular": "Mark as Popular",
       "setActive": "Set Plan as Active",
       "buttonSaveNew": "Save New Plan",
-      "buttonSaveChanges": "Save Changes"
+      "buttonSaveChanges": "Save Changes",
+      "editPlan": "Edit Plan",
+      "durationOptions": {
+        "title": "Duration Options",
+        "description": "Configure different pricing for various subscription durations",
+        "durationLabel": "Duration",
+        "priceLabel": "Price (GEL)",
+        "discountLabel": "Discount %",
+        "addButton": "Add Duration Option"
+      }
     },
     "card": {
       "popular": "Popular",
       "inactive": "Inactive",
       "oneTime": "/ one-time",
       "editPlan": "Edit Plan",
+      "durationOptionsLabel": "Duration Options:",
+      "basePrice": "base price",
+      "noDurationOptions": {
+        "title": "No duration options configured.",
+        "description": "Add duration options to enable flexible pricing.",
+        "button": "Configure Duration Options"
+      },
       "features": {
         "photoUploads": "{count} Photo Uploads",
         "unlimitedPhotos": "Unlimited Photo Uploads",
