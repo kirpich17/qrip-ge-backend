@@ -362,7 +362,22 @@
       "creatingAccount": "Создание аккаунта...",
       "createAccountButton": "Создать аккаунт",
       "alreadyHaveAccount": "Уже есть аккаунт?",
-      "signIn": "Войти"
+      "signIn": "Войти",
+      "shippingInformation": "Информация о доставке (Необязательно)",
+      "addShippingDetails": "Добавить данные для доставки",
+      "hideShippingDetails": "Скрыть",
+      "shippingFullName": "Полное имя",
+      "shippingFullNamePlaceholder": "Иван Иванов",
+      "shippingAddress": "Адрес",
+      "shippingAddressPlaceholder": "ул. Главная, д. 123, кв. 4Б",
+      "shippingCity": "Город",
+      "shippingCityPlaceholder": "Москва",
+      "shippingPostalCode": "Почтовый индекс",
+      "shippingPostalCodePlaceholder": "10001",
+      "shippingCountry": "Страна",
+      "shippingCountryPlaceholder": "Россия",
+      "shippingPhoneNumber": "Номер телефона",
+      "shippingPhoneNumberPlaceholder": "+7 123 456 7890"
     },
     "errors": {
       "invalidCredentials": "Неверные учетные данные. Используйте user@qrip.ge / user123"
@@ -439,6 +454,7 @@
       "lastName": "Фамилия",
       "birthDate": "Дата рождения",
       "deathDate": "Дата ухода из жизни",
+      "epitaphPlaceholder": "Короткая памятная фраза",
       "location": {
         "title": "Местоположение мемориала",
         "description": "Нажмите на карту, чтобы установить точные GPS-координаты для местоположения мемориала.",
