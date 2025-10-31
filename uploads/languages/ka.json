@@ -1609,13 +1609,29 @@
       "markPopular": "მონიშნე როგორც პოპულარული",
       "setActive": "პაკეტის გააქტიურება",
       "buttonSaveNew": "ახალი პაკეტის შენახვა",
-      "buttonSaveChanges": "ცვლილებების შენახვა"
+      "buttonSaveChanges": "ცვლილებების შენახვა",
+      "editPlan": "პაკეტის რედაქტირება",
+      "durationOptions": {
+        "title": "ხანგრძლივობის ოფციები",
+        "description": "კონფიგურაცია სხვადასხვა ხანგრძლივობის ფასები",
+        "durationLabel": "ხანგრძლივობა",
+        "priceLabel": "ფასი (GEL)",
+        "discountLabel": "ფასდაკლება %",
+        "addButton": "ხანგრძლივობის ოფციის დამატება"
+      }
     },
     "card": {
       "popular": "პოპულარული",
       "inactive": "გამორთული",
       "oneTime": "ერთჯერადი გადახდა",
       "editPlan": "პაკეტის რედაქტირება",
+      "durationOptionsLabel": "ხანგრძლივობის ოფციები:",
+      "basePrice": "საბაზისო ფასი",
+      "noDurationOptions": {
+        "title": "ხანგრძლივობის ოფციები არ არის კონფიგურირებული.",
+        "description": "დაამატეთ ხანგრძლივობის ოფციები მოქნილი ფასებისთვის.",
+        "button": "ხანგრძლივობის ოფციების კონფიგურაცია"
+      },
       "features": {
         "photoUploads": "ფოტოების ატვირთვა",
         "unlimitedPhotos": "ფოტოების შეუზღუდავი რაოდენობა",

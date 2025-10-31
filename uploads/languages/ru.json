@@ -1550,13 +1550,29 @@
       "markPopular": "Отметить как популярный",
       "setActive": "Сделать план активным",
       "buttonSaveNew": "Сохранить новый план",
-      "buttonSaveChanges": "Сохранить изменения"
+      "buttonSaveChanges": "Сохранить изменения",
+      "editPlan": "Редактировать план",
+      "durationOptions": {
+        "title": "Варианты продолжительности",
+        "description": "Настройка различных цен для разных периодов подписки",
+        "durationLabel": "Продолжительность",
+        "priceLabel": "Цена (GEL)",
+        "discountLabel": "Скидка %",
+        "addButton": "Добавить вариант продолжительности"
+      }
     },
     "card": {
       "popular": "Популярный",
       "inactive": "Неактивный",
       "oneTime": "/ единоразово",
       "editPlan": "Редактировать план",
+      "durationOptionsLabel": "Варианты продолжительности:",
+      "basePrice": "базовая цена",
+      "noDurationOptions": {
+        "title": "Варианты продолжительности не настроены.",
+        "description": "Добавьте варианты продолжительности для гибкого ценообразования.",
+        "button": "Настроить варианты продолжительности"
+      },
       "features": {
         "photoUploads": "Загрузка {count} фото",
         "unlimitedPhotos": "Безлимитная загрузка фото",
@@ -1649,6 +1665,41 @@
   "homePagePlan": {
     "heading": "Выберите свой план",
     "title": "Выберите идеальный план, чтобы почтить память ваших близких"
+  },
+  "plansTranslations": {
+    "minimal": {
+      "name": "Минимальный план",
+      "description": "1 фото + биография",
+      "features": {
+        "photoUploads": "Загрузка 1 фото",
+        "slideshow": "Фото слайд-шоу",
+        "videoUploads": "Загрузка видео (макс. 0с)",
+        "documentUpload": "Загрузка документов",
+        "familyTree": "Семейное древо"
+      }
+    },
+    "medium": {
+      "name": "Средний план",
+      "description": "До 10 фото на мемориал со слайд-шоу",
+      "features": {
+        "photoUploads": "Загрузка 10 фото",
+        "slideshow": "Фото слайд-шоу",
+        "videoUploads": "Загрузка видео (макс. 0с)",
+        "documentUpload": "Загрузка документов",
+        "familyTree": "Семейное древо"
+      }
+    },
+    "premium": {
+      "name": "Премиум план",
+      "description": "Неограниченное количество фото, слайд-шоу, видео",
+      "features": {
+        "photoUploads": "Неограниченная загрузка фото",
+        "slideshow": "Фото слайд-шоу",
+        "videoUploads": "Загрузка видео (макс. 60с)",
+        "documentUpload": "Загрузка документов",
+        "familyTree": "Семейное древо"
+      }
+    }
   },
   "help": {
     "helpButton": "помощь"
