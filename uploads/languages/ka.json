@@ -359,7 +359,22 @@
       "creatingAccount": "ანგარიშის შექმნა...",
       "createAccountButton": "ანგარიშის შექმნა",
       "alreadyHaveAccount": "უკვე გაქვთ ანგარიში?",
-      "signIn": "შესვლა"
+      "signIn": "შესვლა",
+      "shippingInformation": "მიწოდების ინფორმაცია (ნებაყოფლობითი)",
+      "addShippingDetails": "მიწოდების მონაცემების დამატება",
+      "hideShippingDetails": "დამალვა",
+      "shippingFullName": "სრული სახელი",
+      "shippingFullNamePlaceholder": "გიორგი ქართველიშვილი",
+      "shippingAddress": "მისამართი",
+      "shippingAddressPlaceholder": "რუსთაველის გამზ., 123, ბინა 4",
+      "shippingCity": "ქალაქი",
+      "shippingCityPlaceholder": "თბილისი",
+      "shippingPostalCode": "საფოსტო ინდექსი",
+      "shippingPostalCodePlaceholder": "0100",
+      "shippingCountry": "ქვეყანა",
+      "shippingCountryPlaceholder": "საქართველო",
+      "shippingPhoneNumber": "ტელეფონის ნომერი",
+      "shippingPhoneNumberPlaceholder": "+995 555 123 456"
     },
     "errors": {
       "invalidCredentials": "არასწორი მონაცემები. გამოიყენეთ user@qrip.ge / user123"
@@ -436,6 +451,7 @@
       "lastName": "გვარი",
       "birthDate": "დაბადების თარიღი",
       "deathDate": "გარდაცვალების თარიღი",
+      "epitaphPlaceholder": "მოკლე მემორიალური ფრაზა",
       "location": {
         "title": "მემორიალის ადგილმდებარეობა",
         "description": "დააწკაპუნეთ რუკაზე მემორიალის ზუსტი GPS კოორდინატების დასაყენებლად.",

@@ -365,7 +365,22 @@
       "creatingAccount": "Creating Account...",
       "createAccountButton": "Create Account",
       "alreadyHaveAccount": "Already have an account?",
-      "signIn": "Sign in"
+      "signIn": "Sign in",
+      "shippingInformation": "Shipping Information (Optional)",
+      "addShippingDetails": "Add Shipping Details",
+      "hideShippingDetails": "Hide",
+      "shippingFullName": "Full Name",
+      "shippingFullNamePlaceholder": "John Doe",
+      "shippingAddress": "Address",
+      "shippingAddressPlaceholder": "123 Main St, Apt 4B",
+      "shippingCity": "City",
+      "shippingCityPlaceholder": "New York",
+      "shippingPostalCode": "Postal Code",
+      "shippingPostalCodePlaceholder": "10001",
+      "shippingCountry": "Country",
+      "shippingCountryPlaceholder": "United States",
+      "shippingPhoneNumber": "Phone Number",
+      "shippingPhoneNumberPlaceholder": "+1 234 567 8900"
     },
     "errors": {
       "invalidCredentials": "Invalid credentials. Use user@qrip.ge / user123"
@@ -442,6 +457,8 @@
       "lastName": "Last Name",
       "birthDate": "Birth Date",
       "deathDate": "Date of Passing",
+      "epitaph": "Epitaph",
+      "epitaphPlaceholder": "Short memorial phrase",
       "location": {
         "title": "Memorial Location",
         "description": "Click on the map to set the exact GPS coordinates for the memorial location.",
