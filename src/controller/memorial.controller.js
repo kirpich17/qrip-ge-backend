@@ -316,8 +316,15 @@ exports.toggleSlideshow = async (req, res) => {
     const { memorialId } = req.params;
     const { allowSlideshow } = req.body;
     
-    // Find the memorial
-    const memorial = await Memorial.findById(memorialId);
+    // Find the memorial with its purchase populated
+    const memorial = await Memorial.findById(memorialId).populate({
+      path: 'purchase',
+      populate: {
+        path: 'planId',
+        model: 'SubscriptionPlan'
+      }
+    });
+    
     if (!memorial) {
       return res.status(404).json({
         status: false,
@@ -333,21 +340,16 @@ exports.toggleSlideshow = async (req, res) => {
       });
     }
 
-    // Check if user has an active subscription (Medium or Premium)
-    const userSubscription = await UserSubscription.findOne({
-      userId: req.user.userId,
-      status: 'active'
-    }).populate('planId');
-
-    if (!userSubscription) {
+    // Check if memorial has a purchase with a plan
+    if (!memorial.purchase || !memorial.purchase.planId) {
       return res.status(403).json({
         status: false,
-        message: "This feature requires an active subscription (Medium or Premium plan).",
+        message: "This feature requires a memorial plan (Medium or Premium plan).",
       });
     }
 
-    // Check if the plan allows slideshow feature
-    const planType = userSubscription.planId?.planType;
+    // Check if the memorial's plan allows slideshow feature
+    const planType = memorial.purchase.planId.planType;
     if (!planType || (planType !== 'medium' && planType !== 'premium')) {
       return res.status(403).json({
         status: false,

@@ -283,6 +283,7 @@ exports.getAllMemorials = async (req, res) => {
 
     if (isPublic) {
       searchFilter.isPublic = true;
+      searchFilter.status = 'active'; // Only show active memorials in public library
     }
     if (searchQuery) {
       const searchRegex = searchQuery.trim();
