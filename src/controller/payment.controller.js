@@ -621,15 +621,30 @@ const initiateMemorialPayment = async (req, res) => {
         
         console.log("✅ Plan found:", plan.name, "Duration:", duration, "Price:", durationOption.price);
 
-        // Verify memorial exists and is in draft status
+        // Verify memorial exists
         console.log("🔍 Finding memorial:", memorialId);
         const memorial = await memorialModel.findOne({
             _id: memorialId,
-            memorialPaymentStatus: 'active',
             createdBy: userId
         });
         
-        if (memorial) {
+        if (!memorial) {
+            console.log("❌ Memorial not found or not owned by user");
+            return res.status(404).json({ message: "Memorial not found." });
+        }
+        
+        // Block minimal plan selection if memorial has videos
+        if (plan.planType === 'minimal') {
+            const hasVideos = memorial.videoGallery && Array.isArray(memorial.videoGallery) && memorial.videoGallery.length > 0;
+            if (hasVideos) {
+                console.log("❌ Blocking minimal plan - memorial has videos");
+                return res.status(403).json({ 
+                    message: "Video upload feature is available for premium memorials. Please select a Premium plan to proceed." 
+                });
+            }
+        }
+        
+        if (memorial.memorialPaymentStatus === 'active') {
           console.log("✅ Memorial found with active status");
           successUrl= `${process.env.FRONTEND_URL}/dashboard/subscription/update?memorialId=${memorialId}`
         }else{
