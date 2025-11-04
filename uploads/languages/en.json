@@ -1490,6 +1490,13 @@
     "loading": "Loading Plans...",
     "error": "Failed to load plans. Please try again later.",
     "selectDuration": "Select Duration",
+    "durations": {
+      "1_month": "1 Month",
+      "3_months": "3 Months",
+      "6_months": "6 Months",
+      "1_year": "1 Year",
+      "2_years": "2 Years"
+    },
     "paymentError": {
       "initiate": "Could not initiate payment. Please try again.",
       "process": "Failed to start payment process."
@@ -1600,7 +1607,14 @@
         "durationLabel": "Duration",
         "priceLabel": "Price (GEL)",
         "discountLabel": "Discount %",
-        "addButton": "Add Duration Option"
+        "addButton": "Add Duration Option",
+        "durations": {
+          "1_month": "1 Month",
+          "3_months": "3 Months",
+          "6_months": "6 Months",
+          "1_year": "1 Year",
+          "2_years": "2 Years"
+        }
       }
     },
     "card": {
@@ -1970,6 +1984,13 @@
       "paid": "Paid",
       "failed": "Failed",
       "refunded": "Refunded"
+    },
+    "duration": {
+      "1_month": "1 Month",
+      "3_months": "3 Months",
+      "6_months": "6 Months",
+      "1_year": "1 Year",
+      "2_years": "2 Years"
     },
     "table": {
       "title": "Orders ({count})",
