@@ -11,6 +11,7 @@ const {
   updateUser,
   allStatsforUser,
   updateUserProfile,
+  refreshToken,
 } = require("../controller/auth.controller");
 const { isAuthenticated, isUser } = require("../middlewares/auth.middleware");
 const { adminGetAllPlans } = require("../controller/admin.controller");
@@ -23,6 +24,7 @@ const upload = multer({
 // Signup/Login
 router.post("/signup", signup);
 router.post("/signin", signin);
+router.post("/refresh-token", refreshToken);
 
 // Password Reset Flow
 router.post("/forgot-password", forgotPassword);

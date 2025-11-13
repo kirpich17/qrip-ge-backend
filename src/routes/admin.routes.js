@@ -24,6 +24,8 @@ const {
   ValidatePromoCode,
   updateAdminPassword,
   adminForgotPassword,
+  adminRefreshToken,
+  test401,
 } = require("../controller/admin.controller");
 const { isAuthenticated, isAdmin } = require("../middlewares/auth.middleware");
 const { adminStats } = require("../controller/admin.stats");
@@ -48,6 +50,9 @@ const {
 router.get("/get-user/:id", isAuthenticated, isAdmin, getUserById);
 router.post("/signUp", createAdminUser);
 router.post("/signIn", adminSignin);
+router.post("/refresh-token", adminRefreshToken);
+// Test endpoint to force 401 (for testing token refresh) - NO AUTH REQUIRED
+router.get("/test-401", test401);
 
 // Admin forgot password routes (no authentication required)
 router.post("/forgot-password", adminForgotPassword);
