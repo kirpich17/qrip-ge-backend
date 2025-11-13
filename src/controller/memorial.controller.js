@@ -265,6 +265,11 @@ exports.getMyMemorialById = async (req, res) => {
       memorialData.allowSlideshow = false;
     }
 
+    // Ensure location is null/undefined if empty
+    if (memorialData.location && memorialData.location.trim() === '') {
+      memorialData.location = null;
+    }
+
     // Remove internal subscription details from response
     delete memorialData.purchase;
 
@@ -1073,6 +1078,12 @@ exports.createOrUpdateMemorial = async (req, res) => {
       // Prepare the update payload
       const payload = { ...req.body, familyTree };
       
+      // Only include location if it's provided and not empty
+      // Also treat "Tbilisi, Georgia" as empty if it seems like a default value
+      if (!req.body.location || req.body.location.trim() === '' || req.body.location.trim() === 'Tbilisi, Georgia') {
+        delete payload.location;
+      }
+      
       // Ensure GPS coordinates are properly parsed
       if (req.body.gps) {
         if (typeof req.body.gps === 'string') {
@@ -1123,6 +1134,12 @@ exports.createOrUpdateMemorial = async (req, res) => {
         // Set status to active by default for all memorials
         status: 'active'
       };
+      
+      // Only include location if it's provided and not empty
+      // Also treat "Tbilisi, Georgia" as empty if it seems like a default value
+      if (!req.body.location || req.body.location.trim() === '' || req.body.location.trim() === 'Tbilisi, Georgia') {
+        delete payload.location;
+      }
       
       // Ensure GPS coordinates are properly parsed for creation
       if (req.body.gps) {
