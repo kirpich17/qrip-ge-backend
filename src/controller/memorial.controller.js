@@ -48,6 +48,14 @@ exports.createMemorial = async (req, res) => {
 
 exports.getMyMemorials = async (req, res) => {
   try {
+    // Check if user is authenticated
+    if (!req.user || !req.user.userId) {
+      return res.status(401).json({ 
+        status: false, 
+        message: "Unauthorized: User authentication required." 
+      });
+    }
+
     // --- Destructure query parameters with defaults ---
     const {
       search = "",
@@ -232,6 +240,14 @@ exports.getMemorialById = async (req, res) => {
 // New function for getting user's own memorial for editing
 exports.getMyMemorialById = async (req, res) => {
   try {
+    // Check if user is authenticated
+    if (!req.user || !req.user.userId) {
+      return res.status(401).json({ 
+        status: false, 
+        message: "Unauthorized: User authentication required." 
+      });
+    }
+
     const userId = req.user.userId;
     const memorial = await Memorial.findOne({
       _id: req.params.id,
