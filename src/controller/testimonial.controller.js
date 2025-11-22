@@ -12,7 +12,7 @@ exports.submitTestimonial = async (req, res) => {
     if (!name || !email || !location || !text) {
       return res.status(400).json({
         status: false,
-        message: "All fields are required"
+        message: 'All fields are required',
       });
     }
 
@@ -21,7 +21,7 @@ exports.submitTestimonial = async (req, res) => {
     if (!settings?.testimonialsEnabled) {
       return res.status(403).json({
         status: false,
-        message: "Testimonials are currently disabled"
+        message: 'Testimonials are currently disabled',
       });
     }
 
@@ -32,21 +32,21 @@ exports.submitTestimonial = async (req, res) => {
       location,
       text,
       rating: rating || 5,
-      status: settings.testimonialsAutoApprove ? 'approved' : 'pending'
+      status: settings.testimonialsAutoApprove ? 'approved' : 'pending',
     });
 
     res.status(201).json({
       status: true,
-      message: settings.testimonialsAutoApprove 
-        ? "Thank you for your testimonial!" 
-        : "Thank you for your testimonial! It will be reviewed before being published.",
-      data: testimonial
+      message: settings.testimonialsAutoApprove
+        ? 'Thank you for your testimonial!'
+        : 'Thank you for your testimonial! It will be reviewed before being published.',
+      data: testimonial,
     });
   } catch (error) {
-    console.error("Error submitting testimonial:", error);
+    console.error('Error submitting testimonial:', error);
     res.status(500).json({
       status: false,
-      message: "Failed to submit testimonial"
+      message: 'Failed to submit testimonial',
     });
   }
 };
@@ -64,30 +64,32 @@ exports.getPublicTestimonials = async (req, res) => {
       return res.json({
         status: true,
         data: [],
-        message: "Testimonials are disabled"
+        message: 'Testimonials are disabled',
       });
     }
 
     // Use the limit from query or fall back to settings max display
-    const displayLimit = limit ? parseInt(limit) : settings.testimonialsMaxDisplay;
+    const displayLimit = limit
+      ? parseInt(limit)
+      : settings.testimonialsMaxDisplay;
 
     const testimonials = await Testimonial.find({
       status: 'approved',
-      isActive: true
+      isActive: true,
     })
-    .sort({ approvedAt: -1, submittedAt: -1 })
-    .limit(displayLimit)
-    .select('-email -__v');
+      .sort({ approvedAt: -1, submittedAt: -1 })
+      .limit(displayLimit)
+      .select('-email -__v');
 
     res.json({
       status: true,
-      data: testimonials
+      data: testimonials,
     });
   } catch (error) {
-    console.error("Error fetching testimonials:", error);
+    console.error('Error fetching testimonials:', error);
     res.status(500).json({
       status: false,
-      message: "Failed to fetch testimonials"
+      message: 'Failed to fetch testimonials',
     });
   }
 };
@@ -110,7 +112,7 @@ exports.getAdminTestimonials = async (req, res) => {
         { name: { $regex: search, $options: 'i' } },
         { email: { $regex: search, $options: 'i' } },
         { location: { $regex: search, $options: 'i' } },
-        { text: { $regex: search, $options: 'i' } }
+        { text: { $regex: search, $options: 'i' } },
       ];
     }
 
@@ -120,7 +122,7 @@ exports.getAdminTestimonials = async (req, res) => {
         .skip(skip)
         .limit(parseInt(limit))
         .populate('approvedBy', 'firstname lastname'),
-      Testimonial.countDocuments(query)
+      Testimonial.countDocuments(query),
     ]);
 
     res.json({
@@ -130,14 +132,14 @@ exports.getAdminTestimonials = async (req, res) => {
         currentPage: parseInt(page),
         totalPages: Math.ceil(total / limit),
         totalItems: total,
-        itemsPerPage: parseInt(limit)
-      }
+        itemsPerPage: parseInt(limit),
+      },
     });
   } catch (error) {
-    console.error("Error fetching admin testimonials:", error);
+    console.error('Error fetching admin testimonials:', error);
     res.status(500).json({
       status: false,
-      message: "Failed to fetch testimonials"
+      message: 'Failed to fetch testimonials',
     });
   }
 };
@@ -154,7 +156,7 @@ exports.updateTestimonialStatus = async (req, res) => {
     if (!['approved', 'rejected', 'pending'].includes(status)) {
       return res.status(400).json({
         status: false,
-        message: "Invalid status"
+        message: 'Invalid status',
       });
     }
 
@@ -164,29 +166,27 @@ exports.updateTestimonialStatus = async (req, res) => {
       updateData.approvedBy = adminId;
     }
 
-    const testimonial = await Testimonial.findByIdAndUpdate(
-      id,
-      updateData,
-      { new: true }
-    ).populate('approvedBy', 'firstname lastname');
+    const testimonial = await Testimonial.findByIdAndUpdate(id, updateData, {
+      new: true,
+    }).populate('approvedBy', 'firstname lastname');
 
     if (!testimonial) {
       return res.status(404).json({
         status: false,
-        message: "Testimonial not found"
+        message: 'Testimonial not found',
       });
     }
 
     res.json({
       status: true,
       message: `Testimonial ${status} successfully`,
-      data: testimonial
+      data: testimonial,
     });
   } catch (error) {
-    console.error("Error updating testimonial status:", error);
+    console.error('Error updating testimonial status:', error);
     res.status(500).json({
       status: false,
-      message: "Failed to update testimonial"
+      message: 'Failed to update testimonial',
     });
   }
 };
@@ -202,19 +202,19 @@ exports.deleteTestimonial = async (req, res) => {
     if (!testimonial) {
       return res.status(404).json({
         status: false,
-        message: "Testimonial not found"
+        message: 'Testimonial not found',
       });
     }
 
     res.json({
       status: true,
-      message: "Testimonial deleted successfully"
+      message: 'Testimonial deleted successfully',
     });
   } catch (error) {
-    console.error("Error deleting testimonial:", error);
+    console.error('Error deleting testimonial:', error);
     res.status(500).json({
       status: false,
-      message: "Failed to delete testimonial"
+      message: 'Failed to delete testimonial',
     });
   }
 };
@@ -225,11 +225,11 @@ exports.deleteTestimonial = async (req, res) => {
 exports.getPublicSiteSettings = async (req, res) => {
   try {
     let settings = await SiteSettings.findOne();
-    
+
     if (!settings) {
       // Create default settings if none exist
       settings = await SiteSettings.create({
-        updatedBy: null // No user ID for default creation
+        updatedBy: null, // No user ID for default creation
       });
     }
 
@@ -238,14 +238,14 @@ exports.getPublicSiteSettings = async (req, res) => {
       status: true,
       data: {
         testimonialsEnabled: settings.testimonialsEnabled,
-        testimonialsMaxDisplay: settings.testimonialsMaxDisplay
-      }
+        testimonialsMaxDisplay: settings.testimonialsMaxDisplay,
+      },
     });
   } catch (error) {
-    console.error("Error fetching public site settings:", error);
+    console.error('Error fetching public site settings:', error);
     res.status(500).json({
       status: false,
-      message: "Failed to fetch site settings"
+      message: 'Failed to fetch site settings',
     });
   }
 };
@@ -256,23 +256,23 @@ exports.getPublicSiteSettings = async (req, res) => {
 exports.getSiteSettings = async (req, res) => {
   try {
     let settings = await SiteSettings.findOne();
-    
+
     if (!settings) {
       // Create default settings if none exist
       settings = await SiteSettings.create({
-        updatedBy: req.user.userId
+        updatedBy: req.user.userId,
       });
     }
 
     res.json({
       status: true,
-      data: settings
+      data: settings,
     });
   } catch (error) {
-    console.error("Error fetching site settings:", error);
+    console.error('Error fetching site settings:', error);
     res.status(500).json({
       status: false,
-      message: "Failed to fetch site settings"
+      message: 'Failed to fetch site settings',
     });
   }
 };
@@ -282,17 +282,21 @@ exports.getSiteSettings = async (req, res) => {
  */
 exports.updateSiteSettings = async (req, res) => {
   try {
-    const { testimonialsEnabled, testimonialsMaxDisplay, testimonialsAutoApprove } = req.body;
+    const {
+      testimonialsEnabled,
+      testimonialsMaxDisplay,
+      testimonialsAutoApprove,
+    } = req.body;
     const adminId = req.user.userId;
 
     let settings = await SiteSettings.findOne();
-    
+
     if (!settings) {
       settings = await SiteSettings.create({
         testimonialsEnabled,
         testimonialsMaxDisplay,
         testimonialsAutoApprove,
-        updatedBy: adminId
+        updatedBy: adminId,
       });
     } else {
       settings.testimonialsEnabled = testimonialsEnabled;
@@ -305,14 +309,14 @@ exports.updateSiteSettings = async (req, res) => {
 
     res.json({
       status: true,
-      message: "Settings updated successfully",
-      data: settings
+      message: 'Settings updated successfully',
+      data: settings,
     });
   } catch (error) {
-    console.error("Error updating site settings:", error);
+    console.error('Error updating site settings:', error);
     res.status(500).json({
       status: false,
-      message: "Failed to update settings"
+      message: 'Failed to update settings',
     });
   }
 };
