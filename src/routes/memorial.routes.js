@@ -89,7 +89,7 @@ router.post(
 router.get('/my-memorials', isAuthenticated, getMyMemorials);
 
 // Get a specific memorial by ID for editing (user's own memorials only)
-router.get('/my-memorial/:id', getMyMemorialById);
+router.get('/my-memorial/:id', isAuthenticated, getMyMemorialById);
 
 router.post('/view', viewAndScanMemorialCount);
 
