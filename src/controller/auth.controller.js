@@ -1,13 +1,16 @@
-const User = require("../models/user.model");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const crypto = require("crypto");
-const memorialModel = require("../models/memorial.model");
-const { default: mongoose } = require("mongoose");
-const { log } = require("console");
-const { uploadFileToS3 } = require("../config/configureAWS");
-const { assignFreePlan } = require("../service/subscriptionService");
-const { sendPasswordResetEmail, sendWelcomeEmail } = require("../service/unifiedEmailService");
+const User = require('../models/user.model');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+const memorialModel = require('../models/memorial.model');
+const { default: mongoose } = require('mongoose');
+const { log } = require('console');
+const { uploadFileToS3 } = require('../config/configureAWS');
+const { assignFreePlan } = require('../service/subscriptionService');
+const {
+  sendPasswordResetEmail,
+  sendWelcomeEmail,
+} = require('../service/unifiedEmailService');
 
 exports.signup = async (req, res) => {
   try {
@@ -16,14 +19,14 @@ exports.signup = async (req, res) => {
       lastname,
       email,
       password,
-      userType = "user",
+      userType = 'user',
       shippingDetails,
     } = req.body;
     const existing = await User.findOne({ email });
     if (existing)
       return res
         .status(400)
-        .json({ status: false, message: "Email already exists" });
+        .json({ status: false, message: 'Email already exists' });
 
     const hash = await bcrypt.hash(password, 10);
     const user = await User.create({
@@ -41,11 +44,11 @@ exports.signup = async (req, res) => {
     try {
       await sendWelcomeEmail(user.email, user.firstname);
     } catch (emailError) {
-      console.error("Failed to send welcome email:", emailError);
+      console.error('Failed to send welcome email:', emailError);
       // Don't fail the signup if email fails
     }
 
-    res.status(201).json({ status: true, message: "Signup successful", user });
+    res.status(201).json({ status: true, message: 'Signup successful', user });
   } catch (err) {
     res.status(500).json({ status: false, message: err.message });
   }
@@ -58,26 +61,26 @@ exports.signin = async (req, res) => {
     if (!user)
       return res
         .status(400)
-        .json({ status: false, message: "Invalid credentials" });
+        .json({ status: false, message: 'Invalid credentials' });
 
     const valid = await bcrypt.compare(password, user.password);
     if (!valid)
       return res
         .status(400)
-        .json({ status: false, message: "Invalid credentials" });
+        .json({ status: false, message: 'Invalid credentials' });
 
-    if (user.accountStatus != "active") {
+    if (user.accountStatus != 'active') {
       res
         .status(401)
-        .json({ status: false, message: "Your account is suspended." });
+        .json({ status: false, message: 'Your account is suspended.' });
     }
 
     const token = jwt.sign(
       { userId: user._id, userType: user.userType },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" }
+      { expiresIn: '7d' }
     );
-    res.json({ status: true, message: "Signin successful", token, user });
+    res.json({ status: true, message: 'Signin successful', token, user });
   } catch (err) {
     res.status(500).json({ status: false, message: err.message });
   }
@@ -86,48 +89,56 @@ exports.signin = async (req, res) => {
 exports.forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
-    
+
     // Check if email is provided
     if (!email) {
-      return res.status(400).json({ status: false, message: "Email is required" });
+      return res
+        .status(400)
+        .json({ status: false, message: 'Email is required' });
     }
 
     // Check if email credentials are configured
     if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-      return res.status(500).json({ 
-        status: false, 
-        message: "Email service not configured. Please contact administrator." 
+      return res.status(500).json({
+        status: false,
+        message: 'Email service not configured. Please contact administrator.',
       });
     }
 
-
     const user = await User.findOne({ email });
     if (!user)
-      return res.status(404).json({ status: false, message: "User not found" });
+      return res.status(404).json({ status: false, message: 'User not found' });
 
-    const resetToken = crypto.randomBytes(32).toString("hex");
+    const resetToken = crypto.randomBytes(32).toString('hex');
     user.resetPasswordToken = resetToken;
     user.resetPasswordExpires = Date.now() + 3600000;
     await user.save();
-    
+
     const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
-    
+
     // Use unified email service
-    const emailSent = await sendPasswordResetEmail(email, resetLink, user.firstname);
-    
+    const emailSent = await sendPasswordResetEmail(
+      email,
+      resetLink,
+      user.firstname
+    );
+
     if (emailSent) {
-      res.json({ status: true, message: "Reset token sent to email" });
+      res.json({ status: true, message: 'Reset token sent to email' });
     } else {
-      res.status(500).json({ status: false, message: "Failed to send reset email" });
+      res
+        .status(500)
+        .json({ status: false, message: 'Failed to send reset email' });
     }
   } catch (err) {
-    console.error("Forgot password error:", err);
-    
+    console.error('Forgot password error:', err);
+
     // Handle specific nodemailer errors
     if (err.code === 'EAUTH' || err.message.includes('Missing credentials')) {
-      return res.status(500).json({ 
-        status: false, 
-        message: "Email service authentication failed. Please contact administrator." 
+      return res.status(500).json({
+        status: false,
+        message:
+          'Email service authentication failed. Please contact administrator.',
       });
     }
     res.status(500).json({ status: false, message: err.message });
@@ -145,14 +156,14 @@ exports.resetPassword = async (req, res) => {
     if (!user)
       return res
         .status(400)
-        .json({ status: false, message: "Invalid or expired token" });
+        .json({ status: false, message: 'Invalid or expired token' });
 
     user.password = await bcrypt.hash(newPassword, 10);
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;
     await user.save();
 
-    res.json({ status: true, message: "Password has been reset successfully" });
+    res.json({ status: true, message: 'Password has been reset successfully' });
   } catch (err) {
     res.status(500).json({ status: false, message: err.message });
   }
@@ -161,53 +172,56 @@ exports.resetPassword = async (req, res) => {
 exports.changePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
-    
+
     if (!currentPassword || !newPassword) {
-      return res.status(400).json({ 
-        status: false, 
-        message: "Current password and new password are required" 
+      return res.status(400).json({
+        status: false,
+        message: 'Current password and new password are required',
       });
     }
-    
+
     if (newPassword.length < 8) {
-      return res.status(400).json({ 
-        status: false, 
-        message: "New password must be at least 8 characters long" 
+      return res.status(400).json({
+        status: false,
+        message: 'New password must be at least 8 characters long',
       });
     }
-    
+
     // Find the user with password field
-    const user = await User.findById(req.user.userId).select("+password");
-    
+    const user = await User.findById(req.user.userId).select('+password');
+
     if (!user) {
-      return res.status(404).json({ 
-        status: false, 
-        message: "User not found" 
+      return res.status(404).json({
+        status: false,
+        message: 'User not found',
       });
     }
-    
+
     // Verify current password
-    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
-    
+    const isCurrentPasswordValid = await bcrypt.compare(
+      currentPassword,
+      user.password
+    );
+
     if (!isCurrentPasswordValid) {
-      return res.status(400).json({ 
-        status: false, 
-        message: "Current password is incorrect" 
+      return res.status(400).json({
+        status: false,
+        message: 'Current password is incorrect',
       });
     }
-    
+
     // Hash the new password
     const hash = await bcrypt.hash(newPassword, 10);
     await User.findByIdAndUpdate(req.user.userId, { password: hash });
-    
-    res.json({ 
-      status: true, 
-      message: "Password changed successfully" 
+
+    res.json({
+      status: true,
+      message: 'Password changed successfully',
     });
   } catch (err) {
-    res.status(500).json({ 
-      status: false, 
-      message: "Server error: " + err.message 
+    res.status(500).json({
+      status: false,
+      message: 'Server error: ' + err.message,
     });
   }
 };
@@ -217,7 +231,7 @@ exports.updatePassword = async (req, res) => {
     const { password } = req.body;
     const hash = await bcrypt.hash(password, 10);
     await User.findByIdAndUpdate(req.user.userId, { password: hash });
-    res.json({ status: true, message: "Password updated successfully" });
+    res.json({ status: true, message: 'Password updated successfully' });
   } catch (err) {
     res.status(500).json({ status: false, message: err.message });
   }
@@ -230,10 +244,12 @@ const MemorialPurchase = require('../models/MemorialPurchase'); // Adjust path a
 exports.getUserDetails = async (req, res) => {
   try {
     // Use .lean() to get a plain JavaScript object, which is easier to modify
-    const user = await User.findById(req.user.userId).select("-password").lean();
+    const user = await User.findById(req.user.userId)
+      .select('-password')
+      .lean();
 
     if (!user) {
-      return res.status(404).json({ status: false, message: "User not found" });
+      return res.status(404).json({ status: false, message: 'User not found' });
     }
 
     // Note: Subscriptions are now memorial-level, not user-level
@@ -241,7 +257,7 @@ exports.getUserDetails = async (req, res) => {
 
     res.status(200).json({
       status: true,
-      message: "User details fetched successfully",
+      message: 'User details fetched successfully',
       user, // User object without subscription plan (subscriptions are memorial-level)
     });
   } catch (err) {
@@ -259,18 +275,18 @@ exports.updateUser = async (req, res) => {
       userId,
       { $set: updates },
       { new: true, runValidators: true, upsert: true }
-    ).select("-password"); // Don't return password
+    ).select('-password'); // Don't return password
 
     if (!updatedUser) {
       return res.status(404).json({
         status: false,
-        message: "User not found",
+        message: 'User not found',
       });
     }
 
     res.status(200).json({
       status: true,
-      message: "User updated successfully",
+      message: 'User updated successfully',
       user: updatedUser,
     });
   } catch (err) {
@@ -284,19 +300,19 @@ exports.allStatsforUser = async (req, res) => {
 
     const stats = await memorialModel.aggregate([
       {
-        $match: { 
+        $match: {
           createdBy: new mongoose.Types.ObjectId(userId),
-          firstName: { $ne: "Untitled" },
-          memorialPaymentStatus: { $ne: "draft" }
+          firstName: { $ne: 'Untitled' },
+          memorialPaymentStatus: { $ne: 'draft' },
         },
       },
       {
         $group: {
           _id: null,
           totalMemorials: { $sum: 1 },
-          totalViews: { $sum: "$viewsCount" },
-          totalScans: { $sum: "$scanCount" },
-          totalFamilyTreeCount: { $sum: { $size: "$familyTree" } },
+          totalViews: { $sum: '$viewsCount' },
+          totalScans: { $sum: '$scanCount' },
+          totalFamilyTreeCount: { $sum: { $size: '$familyTree' } },
         },
       },
     ]);
@@ -310,14 +326,14 @@ exports.allStatsforUser = async (req, res) => {
 
     res.status(200).json({
       status: true,
-      message: "Stats fetched successfully",
+      message: 'Stats fetched successfully',
       data: result,
     });
   } catch (error) {
-    console.error("Error fetching memorial stats:", error);
+    console.error('Error fetching memorial stats:', error);
     res.status(500).json({
       status: false,
-      message: "Internal server error",
+      message: 'Internal server error',
     });
   }
 };
@@ -330,7 +346,7 @@ exports.updateUserProfile = async (req, res) => {
     if (!profile) {
       return res
         .status(400)
-        .json({ status: false, message: "No file uploaded." });
+        .json({ status: false, message: 'No file uploaded.' });
     }
 
     const url = await uploadFileToS3(profile);
@@ -344,28 +360,28 @@ exports.updateUserProfile = async (req, res) => {
     if (!updatedUser) {
       return res
         .status(404)
-        .json({ status: false, message: "User not found." });
+        .json({ status: false, message: 'User not found.' });
     }
 
     res.status(200).json({
       status: true,
-      message: "Profile image updated successfully",
+      message: 'Profile image updated successfully',
       data: updatedUser,
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ status: false, message: "Internal server error" });
+    res.status(500).json({ status: false, message: 'Internal server error' });
   }
 };
 
 exports.refreshToken = async (req, res) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
-    
+
     if (!token) {
-      return res.status(401).json({ 
-        status: false, 
-        message: 'No token provided.' 
+      return res.status(401).json({
+        status: false,
+        message: 'No token provided.',
       });
     }
 
@@ -376,45 +392,50 @@ exports.refreshToken = async (req, res) => {
     } catch (error) {
       // If token verification fails, try to decode without verification
       // This handles expired tokens and tokens with invalid signatures (from testing)
-      if (error.name === 'TokenExpiredError' || error.name === 'JsonWebTokenError') {
-        console.log(`Token verification failed (${error.name}), attempting to decode without verification...`);
+      if (
+        error.name === 'TokenExpiredError' ||
+        error.name === 'JsonWebTokenError'
+      ) {
+        console.log(
+          `Token verification failed (${error.name}), attempting to decode without verification...`
+        );
         decoded = jwt.decode(token, { complete: false });
-        
+
         // If decode also fails, token is completely invalid
         if (!decoded) {
-          return res.status(401).json({ 
-            status: false, 
-            message: 'Invalid token format. Please login again.' 
+          return res.status(401).json({
+            status: false,
+            message: 'Invalid token format. Please login again.',
           });
         }
       } else {
-        return res.status(401).json({ 
-          status: false, 
-          message: 'Invalid token: ' + error.message 
+        return res.status(401).json({
+          status: false,
+          message: 'Invalid token: ' + error.message,
         });
       }
     }
 
     if (!decoded || !decoded.userId) {
-      return res.status(401).json({ 
-        status: false, 
-        message: 'Invalid token payload.' 
+      return res.status(401).json({
+        status: false,
+        message: 'Invalid token payload.',
       });
     }
 
     // Verify user still exists and is active
     const user = await User.findById(decoded.userId);
     if (!user) {
-      return res.status(401).json({ 
-        status: false, 
-        message: 'User not found.' 
+      return res.status(401).json({
+        status: false,
+        message: 'User not found.',
       });
     }
 
     if (user.accountStatus !== 'active') {
-      return res.status(401).json({ 
-        status: false, 
-        message: 'Account is suspended.' 
+      return res.status(401).json({
+        status: false,
+        message: 'Account is suspended.',
       });
     }
 
@@ -422,26 +443,26 @@ exports.refreshToken = async (req, res) => {
     const newToken = jwt.sign(
       { userId: user._id, userType: user.userType },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" }
+      { expiresIn: '7d' }
     );
 
-    res.json({ 
-      status: true, 
-      message: "Token refreshed successfully", 
+    res.json({
+      status: true,
+      message: 'Token refreshed successfully',
       token: newToken,
       user: {
-        id: user._id,
+        _id: user._id,
         firstname: user.firstname,
         lastname: user.lastname,
         email: user.email,
         userType: user.userType,
-      }
+      },
     });
   } catch (err) {
     console.error('Refresh token error:', err);
-    res.status(500).json({ 
-      status: false, 
-      message: 'Server error: ' + err.message 
+    res.status(500).json({
+      status: false,
+      message: 'Server error: ' + err.message,
     });
   }
 };
