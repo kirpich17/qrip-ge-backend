@@ -234,11 +234,7 @@
       "name": "Free",
       "price": "$0",
       "period": "forever",
-      "features": [
-        "Biography & photo",
-        "QR code",
-        "Basic memorial"
-      ]
+      "features": ["Biography & photo", "QR code", "Basic memorial"]
     },
     "premium": {
       "name": "Basic Premium",
@@ -292,11 +288,7 @@
     "subtitle": "Join thousands of families who trust QRIP.ge to preserve and share their most precious memories. Create your first memorial in minutes.",
     "primaryButton": "Create Your First Memorial",
     "secondaryButton": "View Demo Memorial",
-    "benefits": [
-      "Free to start",
-      "No credit card required",
-      "Setup in minutes"
-    ]
+    "benefits": ["Free to start", "No credit card required", "Setup in minutes"]
   },
   "footer": {
     "copyright": "© 2025 QRIP.ge. All rights reserved."
@@ -658,9 +650,7 @@
           "Advanced customization",
           "Priority support"
         ],
-        "limitations": [
-          "No lifetime access"
-        ],
+        "limitations": ["No lifetime access"],
         "button": "Upgrade to Basic Premium",
         "popular": "Most Popular",
         "yearlySave": "Save $18 per year"
@@ -890,60 +880,42 @@
         "dates": "1945 - 2023",
         "location": "Tbilisi, Georgia",
         "description": "Beloved father, grandfather, and community leader who dedicated his life to education.",
-        "tags": [
-          "Teacher",
-          "Community Leader"
-        ]
+        "tags": ["Teacher", "Community Leader"]
       },
       "maryJohnson": {
         "name": "Mary Johnson",
         "dates": "1952 - 2024",
         "location": "Batumi, Georgia",
         "description": "Loving mother and talented artist who brought beauty to the world through her paintings.",
-        "tags": [
-          "Artist",
-          "Mother"
-        ]
+        "tags": ["Artist", "Mother"]
       },
       "robertWilson": {
         "name": "Robert Wilson",
         "dates": "1938 - 2023",
         "location": "Kutaisi, Georgia",
         "description": "War veteran and devoted husband who served his country with honor and dignity.",
-        "tags": [
-          "Veteran",
-          "Husband"
-        ]
+        "tags": ["Veteran", "Husband"]
       },
       "annaGeorgadze": {
         "name": "Anna Georgadze",
         "dates": "1960 - 2024",
         "location": "Tbilisi, Georgia",
         "description": "Renowned doctor who saved countless lives and mentored young medical professionals.",
-        "tags": [
-          "Doctor",
-          "Mentor"
-        ]
+        "tags": ["Doctor", "Mentor"]
       },
       "davidKvirikashvili": {
         "name": "David Kvirikashvili",
         "dates": "1955 - 2023",
         "location": "Rustavi, Georgia",
         "description": "Passionate musician and composer who enriched Georgian cultural heritage.",
-        "tags": [
-          "Musician",
-          "Composer"
-        ]
+        "tags": ["Musician", "Composer"]
       },
       "elenaChavchavadze": {
         "name": "Elena Chavchavadze",
         "dates": "1948 - 2024",
         "location": "Gori, Georgia",
         "description": "Dedicated teacher and children's book author who inspired generations of young minds.",
-        "tags": [
-          "Teacher",
-          "Author"
-        ]
+        "tags": ["Teacher", "Author"]
       }
     },
     "loadMore": "Load More Memorials"
@@ -1266,10 +1238,7 @@
           "Advanced customization",
           "Priority support"
         ],
-        "limitations": [
-          "No multiple administrators",
-          "No lifetime access"
-        ],
+        "limitations": ["No multiple administrators", "No lifetime access"],
         "button": "Upgrade to Basic Premium",
         "popular": "Most Popular",
         "yearlySave": "Save $18 per year"
@@ -1495,7 +1464,8 @@
       "3_months": "3 Months",
       "6_months": "6 Months",
       "1_year": "1 Year",
-      "2_years": "2 Years"
+      "2_years": "2 Years",
+      "life_time": "life time"
     },
     "paymentError": {
       "initiate": "Could not initiate payment. Please try again.",
@@ -1613,7 +1583,8 @@
           "3_months": "3 Months",
           "6_months": "6 Months",
           "1_year": "1 Year",
-          "2_years": "2 Years"
+          "2_years": "2 Years",
+          "life_time": "life time"
         }
       }
     },
@@ -1990,7 +1961,8 @@
       "3_months": "3 Months",
       "6_months": "6 Months",
       "1_year": "1 Year",
-      "2_years": "2 Years"
+      "2_years": "2 Years",
+      "life_time": "life time"
     },
     "table": {
       "title": "Orders ({count})",
