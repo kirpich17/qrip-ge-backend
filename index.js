@@ -24,6 +24,7 @@ const adminStickerRoutes = require('./src/routes/adminSticker.routes');
 const testimonialRoutes = require('./src/routes/testimonial.routes');
 const translationRoutes = require('./src/routes/translation.routes');
 const chargeRecurringSubscriptions = require('./src/service/bog-cron-jobs');
+const FooterInfoRouter = require('./src/routes/footerInfo.routes');
 
 const app = express();
 
@@ -64,7 +65,7 @@ app.use('/api/testimonials', testimonialRoutes);
 app.use('/api/translation', translationRoutes);
 app.use('/api/payments', paymentRouter);
 app.use('/api/terms', termRouter);
+app.use('/api', FooterInfoRouter);
 
-// ✅ Start Server
 const PORT = process.env.PORT || 4040;
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));

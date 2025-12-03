@@ -1,5 +1,5 @@
 // models/SubscriptionPlan.js
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const SubscriptionPlanSchema = new mongoose.Schema(
   {
@@ -20,7 +20,7 @@ const SubscriptionPlanSchema = new mongoose.Schema(
     planType: {
       type: String,
       enum: ['minimal', 'medium', 'premium'],
-      required: true
+      required: true,
     },
 
     isActive: {
@@ -33,16 +33,18 @@ const SubscriptionPlanSchema = new mongoose.Schema(
     },
     features: [
       {
-        text: { // Description of the feature
+        text: {
+          // Description of the feature
           type: String,
           required: [true, 'Feature text is required'],
           trim: true,
         },
-        included: { // Boolean: true for checkmark (included), false for cross (not included)
+        included: {
+          // Boolean: true for checkmark (included), false for cross (not included)
           type: Boolean,
           default: true,
         },
-      }
+      },
     ],
     // limitations: [
     //   {
@@ -51,76 +53,94 @@ const SubscriptionPlanSchema = new mongoose.Schema(
     // ],
     color: {
       type: String,
-      default: "text-black",
+      default: 'text-black',
     },
     bgColor: {
       type: String,
-      default: "bg-green-50",
+      default: 'bg-green-50',
     },
     borderColor: {
       type: String,
-      default: "border-gray-200",
+      default: 'border-gray-200',
     },
 
     maxPhotos: {
       type: Number,
       required: true,
-      default: 0
+      default: 0,
     },
     allowSlideshow: {
       type: Boolean,
-      default: false
+      default: false,
     },
     allowVideos: {
       type: Boolean,
-      default: false
+      default: false,
     },
     maxVideoDuration: {
       type: Number, // in seconds
-      default: 0
+      default: 0,
     },
 
-    ctaButtonText: { // e.g., "14 Day's Free Trial", "Upgrade to Premium", "Go Yearly & Save"
+    ctaButtonText: {
+      // e.g., "14 Day's Free Trial", "Upgrade to Premium", "Go Yearly & Save"
       type: String,
       required: [true, 'CTA button text is required'],
       trim: true,
     },
 
     // Duration options for this plan
-    durationOptions: [{
-      duration: {
-        type: String,
-        required: true,
-        enum: ['1_month', '3_months', '6_months', '1_year', '2_years']
+    durationOptions: [
+      {
+        duration: {
+          type: String,
+          required: true,
+          enum: [
+            '1_month',
+            '3_months',
+            '6_months',
+            '1_year',
+            '2_years',
+            'life_time',
+          ],
+        },
+        price: {
+          type: Number,
+          required: true,
+          min: [0, 'Price cannot be negative'],
+        },
+        discountPercentage: {
+          type: Number,
+          default: 0,
+          min: [0, 'Discount cannot be negative'],
+          max: [100, 'Discount cannot exceed 100%'],
+        },
+        isActive: {
+          type: Boolean,
+          default: true,
+        },
       },
-      price: {
-        type: Number,
-        required: true,
-        min: [0, 'Price cannot be negative']
-      },
-      discountPercentage: {
-        type: Number,
-        default: 0,
-        min: [0, 'Discount cannot be negative'],
-        max: [100, 'Discount cannot exceed 100%']
-      },
-      isActive: {
-        type: Boolean,
-        default: true
-      }
-    }],
+    ],
 
     // Default duration for this plan
     defaultDuration: {
       type: String,
-      enum: ['1_month', '3_months', '6_months', '1_year', '2_years'],
-      default: '1_month'
-    }
-
+      enum: [
+        '1_month',
+        '3_months',
+        '6_months',
+        '1_year',
+        '2_years',
+        'life_time',
+      ],
+      default: '1_month',
+    },
   },
   {
     timestamps: true,
   }
 );
 
-module.exports = mongoose.models.SubscriptionPlan || mongoose.model("SubscriptionPlan", SubscriptionPlanSchema);
+module.exports =
+  mongoose.models.SubscriptionPlan ||
+  mongoose.model('SubscriptionPlan', SubscriptionPlanSchema);
