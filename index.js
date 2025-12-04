@@ -25,6 +25,7 @@ const testimonialRoutes = require('./src/routes/testimonial.routes');
 const translationRoutes = require('./src/routes/translation.routes');
 const chargeRecurringSubscriptions = require('./src/service/bog-cron-jobs');
 const FooterInfoRouter = require('./src/routes/footerInfo.routes');
+const { getPlansByPlanType } = require('./src/controller/admin.controller');
 
 const app = express();
 
@@ -53,6 +54,7 @@ cron.schedule(
 );
 
 // ✅ API Routes
+app.get('/api/subscription/by-type', getPlansByPlanType);
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/admin', adminStickerRoutes);
