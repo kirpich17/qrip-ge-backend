@@ -9,6 +9,6 @@ const FooterInfoRouter = express.Router();
 
 FooterInfoRouter.post('/footerInfo', createFooterInfo);
 FooterInfoRouter.get('/footerInfo', getFooterInformation);
-FooterInfoRouter.patch('/footerInfo', updateFooterInfo);
+FooterInfoRouter.patch('/footerInfoUpdate', updateFooterInfo);
 
 module.exports = FooterInfoRouter;

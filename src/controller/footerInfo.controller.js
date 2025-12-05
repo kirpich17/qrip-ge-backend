@@ -3,23 +3,28 @@ const { StatusCodes } = require('http-status-codes');
 const FooterInfo = require('../models/footerInfo');
 
 const createFooterInfo = asyncHandler(async (req, res) => {
-  const { phone, email } = req.body;
+  const { phone, email, isVisibleEmail, isVisiblePhone } = req.body;
   if (!phone && !email) {
     return res
       .status(StatusCodes.BAD_REQUEST)
       .json({ message: 'Request is empty' });
   }
-  const footerInfo = await FooterInfo.create({ phone, email });
+  const footerInfo = await FooterInfo.create({
+    phone,
+    email,
+    isVisibleEmail,
+    isVisiblePhone,
+  });
   res.status(StatusCodes.OK).json(footerInfo);
 });
 
-const getFooterInformation = asyncHandler(async (req, res) => {
+const getFooterInformation = asyncHandler(async (_, res) => {
   const footerInfo = await FooterInfo.find();
   res.status(StatusCodes.OK).json(footerInfo);
 });
 
 const updateFooterInfo = asyncHandler(async (req, res) => {
-  const { phone, email } = req.body;
+  const { phone, email, isVisibleEmail, isVisiblePhone } = req.body;
   if (!phone && !email) {
     return res
       .status(StatusCodes.BAD_REQUEST)
@@ -31,6 +36,9 @@ const updateFooterInfo = asyncHandler(async (req, res) => {
   if (footerInfo) {
     footerInfo.phone = phone ?? footerInfo.phone;
     footerInfo.email = email ?? footerInfo.email;
+    footerInfo.isVisibleEmail = isVisibleEmail ?? footerInfo.isVisibleEmail;
+    footerInfo.isVisiblePhone = isVisiblePhone ?? footerInfo.isVisiblePhone;
+
     await footerInfo.save();
   }
 
