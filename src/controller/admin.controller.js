@@ -1,22 +1,22 @@
-const User = require("../models/user.model");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const crypto = require("crypto");
-const Memorial = require("../models/memorial.model");
-const SubscriptionPlan = require("../models/SubscriptionPlan");
-const PromoCodeSchema = require("../models/PromoCodeSchema");
-const memorialModel = require("../models/memorial.model");
-const UserSubscription = require("../models/UserSubscription");
-const MemorialPurchase = require("../models/MemorialPurchase");
-const { sendPasswordResetEmail } = require("../service/unifiedEmailService");
+const User = require('../models/user.model');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+const Memorial = require('../models/memorial.model');
+const SubscriptionPlan = require('../models/SubscriptionPlan');
+const PromoCodeSchema = require('../models/PromoCodeSchema');
+const memorialModel = require('../models/memorial.model');
+const UserSubscription = require('../models/UserSubscription');
+const MemorialPurchase = require('../models/MemorialPurchase');
+const { sendPasswordResetEmail } = require('../service/unifiedEmailService');
 
 exports.getUserById = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).select("-password");
+    const user = await User.findById(req.params.id).select('-password');
     if (!user) {
-      return res.status(404).json({ status: false, message: "User not found" });
+      return res.status(404).json({ status: false, message: 'User not found' });
     }
-    res.json({ status: true, message: "User fetched successfully", user });
+    res.json({ status: true, message: 'User fetched successfully', user });
   } catch (err) {
     res.status(500).json({ status: false, message: err.message });
   }
@@ -27,14 +27,14 @@ exports.createAdminUser = async (req, res) => {
     if (!email || !password) {
       return res
         .status(400)
-        .json({ status: false, message: "Email and password are required." });
+        .json({ status: false, message: 'Email and password are required.' });
     }
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(409).json({
         status: false,
-        message: "An account with this email already exists.",
+        message: 'An account with this email already exists.',
       });
     }
     // --- End Validation ---
@@ -48,23 +48,21 @@ exports.createAdminUser = async (req, res) => {
       password: hashedPassword,
       firstname: firstname, // Optional: provide a default
       lastname: lastname, // Optional: provide a default
-      userType: "admin", // Explicitly set the role to 'admin'
+      userType: 'admin', // Explicitly set the role to 'admin'
     });
 
-    
     // Remove the password from the response object for security
     newAdmin.password = undefined;
 
     res.status(201).json({
       status: true,
-      message: "New admin user created successfully.",
+      message: 'New admin user created successfully.',
       user: newAdmin,
     });
   } catch (err) {
-    
     res
       .status(500)
-      .json({ status: false, message: "Server error: " + err.message });
+      .json({ status: false, message: 'Server error: ' + err.message });
   }
 };
 exports.adminSignin = async (req, res) => {
@@ -72,13 +70,13 @@ exports.adminSignin = async (req, res) => {
     const { email, password } = req.body;
 
     // 1. Find the user by email
-    const user = await User.findOne({ email }).select("+password");
+    const user = await User.findOne({ email }).select('+password');
 
     // 2. If no user or password doesn't match, send a generic error
     if (!user) {
       return res.status(401).json({
         status: false,
-        message: "Invalid credentials or access denied",
+        message: 'Invalid credentials or access denied',
       });
     }
 
@@ -86,24 +84,23 @@ exports.adminSignin = async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({
         status: false,
-        message: "Invalid credentials or access denied",
+        message: 'Invalid credentials or access denied',
       });
     }
 
     // 3. !! CRITICAL !!: Check if the user is an admin
-    if (user.userType !== "admin") {
+    if (user.userType !== 'admin') {
       return res.status(403).json({
         status: false,
-        message: "Forbidden: You do not have administrator privileges.",
+        message: 'Forbidden: You do not have administrator privileges.',
       });
     }
-    
 
     // 4. If all checks pass, create a token
     const token = jwt.sign(
       { userId: user._id, userType: user.userType }, // Payload
       process.env.JWT_SECRET, // Secret
-      { expiresIn: "7d" } // Expiration
+      { expiresIn: '7d' } // Expiration
     );
 
     // 5. Send the successful response
@@ -112,7 +109,7 @@ exports.adminSignin = async (req, res) => {
 
     res.json({
       status: true,
-      message: "Admin signin successful",
+      message: 'Admin signin successful',
       token,
       user: {
         id: user._id,
@@ -124,26 +121,26 @@ exports.adminSignin = async (req, res) => {
   } catch (err) {
     res
       .status(500)
-      .json({ status: false, message: "Server error: " + err.message });
+      .json({ status: false, message: 'Server error: ' + err.message });
   }
 };
 
 // Test endpoint to force 401 error (for testing token refresh)
 exports.test401 = async (req, res) => {
-  return res.status(401).json({ 
-    status: false, 
-    message: 'Test 401 error - this should trigger token refresh' 
+  return res.status(401).json({
+    status: false,
+    message: 'Test 401 error - this should trigger token refresh',
   });
 };
 
 exports.adminRefreshToken = async (req, res) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
-    
+
     if (!token) {
-      return res.status(401).json({ 
-        status: false, 
-        message: 'No token provided.' 
+      return res.status(401).json({
+        status: false,
+        message: 'No token provided.',
       });
     }
 
@@ -154,53 +151,62 @@ exports.adminRefreshToken = async (req, res) => {
     } catch (error) {
       // If token verification fails, try to decode without verification
       // This handles expired tokens and tokens with invalid signatures (from testing)
-      if (error.name === 'TokenExpiredError' || error.name === 'JsonWebTokenError') {
-        console.log(`Token verification failed (${error.name}), attempting to decode without verification...`);
+      if (
+        error.name === 'TokenExpiredError' ||
+        error.name === 'JsonWebTokenError'
+      ) {
+        console.log(
+          `Token verification failed (${error.name}), attempting to decode without verification...`
+        );
         decoded = jwt.decode(token, { complete: false });
-        
+
         // If decode also fails, token is completely invalid
         if (!decoded) {
           console.log('Token decode failed - invalid JWT format');
-          return res.status(401).json({ 
-            status: false, 
-            message: 'Invalid token format. Please login again.' 
+          return res.status(401).json({
+            status: false,
+            message: 'Invalid token format. Please login again.',
           });
         }
-        
+
         // Check if token is expired (for logging)
         if (decoded.exp && decoded.exp < Math.floor(Date.now() / 1000)) {
-          console.log('Token is expired (expired at:', new Date(decoded.exp * 1000).toLocaleString(), ')');
+          console.log(
+            'Token is expired (expired at:',
+            new Date(decoded.exp * 1000).toLocaleString(),
+            ')'
+          );
         }
       } else {
         console.log('Token verification error:', error.name, error.message);
-        return res.status(401).json({ 
-          status: false, 
-          message: 'Invalid token: ' + error.message 
+        return res.status(401).json({
+          status: false,
+          message: 'Invalid token: ' + error.message,
         });
       }
     }
 
     if (!decoded || !decoded.userId) {
       console.log('Invalid token payload - decoded:', decoded);
-      return res.status(401).json({ 
-        status: false, 
-        message: 'Invalid token payload. Please login again.' 
+      return res.status(401).json({
+        status: false,
+        message: 'Invalid token payload. Please login again.',
       });
     }
 
     // Verify user still exists and is admin
     const user = await User.findById(decoded.userId);
     if (!user) {
-      return res.status(401).json({ 
-        status: false, 
-        message: 'User not found.' 
+      return res.status(401).json({
+        status: false,
+        message: 'User not found.',
       });
     }
 
-    if (user.userType !== "admin") {
+    if (user.userType !== 'admin') {
       return res.status(403).json({
         status: false,
-        message: "Forbidden: Administrator access is required.",
+        message: 'Forbidden: Administrator access is required.',
       });
     }
 
@@ -208,12 +214,12 @@ exports.adminRefreshToken = async (req, res) => {
     const newToken = jwt.sign(
       { userId: user._id, userType: user.userType },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" }
+      { expiresIn: '7d' }
     );
 
-    res.json({ 
-      status: true, 
-      message: "Token refreshed successfully", 
+    res.json({
+      status: true,
+      message: 'Token refreshed successfully',
       token: newToken,
       user: {
         id: user._id,
@@ -221,13 +227,13 @@ exports.adminRefreshToken = async (req, res) => {
         lastname: user.lastname,
         email: user.email,
         userType: user.userType,
-      }
+      },
     });
   } catch (err) {
     console.error('Admin refresh token error:', err);
-    res.status(500).json({ 
-      status: false, 
-      message: 'Server error: ' + err.message 
+    res.status(500).json({
+      status: false,
+      message: 'Server error: ' + err.message,
     });
   }
 };
@@ -239,18 +245,18 @@ exports.getAllUsers = async (req, res) => {
     const skip = (page - 1) * limit;
 
     // Search functionality
-    const searchQuery = req.query.search || "";
+    const searchQuery = req.query.search || '';
     const searchFilter = {
-      userType: "user",
+      userType: 'user',
       $or: [
-        { firstName: { $regex: searchQuery, $options: "i" } },
-        { lastName: { $regex: searchQuery, $options: "i" } },
-        { email: { $regex: searchQuery, $options: "i" } },
+        { firstName: { $regex: searchQuery, $options: 'i' } },
+        { lastName: { $regex: searchQuery, $options: 'i' } },
+        { email: { $regex: searchQuery, $options: 'i' } },
       ],
     };
 
     // Fetch users with pagination and search
-    const usersData = await User.find(searchFilter)
+    const usersData = await User.find(searchFilter);
     // .skip(skip).limit(limit);
 
     const totalUsers = await User.countDocuments(searchFilter);
@@ -260,7 +266,7 @@ exports.getAllUsers = async (req, res) => {
     const memorialCounts = await Memorial.aggregate([
       {
         $group: {
-          _id: "$createdBy",
+          _id: '$createdBy',
           count: { $sum: 1 },
         },
       },
@@ -279,30 +285,30 @@ exports.getAllUsers = async (req, res) => {
           from: 'memorials',
           localField: 'memorialId',
           foreignField: '_id',
-          as: 'memorialData'
-        }
+          as: 'memorialData',
+        },
       },
       {
         $lookup: {
           from: 'subscriptionplans',
           localField: 'planId',
           foreignField: '_id',
-          as: 'planData'
-        }
+          as: 'planData',
+        },
       },
       {
         $lookup: {
           from: 'usersubscriptions',
           localField: 'memorialId',
           foreignField: 'userId',
-          as: 'subscriptionData'
-        }
+          as: 'subscriptionData',
+        },
       },
       {
         $match: {
           status: { $in: ['completed', 'paid'] },
-          'memorialData.status': 'active'
-        }
+          'memorialData.status': 'active',
+        },
       },
       {
         $project: {
@@ -315,9 +321,9 @@ exports.getAllUsers = async (req, res) => {
           status: 1,
           memorialData: { $arrayElemAt: ['$memorialData', 0] },
           planData: { $arrayElemAt: ['$planData', 0] },
-          subscriptionData: { $arrayElemAt: ['$subscriptionData', 0] }
-        }
-      }
+          subscriptionData: { $arrayElemAt: ['$subscriptionData', 0] },
+        },
+      },
     ]);
 
     // Create a map for memorial subscriptions
@@ -327,21 +333,23 @@ exports.getAllUsers = async (req, res) => {
       if (!memorialSubscriptionMap[userId]) {
         memorialSubscriptionMap[userId] = [];
       }
-      
+
       // Get the most recent active subscription for this memorial
       const activeSubscription = purchase.subscriptionData;
       const subscriptionStatus = activeSubscription?.status || 'inactive';
-      
+
       memorialSubscriptionMap[userId].push({
         memorialId: purchase.memorialId,
-        memorialName: `${purchase.memorialData?.firstName || 'Unknown'} ${purchase.memorialData?.lastName || ''}`,
+        memorialName: `${purchase.memorialData?.firstName || 'Unknown'} ${
+          purchase.memorialData?.lastName || ''
+        }`,
         planName: purchase.planData?.name || 'Unknown',
         duration: purchase.duration || '1_month',
         durationPrice: purchase.durationPrice || 0,
         finalPricePaid: purchase.finalPricePaid || 0,
         subscriptionStatus: subscriptionStatus,
         purchaseStatus: purchase.status,
-        planType: purchase.planData?.planType || 'minimal'
+        planType: purchase.planData?.planType || 'minimal',
       });
     });
 
@@ -354,7 +362,7 @@ exports.getAllUsers = async (req, res) => {
 
     res.json({
       status: true,
-      message: "Users fetched successfully",
+      message: 'Users fetched successfully',
       users: usersWithMemorialCount,
       // pagination: {
       //   currentPage: page,
@@ -366,12 +374,10 @@ exports.getAllUsers = async (req, res) => {
   } catch (err) {
     res.status(500).json({
       status: false,
-      message: "Server error: " + err.message,
+      message: 'Server error: ' + err.message,
     });
   }
 };
-
-
 
 exports.getAllMemorials = async (req, res) => {
   try {
@@ -380,9 +386,9 @@ exports.getAllMemorials = async (req, res) => {
     const isPublic = req.query.isPublic === 'true';
 
     // --- Search functionality (no changes here) ---
-    const searchQuery = req.query.search || "";
+    const searchQuery = req.query.search || '';
     let searchFilter = {
-      memorialPaymentStatus: { $ne: 'draft' }
+      memorialPaymentStatus: { $ne: 'draft' },
     };
 
     if (isPublic) {
@@ -394,10 +400,10 @@ exports.getAllMemorials = async (req, res) => {
       searchFilter = {
         ...searchFilter,
         $or: [
-          { firstName: { $regex: searchRegex, $options: "i" } },
-          { lastName: { $regex: searchRegex, $options: "i" } },
-          { lifeStory: { $regex: searchRegex, $options: "i" } },
-          { location: { $regex: searchRegex, $options: "i" } },
+          { firstName: { $regex: searchRegex, $options: 'i' } },
+          { lastName: { $regex: searchRegex, $options: 'i' } },
+          { lifeStory: { $regex: searchRegex, $options: 'i' } },
+          { location: { $regex: searchRegex, $options: 'i' } },
         ],
       };
     }
@@ -418,13 +424,13 @@ exports.getAllMemorials = async (req, res) => {
 
     // Start building the query
     let query = Memorial.find(searchFilter)
-      .populate("createdBy")
+      .populate('createdBy')
       .populate({
-        path: "purchase",
+        path: 'purchase',
         populate: {
-          path: "planId",
-          model: "SubscriptionPlan"
-        }
+          path: 'planId',
+          model: 'SubscriptionPlan',
+        },
       })
       .sort(sortOptions); // Apply the sorting to the query
 
@@ -455,13 +461,13 @@ exports.getAllMemorials = async (req, res) => {
     if (!memorials || memorials.length === 0) {
       return res
         .status(404)
-        .json({ status: false, message: "No memorials found" });
+        .json({ status: false, message: 'No memorials found' });
     }
 
     // --- Conditionally build the final response object ---
     const response = {
       status: true,
-      message: "Memorials fetched successfully",
+      message: 'Memorials fetched successfully',
       memorials,
     };
 
@@ -470,14 +476,12 @@ exports.getAllMemorials = async (req, res) => {
     }
 
     res.json(response);
-
   } catch (err) {
     res
       .status(500)
-      .json({ status: false, message: "Server error: " + err.message });
+      .json({ status: false, message: 'Server error: ' + err.message });
   }
 };
-
 
 exports.toggleAccountStatus = async (req, res) => {
   try {
@@ -486,18 +490,18 @@ exports.toggleAccountStatus = async (req, res) => {
     if (!userId) {
       return res
         .status(400)
-        .json({ status: false, message: "User ID is required" });
+        .json({ status: false, message: 'User ID is required' });
     }
 
     const user = await User.findById(userId);
 
     if (!user) {
-      return res.status(404).json({ status: false, message: "User not found" });
+      return res.status(404).json({ status: false, message: 'User not found' });
     }
 
     // Toggle logic
     user.accountStatus =
-      user.accountStatus === "active" ? "suspended" : "active";
+      user.accountStatus === 'active' ? 'suspended' : 'active';
     await user.save();
 
     res.status(200).json({
@@ -506,8 +510,8 @@ exports.toggleAccountStatus = async (req, res) => {
       data: { accountStatus: user.accountStatus },
     });
   } catch (error) {
-    console.error("Error toggling account status:", error);
-    res.status(500).json({ status: false, message: "Internal server error" });
+    console.error('Error toggling account status:', error);
+    res.status(500).json({ status: false, message: 'Internal server error' });
   }
 };
 exports.adminDeleteMemorial = async (req, res) => {
@@ -516,14 +520,14 @@ exports.adminDeleteMemorial = async (req, res) => {
     if (!memorial) {
       return res
         .status(404)
-        .json({ status: false, message: "Memorial not found." });
+        .json({ status: false, message: 'Memorial not found.' });
     }
     await memorial.deleteOne();
-    res.json({ status: true, message: "Memorial deleted successfully" });
+    res.json({ status: true, message: 'Memorial deleted successfully' });
   } catch (error) {
     res
       .status(500)
-      .json({ status: false, message: "Server Error: " + error.message });
+      .json({ status: false, message: 'Server Error: ' + error.message });
   }
 };
 exports.adminDeleteUser = async (req, res) => {
@@ -532,14 +536,14 @@ exports.adminDeleteUser = async (req, res) => {
     if (!user) {
       return res
         .status(404)
-        .json({ status: false, message: "User not found." });
+        .json({ status: false, message: 'User not found.' });
     }
     await user.deleteOne();
-    res.json({ status: true, message: "User deleted successfully" });
+    res.json({ status: true, message: 'User deleted successfully' });
   } catch (error) {
     res
       .status(500)
-      .json({ status: false, message: "Server Error: " + error.message });
+      .json({ status: false, message: 'Server Error: ' + error.message });
   }
 };
 exports.toggleMemorialStatus = async (req, res) => {
@@ -549,17 +553,17 @@ exports.toggleMemorialStatus = async (req, res) => {
     const memorial = await Memorial.findById(id);
 
     if (!memorial) {
-      return res.status(404).json({ message: "Memorial not found" });
+      return res.status(404).json({ message: 'Memorial not found' });
     }
 
-    if (memorial.status === "expired") {
+    if (memorial.status === 'expired') {
       return res
         .status(400)
-        .json({ message: "Cannot toggle status of an expired memorial" });
+        .json({ message: 'Cannot toggle status of an expired memorial' });
     }
 
     // Toggle between active and inactive
-    memorial.status = memorial.status === "active" ? "inactive" : "active";
+    memorial.status = memorial.status === 'active' ? 'inactive' : 'active';
     await memorial.save();
 
     return res.status(200).json({
@@ -567,30 +571,30 @@ exports.toggleMemorialStatus = async (req, res) => {
       status: memorial.status,
     });
   } catch (error) {
-    console.error("Error toggling memorial status:", error);
-    return res.status(500).json({ message: "Internal server error" });
+    console.error('Error toggling memorial status:', error);
+    return res.status(500).json({ message: 'Internal server error' });
   }
 };
 
 // Create a new plan
 exports.adminCreatePlan = async (req, res) => {
   try {
-    const { 
+    const {
       maxPhotos = 0,
       allowSlideshow = false,
       allowVideos = false,
       maxVideoDuration = 0,
       ...otherFields
     } = req.body;
-    
+
     const plan = await SubscriptionPlan.create({
       maxPhotos,
       allowSlideshow,
       allowVideos,
       maxVideoDuration,
-      ...otherFields
+      ...otherFields,
     });
-    
+
     res.status(201).json(plan);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -607,11 +611,27 @@ exports.adminGetAllPlans = async (req, res) => {
   }
 };
 
+exports.getPlansByPlanType = async (req, res) => {
+  const { planType } = req.query;
+
+  if (!planType) {
+    return res.status(400).json({ error: 'planType is required' });
+  }
+
+  try {
+    const plans = await SubscriptionPlan.find({ planType });
+    res.status(200).json(plans);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
 // Get a single plan by ID
 exports.adminGetPlanById = async (req, res) => {
   try {
     const plan = await SubscriptionPlan.findById(req.params.id);
-    if (!plan) return res.status(404).json({ error: "Plan not found" });
+    if (!plan) return res.status(404).json({ error: 'Plan not found' });
     res.status(200).json(plan);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -621,14 +641,14 @@ exports.adminGetPlanById = async (req, res) => {
 // Update a plan
 exports.adminUpdatePlan = async (req, res) => {
   try {
-    const { 
+    const {
       maxPhotos,
       allowSlideshow,
       allowVideos,
       maxVideoDuration,
       ...otherFields
     } = req.body;
-    
+
     const plan = await SubscriptionPlan.findByIdAndUpdate(
       req.params.id,
       {
@@ -636,11 +656,11 @@ exports.adminUpdatePlan = async (req, res) => {
         allowSlideshow,
         allowVideos,
         maxVideoDuration,
-        ...otherFields
+        ...otherFields,
       },
       { new: true }
     );
-    
+
     res.json(plan);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -651,8 +671,8 @@ exports.adminUpdatePlan = async (req, res) => {
 exports.adminDeletePlan = async (req, res) => {
   try {
     const deleted = await SubscriptionPlan.findByIdAndDelete(req.params.id);
-    if (!deleted) return res.status(404).json({ error: "Plan not found" });
-    res.status(200).json({ message: "Plan deleted successfully" });
+    if (!deleted) return res.status(404).json({ error: 'Plan not found' });
+    res.status(200).json({ message: 'Plan deleted successfully' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -664,7 +684,7 @@ exports.togglePlanStatus = async (req, res) => {
   try {
     const plan = await SubscriptionPlan.findById(id);
     if (!plan) {
-      return res.status(404).json({ error: "Subscription plan not found" });
+      return res.status(404).json({ error: 'Subscription plan not found' });
     }
 
     plan.isActive = !plan.isActive;
@@ -675,34 +695,59 @@ exports.togglePlanStatus = async (req, res) => {
       updatedPlan: plan,
     });
   } catch (error) {
-    res.status(500).json({ error: "Server error", details: error.message });
+    res.status(500).json({ error: 'Server error', details: error.message });
   }
 };
 
-
 exports.AddPromoCode = async (req, res) => {
- try {
-    const { code, discountType, discountValue, expiryDate, maxUsage, isActive, appliesToPlan, appliesToUser } = req.body;
+  try {
+    const {
+      code,
+      discountType,
+      discountValue,
+      expiryDate,
+      maxUsage,
+      isActive,
+      appliesToPlan,
+      appliesToUser,
+    } = req.body;
 
     // Basic validation
     if (!code || !discountType || !expiryDate) {
-      return res.status(400).json({ message: "Please provide code, discount type, and expiry date." });
+      return res.status(400).json({
+        message: 'Please provide code, discount type, and expiry date.',
+      });
     }
 
-       if (!appliesToPlan) {
-      return res.status(400).json({ message: "Please select plan first." });
+    if (!appliesToPlan) {
+      return res.status(400).json({ message: 'Please select plan first.' });
     }
-    if (discountType !== 'free' && (discountValue === undefined || discountValue === null)) {
-      return res.status(400).json({ message: "Discount value is required for 'percentage' or 'fixed' discount types." });
+    if (
+      discountType !== 'free' &&
+      (discountValue === undefined || discountValue === null)
+    ) {
+      return res.status(400).json({
+        message:
+          "Discount value is required for 'percentage' or 'fixed' discount types.",
+      });
     }
-    if (discountType === 'percentage' && (discountValue < 0 || discountValue > 100)) {
-      return res.status(400).json({ message: "Percentage discount value must be between 0 and 100." });
+    if (
+      discountType === 'percentage' &&
+      (discountValue < 0 || discountValue > 100)
+    ) {
+      return res.status(400).json({
+        message: 'Percentage discount value must be between 0 and 100.',
+      });
     }
     if (discountType === 'fixed' && discountValue < 0) {
-      return res.status(400).json({ message: "Fixed discount value cannot be negative." });
+      return res
+        .status(400)
+        .json({ message: 'Fixed discount value cannot be negative.' });
     }
     if (maxUsage !== undefined && maxUsage !== null && maxUsage < 1) {
-        return res.status(400).json({ message: "Max usage must be at least 1 or left empty for unlimited." });
+      return res.status(400).json({
+        message: 'Max usage must be at least 1 or left empty for unlimited.',
+      });
     }
 
     const newPromoCode = new PromoCodeSchema({
@@ -710,7 +755,7 @@ exports.AddPromoCode = async (req, res) => {
       discountType,
       discountValue: discountType === 'free' ? 0 : discountValue, // Set value to 0 for free type
       expiryDate,
-      maxUsage: maxUsage === "" ? null : maxUsage, // Handle empty string for maxUsage as null
+      maxUsage: maxUsage === '' ? null : maxUsage, // Handle empty string for maxUsage as null
       isActive,
       appliesToPlan: appliesToPlan || null,
       appliesToUser: appliesToUser || null,
@@ -719,26 +764,23 @@ exports.AddPromoCode = async (req, res) => {
     const savedPromoCode = await newPromoCode.save();
     res.status(201).json(savedPromoCode);
   } catch (error) {
-    console.error("Error creating promo code:", error);
+    console.error('Error creating promo code:', error);
     if (error.code === 11000) {
-      return res.status(400).json({ message: "Promo code already exists.", error: error.message });
+      return res
+        .status(400)
+        .json({ message: 'Promo code already exists.', error: error.message });
     }
-    res.status(500).json({ message: "Server error", error: error.message });
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
-
-
-
 exports.GetAllPromoCodes = async (req, res) => {
   try {
-    let { page = 1, limit = 5, search = "" } = req.query;
+    let { page = 1, limit = 5, search = '' } = req.query;
     page = parseInt(page);
     limit = parseInt(limit);
 
-    const query = search
-      ? { code: { $regex: search, $options: "i" } }
-      : {};
+    const query = search ? { code: { $regex: search, $options: 'i' } } : {};
 
     const total = await PromoCodeSchema.countDocuments(query);
     const promoCodes = await PromoCodeSchema.find(query)
@@ -753,8 +795,8 @@ exports.GetAllPromoCodes = async (req, res) => {
       totalPages: Math.ceil(total / limit),
     });
   } catch (error) {
-    console.error("Error fetching promo codes:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    console.error('Error fetching promo codes:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
@@ -762,26 +804,25 @@ exports.GetPromoCodeById = async (req, res) => {
   try {
     const promoCode = await PromoCodeSchema.findById(req.params.id);
     if (!promoCode) {
-      return res.status(404).json({ message: "Promo code not found" });
+      return res.status(404).json({ message: 'Promo code not found' });
     }
     res.status(200).json(promoCode);
   } catch (error) {
-    console.error("Error fetching promo code:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    console.error('Error fetching promo code:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
-
 
 exports.DeletePromoCode = async (req, res) => {
   try {
     const deletedPromo = await PromoCodeSchema.findByIdAndDelete(req.params.id);
     if (!deletedPromo) {
-      return res.status(404).json({ message: "Promo code not found" });
+      return res.status(404).json({ message: 'Promo code not found' });
     }
-    res.status(200).json({ message: "Promo code deleted successfully" });
+    res.status(200).json({ message: 'Promo code deleted successfully' });
   } catch (error) {
-    console.error("Error deleting promo code:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    console.error('Error deleting promo code:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
@@ -800,30 +841,42 @@ exports.UpdatePromoCode = async (req, res) => {
     } = req.body;
 
     // Basic validation
-    if (discountType && !["percentage", "fixed", "free"].includes(discountType)) {
-      return res.status(400).json({ message: "Invalid discount type." });
+    if (
+      discountType &&
+      !['percentage', 'fixed', 'free'].includes(discountType)
+    ) {
+      return res.status(400).json({ message: 'Invalid discount type.' });
     }
-    if (discountType === "percentage" && (discountValue < 0 || discountValue > 100)) {
-      return res.status(400).json({ message: "Percentage discount value must be between 0 and 100." });
+    if (
+      discountType === 'percentage' &&
+      (discountValue < 0 || discountValue > 100)
+    ) {
+      return res.status(400).json({
+        message: 'Percentage discount value must be between 0 and 100.',
+      });
     }
-    if (discountType === "fixed" && discountValue < 0) {
-      return res.status(400).json({ message: "Fixed discount value cannot be negative." });
+    if (discountType === 'fixed' && discountValue < 0) {
+      return res
+        .status(400)
+        .json({ message: 'Fixed discount value cannot be negative.' });
     }
     if (maxUsage !== undefined && maxUsage !== null && maxUsage < 1) {
-      return res.status(400).json({ message: "Max usage must be at least 1 or left empty for unlimited." });
+      return res.status(400).json({
+        message: 'Max usage must be at least 1 or left empty for unlimited.',
+      });
     }
 
     // Prepare update object
     const updateData = {};
     if (code) updateData.code = code.toUpperCase();
     if (discountType) updateData.discountType = discountType;
-    if (discountType === "free") {
+    if (discountType === 'free') {
       updateData.discountValue = 0;
     } else if (discountValue !== undefined) {
       updateData.discountValue = discountValue;
     }
     if (expiryDate) updateData.expiryDate = expiryDate;
-    if (maxUsage === "") {
+    if (maxUsage === '') {
       updateData.maxUsage = null;
     } else if (maxUsage !== undefined) {
       updateData.maxUsage = maxUsage;
@@ -832,86 +885,89 @@ exports.UpdatePromoCode = async (req, res) => {
     if (appliesToPlan !== undefined) updateData.appliesToPlan = appliesToPlan;
     if (appliesToUser !== undefined) updateData.appliesToUser = appliesToUser;
 
-    const updatedPromoCode = await PromoCodeSchema.findByIdAndUpdate(id, updateData, {
-      new: true,
-      runValidators: true,
-    });
+    const updatedPromoCode = await PromoCodeSchema.findByIdAndUpdate(
+      id,
+      updateData,
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
 
     if (!updatedPromoCode) {
-      return res.status(404).json({ message: "Promo code not found." });
+      return res.status(404).json({ message: 'Promo code not found.' });
     }
 
     res.status(200).json(updatedPromoCode);
   } catch (error) {
-    console.error("Error updating promo code:", error);
+    console.error('Error updating promo code:', error);
     if (error.code === 11000) {
-      return res.status(400).json({ message: "Promo code already exists.", error: error.message });
+      return res
+        .status(400)
+        .json({ message: 'Promo code already exists.', error: error.message });
     }
-    res.status(500).json({ message: "Server error", error: error.message });
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
-
-
 
 // Updated validation function that accepts planId
 exports.ValidatePromoCode = async (req, res) => {
   try {
-    console.log("🚀 ~ req:", req)
+    console.log('🚀 ~ req:', req);
     const { promoCode, memorialId, planId } = req.body;
 
     if (!promoCode || !memorialId || !planId) {
-      return res.status(400).json({ 
-        isValid: false, 
-        message: "Promo code, memorial ID, and plan ID are required" 
+      return res.status(400).json({
+        isValid: false,
+        message: 'Promo code, memorial ID, and plan ID are required',
       });
     }
 
     // Find the promo code
-    const promo = await PromoCodeSchema.findOne({ 
-      code: promoCode.toUpperCase(), 
-      isActive: true 
+    const promo = await PromoCodeSchema.findOne({
+      code: promoCode.toUpperCase(),
+      isActive: true,
     });
 
     if (!promo) {
-      return res.status(404).json({ 
-        isValid: false, 
-        message: "Promo code not found" 
+      return res.status(404).json({
+        isValid: false,
+        message: 'Promo code not found',
       });
     }
 
     // Check if expired
     if (new Date() > promo.expiryDate) {
-      return res.status(400).json({ 
-        isValid: false, 
-        message: "Promo code has expired" 
+      return res.status(400).json({
+        isValid: false,
+        message: 'Promo code has expired',
       });
     }
 
     // Check usage limits
     if (promo.maxUsage !== null && promo.currentUsage >= promo.maxUsage) {
-      return res.status(400).json({ 
-        isValid: false, 
-        message: "Promo code has reached its usage limit" 
+      return res.status(400).json({
+        isValid: false,
+        message: 'Promo code has reached its usage limit',
       });
     }
 
     // Check if applies to specific user
- 
 
     // Check if applies to specific plan
     if (promo.appliesToPlan && promo.appliesToPlan.toString() !== planId) {
-      return res.status(400).json({ 
-        isValid: false, 
-        message: "This promo code is not valid for the selected plan" 
+      return res.status(400).json({
+        isValid: false,
+        message: 'This promo code is not valid for the selected plan',
       });
     }
 
     // Get memorial to check if it already has a discount
     const memorial = await memorialModel.findById(memorialId);
     if (memorial && memorial.isAdminDiscounted) {
-      return res.status(400).json({ 
-        isValid: false, 
-        message: "Cannot apply promo code to an already discounted memorial" 
+      return res.status(400).json({
+        isValid: false,
+        message: 'Cannot apply promo code to an already discounted memorial',
       });
     }
 
@@ -922,14 +978,13 @@ exports.ValidatePromoCode = async (req, res) => {
       discountValue: promo.discountValue,
       appliesToPlan: promo.appliesToPlan,
       code: promo.code,
-      message: "Promo code applied successfully"
+      message: 'Promo code applied successfully',
     });
-
   } catch (error) {
-    console.error("Error validating promo code:", error);
-    res.status(500).json({ 
-      isValid: false, 
-      message: "Server error validating promo code" 
+    console.error('Error validating promo code:', error);
+    res.status(500).json({
+      isValid: false,
+      message: 'Server error validating promo code',
     });
   }
 };
@@ -938,65 +993,72 @@ exports.ValidatePromoCode = async (req, res) => {
 exports.adminForgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
-    
+
     // Check if email is provided
     if (!email) {
-      return res.status(400).json({ status: false, message: "Email is required" });
+      return res
+        .status(400)
+        .json({ status: false, message: 'Email is required' });
     }
 
     // Check if email credentials are configured
     if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-      return res.status(500).json({ 
-        status: false, 
-        message: "Email service not configured. Please contact administrator." 
+      return res.status(500).json({
+        status: false,
+        message: 'Email service not configured. Please contact administrator.',
       });
     }
 
     // Find admin user by email
-    const user = await User.findOne({ email, userType: "admin" });
+    const user = await User.findOne({ email, userType: 'admin' });
     if (!user) {
-      return res.status(404).json({ 
-        status: false, 
-        message: "Admin user not found with this email" 
+      return res.status(404).json({
+        status: false,
+        message: 'Admin user not found with this email',
       });
     }
 
     // Generate reset token
-    const resetToken = crypto.randomBytes(32).toString("hex");
+    const resetToken = crypto.randomBytes(32).toString('hex');
     user.resetPasswordToken = resetToken;
     user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
     await user.save();
-    
+
     // Create reset link for admin (using same page as regular users)
     const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
-    
+
     // Send password reset email using unified email service
-    const emailSent = await sendPasswordResetEmail(email, resetLink, user.firstname || "Admin");
-    
+    const emailSent = await sendPasswordResetEmail(
+      email,
+      resetLink,
+      user.firstname || 'Admin'
+    );
+
     if (emailSent) {
-      res.json({ 
-        status: true, 
-        message: "Password reset link sent to your email" 
+      res.json({
+        status: true,
+        message: 'Password reset link sent to your email',
       });
     } else {
-      res.status(500).json({ 
-        status: false, 
-        message: "Failed to send reset email" 
+      res.status(500).json({
+        status: false,
+        message: 'Failed to send reset email',
       });
     }
   } catch (err) {
-    console.error("Admin forgot password error:", err);
-    
+    console.error('Admin forgot password error:', err);
+
     // Handle specific nodemailer errors
     if (err.code === 'EAUTH' || err.message.includes('Missing credentials')) {
-      return res.status(500).json({ 
-        status: false, 
-        message: "Email service authentication failed. Please contact administrator." 
+      return res.status(500).json({
+        status: false,
+        message:
+          'Email service authentication failed. Please contact administrator.',
       });
     }
-    res.status(500).json({ 
-      status: false, 
-      message: "Server error: " + err.message 
+    res.status(500).json({
+      status: false,
+      message: 'Server error: ' + err.message,
     });
   }
 };
@@ -1004,54 +1066,57 @@ exports.adminForgotPassword = async (req, res) => {
 exports.updateAdminPassword = async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
-    
+
     if (!currentPassword || !newPassword) {
-      return res.status(400).json({ 
-        status: false, 
-        message: "Current password and new password are required" 
+      return res.status(400).json({
+        status: false,
+        message: 'Current password and new password are required',
       });
     }
-    
+
     if (newPassword.length < 8) {
-      return res.status(400).json({ 
-        status: false, 
-        message: "New password must be at least 8 characters long" 
+      return res.status(400).json({
+        status: false,
+        message: 'New password must be at least 8 characters long',
       });
     }
-    
+
     // Find the admin user with password field
-    const user = await User.findById(req.user.userId).select("+password");
-    
+    const user = await User.findById(req.user.userId).select('+password');
+
     if (!user) {
-      return res.status(404).json({ 
-        status: false, 
-        message: "Admin user not found" 
+      return res.status(404).json({
+        status: false,
+        message: 'Admin user not found',
       });
     }
-    
+
     // Verify current password
-    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
-    
+    const isCurrentPasswordValid = await bcrypt.compare(
+      currentPassword,
+      user.password
+    );
+
     if (!isCurrentPasswordValid) {
-      return res.status(400).json({ 
-        status: false, 
-        message: "Current password is incorrect" 
+      return res.status(400).json({
+        status: false,
+        message: 'Current password is incorrect',
       });
     }
-    
+
     // Hash the new password
     const hash = await bcrypt.hash(newPassword, 10);
     await User.findByIdAndUpdate(req.user.userId, { password: hash });
-    
-    res.json({ 
+
+    res.json({
       status: true,
-      message: "Password updated successfully" 
+      message: 'Password updated successfully',
     });
   } catch (err) {
-    console.error("Admin password update error:", err);
-    res.status(500).json({ 
-      status: false, 
-      message: "Server error: " + err.message 
+    console.error('Admin password update error:', err);
+    res.status(500).json({
+      status: false,
+      message: 'Server error: ' + err.message,
     });
   }
 };

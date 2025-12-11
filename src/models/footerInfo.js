@@ -12,6 +12,8 @@ const footerInfoSchema = new mongoose.Schema(
       trim: true,
       lowercase: true,
     },
+    isVisibleEmail: { type: Boolean, default: true },
+    isVisiblePhone: { type: Boolean, default: true },
   },
   { timestamps: true }
 );
