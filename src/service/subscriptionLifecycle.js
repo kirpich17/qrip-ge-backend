@@ -1,76 +1,108 @@
+const cron = require('node-cron');
+const mongoose = require('mongoose');
+const Memorial = require('../models/memorial.model');
 
+const durationMap = {
+  '1_month': { unit: 'days', value: 30 },
+  '3_months': { unit: 'days', value: 90 },
+  '6_months': { unit: 'days', value: 180 },
+  '1_year': { unit: 'days', value: 365 },
+  '2_years': { unit: 'days', value: 730 },
+  life_time: { unit: 'infinite' },
+};
 
-const cron =require('node-cron');
-const mongoose =require('mongoose');
-const UserModal =require('../../src/models/user.model.js');
-const UserSubscription =require('../../src/models/UserSubscription.js');
-const {CronJob } =require('cron');
+const manageMemorialExpiry = async () => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
-
-const manageSubscriptionLifecycle = async () => {
   try {
-    // 1. Create consistent evaluation point
-    const evaluationTime = new Date();
-    const startOfToday = new Date(evaluationTime);
-    startOfToday.setHours(0, 0, 0, 0);
+    const now = new Date();
 
-    console.log(`[${evaluationTime.toISOString()}] Running subscription job`);
+    const memorials = await Memorial.find({
+      status: 'active',
+      purchase: { $exists: true, $ne: null },
+    })
+      .populate('purchase')
+      .session(session);
 
- 
+    for (const memorial of memorials) {
+      const purchase = memorial.purchase;
 
-    // 3. Handle canceled subscriptions (WITH USER STATE UPDATE)
-    const endedSubscriptions = await UserSubscription.find({
-      status: 'canceled',
-      endDate: { $lt: startOfToday } 
-    }).populate('userId', 'email subscriptionPlan');
+      if (!purchase || !purchase.paymentDate) continue;
+      if (purchase.status !== 'active') continue;
 
-    console.log(`Found ${endedSubscriptions.length} ended subscriptions`);
+      if (memorial.isAdminDiscounted && memorial.adminDiscountType === 'free') {
+        continue;
+      }
 
-    for (const sub of endedSubscriptions) {
-      const session = await mongoose.startSession();
-      session.startTransaction();
+      const durationConfig = durationMap[purchase.duration];
+      if (!durationConfig || durationConfig.unit === 'infinite') continue;
 
-      try {
-        // Update subscription
-        await UserSubscription.findByIdAndUpdate(
-          sub._id,
-          { status: 'expired' }, // Matches model enum
-          { session }
-        );
+      const expiryDate = new Date(purchase.paymentDate);
+      expiryDate.setDate(expiryDate.getDate() + durationConfig.value);
 
-        // Update user if this was their active plan
-        if (sub.userId.subscriptionPlan?.equals(sub.planId)) {
-          await UserModal.findByIdAndUpdate(
-            sub.userId._id,
-            {
-              accountStatus: 'active', // Or whatever status makes sense
-           subscriptionExpiresAt: null //When a subscription expires, setting it to null indicates: No active subscription end date
-            },
-            { session }
-          );
-        }
-
-        await session.commitTransaction();
-        console.log(`Expired canceled sub ${sub._id} for ${sub.userId.email}`);
-      } catch (error) {
-        await session.abortTransaction();
-        console.error(`Failed sub expiration ${sub._id}:`, error);
-      } finally {
-        session.endSession();
+      if (now >= expiryDate) {
+        memorial.status = 'expired';
+        memorial.memorialPaymentStatus = 'draft';
+        await memorial.save({ session });
       }
     }
 
-  } catch (error) {
-    console.error('Critical job error:', error);
-    // ADD REAL ALERTING HERE (Sentry, PagerDuty, etc)
+    await session.commitTransaction();
+  } catch (err) {
+    await session.abortTransaction();
+    throw err;
+  } finally {
+    session.endSession();
   }
 };
 
-// Production schedule: Daily at 3 AM Tbilisi time
-cron.schedule('0 3 * * *', manageSubscriptionLifecycle, {
-  timezone: "Asia/Tbilisi"
+const findExpiringMemorials = async (daysAhead = 7) => {
+  const now = new Date();
+  const future = new Date();
+  future.setDate(future.getDate() + daysAhead);
+
+  const memorials = await Memorial.find({
+    status: 'active',
+    purchase: { $ne: null },
+  }).populate('purchase');
+
+  return memorials
+    .map((memorial) => {
+      const purchase = memorial.purchase;
+      if (!purchase || purchase.status !== 'active') return null;
+
+      const config = durationMap[purchase.duration];
+      if (!config || config.unit === 'infinite') return null;
+
+      const expiryDate = new Date(purchase.paymentDate);
+      expiryDate.setDate(expiryDate.getDate() + config.value);
+
+      if (expiryDate >= now && expiryDate <= future) {
+        return {
+          memorial,
+          expiryDate,
+          daysRemaining: Math.ceil((expiryDate - now) / (1000 * 60 * 60 * 24)),
+        };
+      }
+
+      return null;
+    })
+    .filter(Boolean);
+};
+
+const triggerMemorialExpiryCheck = async () => {
+  await manageMemorialExpiry();
+};
+
+cron.schedule('*/10 * * * * *', manageMemorialExpiry, {
+  timezone: 'Asia/Tbilisi',
+  name: 'memorial-expiry-check',
 });
 
-
-
-// new CronJob('*/1 * * * * *', manageSubscriptionLifecycle, null, true, 'Asia/Tbilisi');
+module.exports = {
+  manageMemorialExpiry,
+  findExpiringMemorials,
+  triggerMemorialExpiryCheck,
+  durationMap,
+};
