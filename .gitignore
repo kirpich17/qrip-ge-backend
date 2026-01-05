@@ -2,3 +2,5 @@ node_modules/
 # Environment variables
 .env
 .env.development
+.dockerignore
+.env.* 
