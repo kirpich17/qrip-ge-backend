@@ -9,6 +9,7 @@ const PromoCodeSchema = require('../models/PromoCodeSchema.js');
 const {
   sendMemorialCreationConfirmationEmail,
 } = require('../service/unifiedEmailService.js');
+const PromoCode = require('../models/PromoCodeSchema');
 
 // Helper function to validate promo code
 const validatePromoCode = async (promoCode, memorialId, planId) => {
@@ -21,7 +22,7 @@ const validatePromoCode = async (promoCode, memorialId, planId) => {
     }
 
     // Find the promo code
-    const promo = await PromoCodeSchema.findOne({
+    const promo = await PromoCode.findOne({
       code: promoCode.toUpperCase(),
       isActive: true,
     });
@@ -282,8 +283,8 @@ const paymentCallbackWebhook = async (req, res) => {
 
       // Increment promo code usage if applicable
       if (purchase.appliedPromoCode) {
-        await PromoCodeSchema.findByIdAndUpdate(purchase.appliedPromoCode._id, {
-          $inc: { currentUsage: 1 },
+        await PromoCode.findByIdAndUpdate(updatedPromo._id, {
+          $inc: { currentUsage: -1 },
         });
         console.log(
           `Incremented usage for promo code: ${purchase.appliedPromoCode.code}`
@@ -782,9 +783,44 @@ const initiateMemorialPayment = async (req, res) => {
     // Add this section inside initiateMemorialPayment function
     // Replace the "Handle free plans" section (around line 340-380)
 
-    // Handle free plans (amount = 0.00) - directly activate without payment
     if (amount === 0) {
       try {
+        console.log(
+          '🚀 Free plan detected, activating directly without payment'
+        );
+
+        const memorial = await memorialModel.findById(memorialId);
+        if (!memorial) {
+          return res.status(404).json({
+            success: false,
+            message: 'Memorial not found',
+          });
+        }
+
+        let updatedPromo = null;
+
+        if (promoCodeDoc) {
+          updatedPromo = await PromoCode.findOneAndUpdate(
+            {
+              _id: promoCodeDoc._id,
+              isActive: true,
+              $or: [
+                { maxUsage: null },
+                { $expr: { $lt: ['$currentUsage', '$maxUsage'] } },
+              ],
+            },
+            { $inc: { currentUsage: 1 } },
+            { new: true }
+          );
+
+          if (!updatedPromo) {
+            return res.status(400).json({
+              success: false,
+              message: 'Promo code usage limit reached',
+            });
+          }
+        }
+
         const purchaseRecord = await MemorialPurchase.create({
           userId,
           memorialId,
@@ -795,26 +831,19 @@ const initiateMemorialPayment = async (req, res) => {
           amount: durationOption.price,
           finalPricePaid: 0,
 
-          ...(promoCodeDoc && {
-            appliedPromoCode: promoCodeDoc._id,
+          ...(updatedPromo && {
+            appliedPromoCode: updatedPromo._id,
             isAdminDiscount: false,
             discountDetails: {
-              type: promoCodeDoc.discountType,
-              value: promoCodeDoc.discountValue,
+              type: updatedPromo.discountType,
+              value: updatedPromo.discountValue,
             },
           }),
 
-          status: 'active',
+          status: 'paid',
           paymentDate: new Date(),
         });
 
-        if (promoCodeDoc) {
-          await PromoCodeSchema.findByIdAndUpdate(promoCodeDoc._id, {
-            $inc: { currentUsage: 1 },
-          });
-        }
-
-        // Activate memorial and link purchase
         const updatedMemorial = await memorialModel.findByIdAndUpdate(
           memorialId,
           {
@@ -827,13 +856,18 @@ const initiateMemorialPayment = async (req, res) => {
         );
 
         if (!updatedMemorial) {
+          await MemorialPurchase.findByIdAndDelete(purchaseRecord._id);
+          if (updatedPromo) {
+            await PromoCodeSchema.findByIdAndUpdate(updatedPromo._id, {
+              $inc: { currentUsage: -1 },
+            });
+          }
           throw new Error('Failed to activate memorial');
         }
 
         try {
           const User = require('../models/User');
           const user = await User.findById(userId);
-
           if (user?.email) {
             await sendMemorialCreationConfirmationEmail(
               user.email,
@@ -843,7 +877,9 @@ const initiateMemorialPayment = async (req, res) => {
               0
             );
           }
-        } catch (_) {}
+        } catch (emailError) {
+          console.error('Email sending failed:', emailError);
+        }
 
         return res.json({
           success: true,
@@ -854,6 +890,7 @@ const initiateMemorialPayment = async (req, res) => {
           message: 'Memorial activated successfully with free plan',
         });
       } catch (error) {
+        console.error('Free memorial activation error:', error);
         return res.status(500).json({
           success: false,
           message: 'Failed to activate free memorial plan',
@@ -861,8 +898,6 @@ const initiateMemorialPayment = async (req, res) => {
         });
       }
     }
-
-    // Use test amount if in test mode
     if (isTestMode) {
       amount = 0.01;
     }
