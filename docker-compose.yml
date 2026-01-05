@@ -1,0 +1,28 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: qrip-mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo_data:/data/db
+
+  backend:
+    container_name: qrip-backend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '4040:4040'
+    env_file:
+      - .env
+    depends_on:
+      - mongo
+    restart: unless-stopped
+
+volumes:
+  mongo_data:
